@@ -6,8 +6,6 @@ angular
 	.module('linkedin', [
 	
 		'ionic', 
-		'linkedin.controllers', 
-		'linkedin.services',
 		'angular-meteor'
 
 	]);

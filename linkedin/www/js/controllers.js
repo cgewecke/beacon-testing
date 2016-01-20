@@ -1,4 +1,4 @@
-angular.module('starter.controllers', [])
+angular.module('linkedin.controllers', [])
 
 .controller('DashCtrl', function($scope) {})
 

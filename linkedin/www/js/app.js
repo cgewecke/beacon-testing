@@ -7,7 +7,8 @@ angular
 	
 		'ionic', 
 		'linkedin.controllers', 
-		'linkedin.services'
+		'linkedin.services',
+		'angular-meteor'
 
 	]);
 

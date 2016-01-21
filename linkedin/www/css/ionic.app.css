@@ -9737,3 +9737,17 @@ a.button {
   right: 38px;
   font-size: 14px;
   color: #9A9898; }
+
+.login-container {
+  display: -webkit-flex;
+  -webkit-flex-direction: column;
+  height: 100%;
+  background: url("../img/psychic-link.jpg") no-repeat center;
+  background-size: cover; }
+
+.login-container > .header {
+  -webkit-flex: 6;
+  padding-top: 20px; }
+
+.login-container > .explanation {
+  background-color: white; }

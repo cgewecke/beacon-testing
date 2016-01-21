@@ -14,6 +14,11 @@ function config ($stateProvider, $urlRouterProvider) {
   })
 
   // Each tab has its own nav history stack:
+  .state('login', {
+      url: '/login',
+      templateUrl: 'templates/login.html',
+      controller: 'LoginCtrl'
+  })
 
   .state('tab.chats', {
       url: '/chats',
@@ -36,6 +41,7 @@ function config ($stateProvider, $urlRouterProvider) {
 
   
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/chats');
+  //$urlRouterProvider.otherwise('/tab/chats');
+  $urlRouterProvider.otherwise('login');
 
 };

@@ -5,7 +5,8 @@
     "ionic": "driftyco/ionic-bower#1.2.4",
     "angular-mocks": "~1.4.8",
     "accounts-base-client-side": "~0.1.1",
-    "accounts-password-client-side": "~0.3.1"
+    "accounts-password-client-side": "~0.3.1",
+    "ionic-toast": "~0.2.0"
   },
   "dependencies": {
     "moment": "~2.11.1",

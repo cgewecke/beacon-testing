@@ -14,7 +14,7 @@ Meteor.methods({
     if (instance){
       var val = instance.counter;
       AppInstance.update(instance._id, {$inc: {counter: 1}});
-      return counter;
+      return val;
     } else {
       return undefined;
     }

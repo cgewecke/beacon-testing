@@ -18,18 +18,19 @@
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth ){
+function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, ionicToast ){
   
     $scope.login = function(){
 
         var token;
+        var appHash = "Txc9";
 
         var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,site-standard-profile-request)";
         var protocol = "?callback=JSON_CALLBACK&format=jsonp&oauth2_access_token="
         var root = "https://api.linkedin.com/v1/people/~";
         var token = "AQV0d0RmptWuBrw9o0w9OIi7lVrjIKMuiguuFXJtRLVJG7oNujxzyIh2cQbPPLcclpQa6dWc-WK61wZ-Rpdzri1KyXNCs7kWach40r90KZRINCo4v9FeUJRmFq7NzooarHnae23pkW7LWV3Y2xye7byEiabPhpgasWpIESKBZ54jWVfHvag";
         
-        var linkedInUrl = root + options + protocol + token;
+        var linkedInUrl = root + options + protocol + token; //A
 
         console.log('Logging in');
         
@@ -58,74 +59,76 @@ function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth ){
         $http.jsonp(linkedInUrl)
           .success(function(result) {
 
+            // Save access token
             result.token = token;
 
+            // User object
             var user = {
               username: result.id,
-              password: result.lastName + result.id,
-              profile: result,
+              password: result.lastName + '_' + appHash,
+              profile: {
+                info: result,
+                appId: null,
+                remember: null
+              }
             };
-
-            user.profile.firstName = 'Alexander';
           
             // Check registration
             Meteor.call('hasRegistered', user.username, function(err, registered ){
               
               if (!err){
-                // Registered
+                
+                // REGISTERED: Login with password. Update our user w/current linkedIn profile
+                // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
                 if ( registered ){
-                  console.log('logging in again: ' + registered);
 
                   Meteor.loginWithPassword(user.username, user.password, function(err){
                     if (!err){
                       
                       $auth.waitForUser().then(function(){
-
-                        Meteor.users.update(Meteor.userId(), { $set: { profile: user.profile } });
-                        console.log('updated user');
-                        // Deposit major into local storage
+              
+                        window.localStorage['pl_major'] = Meteor.user().profile.appId;
+                        Meteor.users.update(Meteor.userId(), { $set: { 'profile.info': user.profile.info } });
+                        
                         // Redirect to chats;
                       })
-                      
+                    
                     } else {
-                      console.log('login with password failed: ' + err);
-                    // Error toast
+                      ionicToast.show("Couldn't log in. (Password) Try again.", 'top', true, 2500);
                     }
                   })
 
-                // New Accounts
+                // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
+                // major there and in local storage. Redirect to . . . 
                 } else {
 
-                  
                   Meteor.call( 'getUniqueAppId', function(err, val){ 
-                    if (!err){
+                    if (!err && val ){
+                      
                       user.profile.appId = val;
-                      console.log('uniqueId generated: ' + val );
-                    }
-                    else{
-                      console.log('uniqueAppId failed');
+                      
+                      Accounts.createUser(user, function(err){
+                        if (!err){
+                          window.localStorage['pl_major'] = user.profile.appId;
+                          // Redirect to chats;
+                        } else{
+                          ionicToast.show('Having connectivity problems (CreateUser) - try again', 'top', true, 2500);
+                        }
+                      })
+
+                    } else{
+                      ionicToast.show('Having connectivity problems (AppID) - try again', 'top', true, 2500);
                     }
                   });
-
-
-                  Accounts.createUser(user, function(err){
-                    if (!err){
-                      console.log('Created User');
-                      // Deposit major into local storage
-                      // Redirect to chats;
-                    } else{
-                      console.log('Couldnt create user');
-                      // Error toast
-                    }
-                  })
+                  
                 }
               }
-            })
-            
+            })            
             console.log(JSON.stringify(result));
           })
+          // CASE: LinkedIn api call failed, bad token
           .error(function(result){
-            // Toast: Couldn't connect to linkedin, try again. 
+            ionicToast.show("Couldn't get your LinkedIn profile. Try again.", 'top', true, 2500);
             console.log(JSON.stringify(result));
           });
     

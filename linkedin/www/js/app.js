@@ -8,6 +8,7 @@ angular
 	.module('linkedin', [
 	
 		'ionic', 
+		'ionic-toast',
 		'ngCordova',
 		'ngCordovaOauth',
 		'angular-meteor',

@@ -21,6 +21,7 @@ $ionicons-font-path: "../lib/ionic/fonts" !default;
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 @import "chats";
-//@import "chats-detail";
+@import "chats_detail"; 
 @import "login";
+
 

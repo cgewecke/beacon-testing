@@ -33,16 +33,25 @@ function config ($stateProvider, $urlRouterProvider) {
           controller: 'ChatsCtrl'
         }
       }
-    })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
+  })
+  .state('tab.nearby', {
+      url: '/nearby',
       views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
+        'nearby': {
+          templateUrl: 'templates/nearby.html',
+          controller: 'NearbyCtrl'
         }
       }
-    })
+  })
+  .state('tab.chat-detail', {
+    url: '/chats/:chatId',
+    views: {
+      'tab-chats': {
+        templateUrl: 'templates/chat-detail.html',
+        controller: 'ChatDetailCtrl'
+      }
+    }
+  })
 
   
   // if none of the above states are matched, use this as the fallback

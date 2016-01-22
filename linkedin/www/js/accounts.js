@@ -79,8 +79,7 @@ function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, $state,
               
                         window.localStorage['pl_major'] = Meteor.user().profile.appId;
                         Meteor.users.update(Meteor.userId(), { $set: { 'profile.info': user.profile.info } });
-                        $state.go('tab.chats');
-                        console.log('went to tab chats');
+                        $state.go('tab.nearby');
 
                       })
                     
@@ -101,7 +100,7 @@ function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, $state,
                       Accounts.createUser(user, function(err){
                         if (!err){
                           window.localStorage['pl_major'] = user.profile.appId;
-                          // Redirect to chats;
+                          $state.go('tab.nearby');
                         } else{
                           ionicToast.show('Having connectivity problems (CreateUser) - try again', 'top', true, 2500);
                         }

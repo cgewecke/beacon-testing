@@ -2,11 +2,28 @@ var log_test;
 
 angular.module('linkedin')
   .controller('ChatsCtrl', ChatsCtrl)
-  .controller('ChatDetailCtrl', ChatDetailCtrl);
-  
-function ChatsCtrl ($scope){
+  .controller('ChatDetailCtrl', ChatDetailCtrl)
+  .controller('NearbyCtrl', NearbyCtrl);
+
+
+function NearbyCtrl ($scope){
   
   /*$scope.helpers({
+    nearbys: function () {
+      return Nearby.find();
+    }
+  });
+ 
+  $scope.remove = remove;
+ 
+  function remove (chat) {
+    Chats.remove(chat);
+  }*/
+};
+
+function ChatsCtrl ($scope){
+  
+  $scope.helpers({
     chats: function () {
       return Chats.find();
     }
@@ -16,7 +33,7 @@ function ChatsCtrl ($scope){
  
   function remove (chat) {
     Chats.remove(chat);
-  }*/
+  }
 };
 
 

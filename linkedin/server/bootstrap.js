@@ -1,5 +1,11 @@
 if (Meteor.isServer) {
   Meteor.startup(function () {
+
+    // Set up counter
+    if (AppInstance.find().count() === 0){
+      AppInstance.insert({counter: 0});
+    }
+    
     if (Chats.find().count() === 0) {
       Messages.remove({});
  

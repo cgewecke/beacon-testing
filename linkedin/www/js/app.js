@@ -10,7 +10,8 @@ angular
 		'ionic', 
 		'ngCordova',
 		'ngCordovaOauth',
-		'angular-meteor'
+		'angular-meteor',
+		'angular-meteor.auth'
 
 	]);
 

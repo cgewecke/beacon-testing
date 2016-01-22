@@ -7,10 +7,15 @@ function config ($stateProvider, $urlRouterProvider) {
   $stateProvider
 
   // setup an abstract state for the tabs directive
-    .state('tab', {
+  .state('tab', {
     url: '/tab',
     abstract: true,
-    templateUrl: 'templates/tabs.html'
+    templateUrl: 'templates/tabs.html',
+    resolve: {
+        user: ['$auth', function ($auth) {
+          return $auth.requireUser();
+      }]
+    }
   })
 
   // Each tab has its own nav history stack:

@@ -18,7 +18,7 @@
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, ionicToast ){
+function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, $state, ionicToast ){
   
     $scope.login = function(){
 
@@ -38,17 +38,7 @@ function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, ionicTo
         /*$ionicPlatform.ready(function() {
           $cordovaOauth.linkedin("75rttrx3oxeeii", "adcGXkzR4fH6e3zI", ["r_basicprofile"], "randomstring").then(function(result) {
                   
-                  console.log(JSON.stringify(result));
-                  linkedInUrl = linkedInUrl + result.access_token;
-
-                  $http.jsonp(linkedInUrl)
-                    .success(function(result) {
-                      log_test = result;
-                      console.log(JSON.stringify(result));
-                    })
-                    .error(function(result){
-                      console.log(JSON.stringify(result));
-                    });
+                // PRODUCTION: MOVE CODE BELOW WITHIN THIS LIVE LINKEDIN AUTH
 
               }, function(error) {
                   console.log(error);
@@ -89,8 +79,9 @@ function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, ionicTo
               
                         window.localStorage['pl_major'] = Meteor.user().profile.appId;
                         Meteor.users.update(Meteor.userId(), { $set: { 'profile.info': user.profile.info } });
-                        
-                        // Redirect to chats;
+                        $state.go('tab.chats');
+                        console.log('went to tab chats');
+
                       })
                     
                     } else {

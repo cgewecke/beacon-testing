@@ -6,7 +6,7 @@ angular.module('linkedin')
   
 function ChatsCtrl ($scope){
   
-  $scope.helpers({
+  /*$scope.helpers({
     chats: function () {
       return Chats.find();
     }
@@ -16,12 +16,12 @@ function ChatsCtrl ($scope){
  
   function remove (chat) {
     Chats.remove(chat);
-  }
+  }*/
 };
 
 
 function ChatDetailCtrl($scope, $stateParams, Chats) {
-  $scope.helpers({
+  /*$scope.helpers({
 
     chat: function () {
       return Chats.findOne($stateParams.chatId);
@@ -30,6 +30,6 @@ function ChatDetailCtrl($scope, $stateParams, Chats) {
       return Messages.find({ chatId: $stateParams.chatId });
     }
   
-  });
+  });*/
 };
 

@@ -37,9 +37,18 @@ function config ($stateProvider, $urlRouterProvider) {
   .state('tab.nearby', {
       url: '/nearby',
       views: {
-        'nearby': {
+        'tab-nearby': {
           templateUrl: 'templates/nearby.html',
           controller: 'NearbyCtrl'
+        }
+      }
+  })
+  .state('tab.profile', {
+      url: '/profile',
+      views: {
+        'tab-profile': {
+          //templateUrl: 'templates/profile.html',
+          controller: 'ProfileCtrl'
         }
       }
   })

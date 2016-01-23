@@ -3,10 +3,12 @@ var log_test;
 angular.module('linkedin')
   .controller('ChatsCtrl', ChatsCtrl)
   .controller('ChatDetailCtrl', ChatDetailCtrl)
-  .controller('NearbyCtrl', NearbyCtrl);
+  .controller('NearbyCtrl', NearbyCtrl)
+  .controller('ProfileCtrl', ProfileCtrl);
 
 
-function NearbyCtrl ($scope){
+function NearbyCtrl ($scope, $reactive){
+  $reactive(this).attach($scope);
   
   /*$scope.helpers({
     nearbys: function () {
@@ -21,15 +23,32 @@ function NearbyCtrl ($scope){
   }*/
 };
 
-function ChatsCtrl ($scope){
+function ProfileCtrl ($scope, $reactive){
+  $reactive(this).attach($scope);
   
-  $scope.helpers({
+  /*$scope.helpers({
+    nearbys: function () {
+      return Nearby.find();
+    }
+  });
+ 
+  $scope.remove = remove;
+ 
+  function remove (chat) {
+    Chats.remove(chat);
+  }*/
+};
+
+function ChatsCtrl ($scope, $reactive){
+  $reactive(this).attach($scope);
+  
+  this.helpers({
     chats: function () {
       return Chats.find();
     }
   });
  
-  $scope.remove = remove;
+  this.remove = remove;
  
   function remove (chat) {
     Chats.remove(chat);

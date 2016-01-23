@@ -89,7 +89,7 @@ function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, $state,
                   })
 
                 // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
-                // major there and in local storage. Redirect to . . . 
+                // major there and in local storage. Redirect to nearby
                 } else {
 
                   Meteor.call( 'getUniqueAppId', function(err, val){ 

@@ -13,114 +13,110 @@
     "url":"https://www.linkedin.com/profile/view?id=473444799&authType=name&authToken=gcD9&trk=api*a4769661*s5086301*"}}
   */
 
-
+// TO DO
+// Break linkedin login out to service
+// Write profile controller
 
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($scope, $http, $cordovaOauth, $ionicPlatform, $auth, $state, ionicToast ){
+function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
   
+    // GET TOKEN from github
+    
+    var appHash = "Txc9";
+    
     $scope.login = function(){
 
-        var token;
-        var appHash = "Txc9";
+      LinkedIn.authenticate().then(function(){
+        LinkedIn.getMe().then(function(){
+          meteorLogin();
+        },
+        function(error){
+          console.log('Linkedin data api call bad: ' + error)
+        });
 
-        var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,site-standard-profile-request)";
-        var protocol = "?callback=JSON_CALLBACK&format=jsonp&oauth2_access_token="
-        var root = "https://api.linkedin.com/v1/people/~";
-        var token = "AQV0d0RmptWuBrw9o0w9OIi7lVrjIKMuiguuFXJtRLVJG7oNujxzyIh2cQbPPLcclpQa6dWc-WK61wZ-Rpdzri1KyXNCs7kWach40r90KZRINCo4v9FeUJRmFq7NzooarHnae23pkW7LWV3Y2xye7byEiabPhpgasWpIESKBZ54jWVfHvag";
+      }, function(error){
+        ionicToast.show("Couldn't get your LinkedIn profile. Try again.", 'top', true, 2500);
+        console.log('Linkedin login call bad: ' + JSON.stringify(error));
+
+      });
+    };
+
+    // DEVELOPMENT
+    $scope.devLogin = function(){
+      console.log('USING DEV LOGIN');
+      //LinkedIn.setAuthToken(token);
+      LinkedIn.getMe().then(function(){
+        meteorLogin();
+      });
+    };
+
+
+    function meteorLogin(){
+
+      // User object
+      var user = {
+        username: LinkedIn.me.id,
+        password: LinkedIn.me.lastName + '_' + appHash,
+        profile: {
+          info: LinkedIn.me,
+          session: null,
+          appId: null,
+        }
+      };
+
+      // Check registration
+      Meteor.call('hasRegistered', user.username, function(err, registered ){
         
-        var linkedInUrl = root + options + protocol + token; //A
-
-        console.log('Logging in');
-        
-        // SignIn w/ LinkedIn, returns access_token.
-        /*$ionicPlatform.ready(function() {
-          $cordovaOauth.linkedin("75rttrx3oxeeii", "adcGXkzR4fH6e3zI", ["r_basicprofile"], "randomstring").then(function(result) {
-                  
-                // PRODUCTION: MOVE CODE BELOW WITHIN THIS LIVE LINKEDIN AUTH
-
-              }, function(error) {
-                  console.log(error);
-              });
-        });*/
-
-        // Get LinkedIn Profile info
-        $http.jsonp(linkedInUrl)
-          .success(function(result) {
-
-            // Save access token
-            result.token = token;
-
-            // User object
-            var user = {
-              username: result.id,
-              password: result.lastName + '_' + appHash,
-              profile: {
-                info: result,
-                appId: null,
-                remember: null
-              }
-            };
+        if (!err){
           
-            // Check registration
-            Meteor.call('hasRegistered', user.username, function(err, registered ){
-              
+          // REGISTERED: Login with password. Update our user w/current linkedIn profile
+          // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
+          if ( registered ){
+
+            Meteor.loginWithPassword(user.username, user.password, function(err){
               if (!err){
                 
-                // REGISTERED: Login with password. Update our user w/current linkedIn profile
-                // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
-                if ( registered ){
+                $auth.waitForUser().then(function(){
+        
+                  window.localStorage['pl_major'] = Meteor.user().profile.appId;
+                  Meteor.users.update(Meteor.userId(), { $set: { 'profile.info': user.profile.info } });
+                  $state.go('tab.nearby');
 
-                  Meteor.loginWithPassword(user.username, user.password, function(err){
-                    if (!err){
-                      
-                      $auth.waitForUser().then(function(){
+                })
               
-                        window.localStorage['pl_major'] = Meteor.user().profile.appId;
-                        Meteor.users.update(Meteor.userId(), { $set: { 'profile.info': user.profile.info } });
-                        $state.go('tab.nearby');
-
-                      })
-                    
-                    } else {
-                      ionicToast.show("Couldn't log in. (Password) Try again.", 'top', true, 2500);
-                    }
-                  })
-
-                // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
-                // major there and in local storage. Redirect to nearby
-                } else {
-
-                  Meteor.call( 'getUniqueAppId', function(err, val){ 
-                    if (!err && val ){
-                      
-                      user.profile.appId = val;
-                      
-                      Accounts.createUser(user, function(err){
-                        if (!err){
-                          window.localStorage['pl_major'] = user.profile.appId;
-                          $state.go('tab.nearby');
-                        } else{
-                          ionicToast.show('Having connectivity problems (CreateUser) - try again', 'top', true, 2500);
-                        }
-                      })
-
-                    } else{
-                      ionicToast.show('Having connectivity problems (AppID) - try again', 'top', true, 2500);
-                    }
-                  });
-                  
-                }
+              } else {
+                ionicToast.show("Couldn't log in to Psychic Link. (Password) Try again.", 'top', true, 2500);
               }
-            })            
-            console.log(JSON.stringify(result));
-          })
-          // CASE: LinkedIn api call failed, bad token
-          .error(function(result){
-            ionicToast.show("Couldn't get your LinkedIn profile. Try again.", 'top', true, 2500);
-            console.log(JSON.stringify(result));
-          });
-    
-    };
+            })
+
+          // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
+          // major there and in local storage. Redirect to nearby
+          } else {
+
+            Meteor.call( 'getUniqueAppId', function(err, val){ 
+              if (!err && val ){
+                
+                user.profile.appId = val;
+                
+                Accounts.createUser(user, function(err){
+                  if (!err){
+                    window.localStorage['pl_major'] = user.profile.appId;
+                    $state.go('tab.nearby');
+                  } else{
+                    ionicToast.show("Couldn't create psychic link (CreateUser) - try again", 'top', true, 2500);
+                  }
+                })
+
+              } else{
+                ionicToast.show("Couldn't create psychic link (AppID) - try again", 'top', true, 2500);
+              }
+            });
+            
+          }
+        }
+      })            
+      console.log(JSON.stringify(LinkedIn.me));
+    }
 };

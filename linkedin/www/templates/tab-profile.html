@@ -1,0 +1,19 @@
+<ion-view view-title="Profile">
+  <ion-content class="profile-content">
+    <div class="list card">
+      
+      <div class="item profile-header">
+        <h2 ng-bind="profile.user.name"></h2>
+        <h3 ng-bind="profile.user.headline"></h3>
+      </div>
+
+      <div class="item item-body">
+        <img class="full-image" src="profile.user.pictureUrl">
+        <p> Connections 
+          <span ng-bind="profile.user.numConnections"></span>
+        </p>
+      </div>
+      
+    </div>
+  </ion-content>
+</ion-view>

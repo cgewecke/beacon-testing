@@ -12,9 +12,20 @@ Meteor.methods({
   getUniqueAppId(){
     var instance = AppInstance.findOne();
     if (instance){
-      var val = instance.counter;
-      AppInstance.update(instance._id, {$inc: {counter: 1}});
-      return val;
+      
+      var major = instance.major;
+      var minor = instance.minor;
+
+      if (minor < 65000){
+        minor = minor + 1;
+      } else {
+        major = major + 1;
+        minor = 0;
+      }
+
+      AppInstance.update(instance._id, {major: major, minor: minor}); 
+      return {major: major, minor: minor};
+    
     } else {
       return undefined;
     }

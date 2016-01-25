@@ -46,7 +46,6 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
     // DEVELOPMENT
     $scope.devLogin = function(){
       console.log('USING DEV LOGIN');
-      //LinkedIn.setAuthToken(token);
       LinkedIn.getMe().then(function(){
         meteorLogin();
       });
@@ -58,11 +57,15 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
       // User object
       var user = {
         username: LinkedIn.me.id,
-        password: LinkedIn.me.lastName + '_' + appHash,
+        password: LinkedIn.me.id + '_' + appHash,
+        email: null,
         profile: {
-          info: LinkedIn.me,
-          session: null,
-          appId: null,
+          major: null,
+          minor: null,
+          appId: "332238CE-745A-4238-B90A-C79163A3C660",
+          chatId: "59688D19-8259-4DDF-819D-E0FA49BC48A1",
+          lookId: "C605A9BE-81FF-4FDD-989A-E5F0322C24D6",
+          session: null
         }
       };
 
@@ -70,53 +73,63 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
       Meteor.call('hasRegistered', user.username, function(err, registered ){
         
         if (!err){
-          
-          // REGISTERED: Login with password. Update our user w/current linkedIn profile
-          // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
-          if ( registered ){
-
-            Meteor.loginWithPassword(user.username, user.password, function(err){
-              if (!err){
-                
-                $auth.waitForUser().then(function(){
         
-                  window.localStorage['pl_major'] = Meteor.user().profile.appId;
-                  Meteor.users.update(Meteor.userId(), { $set: { 'profile.info': user.profile.info } });
-                  $state.go('tab.nearby');
-
-                })
-              
-              } else {
-                ionicToast.show("Couldn't log in to Psychic Link. (Password) Try again.", 'top', true, 2500);
-              }
-            })
-
-          // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
-          // major there and in local storage. Redirect to nearby
-          } else {
-
-            Meteor.call( 'getUniqueAppId', function(err, val){ 
-              if (!err && val ){
-                
-                user.profile.appId = val;
-                
-                Accounts.createUser(user, function(err){
-                  if (!err){
-                    window.localStorage['pl_major'] = user.profile.appId;
-                    $state.go('tab.nearby');
-                  } else{
-                    ionicToast.show("Couldn't create psychic link (CreateUser) - try again", 'top', true, 2500);
-                  }
-                })
-
-              } else{
-                ionicToast.show("Couldn't create psychic link (AppID) - try again", 'top', true, 2500);
-              }
-            });
-            
-          }
+          (registered) ? loginWithAccount(user) : createAccount(user); 
+        
+        } else {
+          console.log('Registration error');
         }
       })            
       console.log(JSON.stringify(LinkedIn.me));
     }
+
+    // REGISTERED: Login with password. Update our user w/current linkedIn profile
+    // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
+    function loginWithAccount(user){
+      Meteor.loginWithPassword(user.username, user.password, function(err){
+        if (!err){
+          
+          $auth.waitForUser().then(function(){
+  
+            window.localStorage['pl_major'] = Meteor.user().profile.major;
+            window.localStorage['pl_minor'] = Meteor.user().profile.minor;
+            
+            $state.go('tab.nearby');
+
+          })
+        
+        } else {
+          ionicToast.show("Couldn't log in to Psychic Link. (Password) Try again.", 'top', true, 2500);
+        }
+      });
+    };
+
+    // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
+    // major there and in local storage. Redirect to nearby
+    function createAccount(user){
+
+      Meteor.call( 'getUniqueAppId', function(err, val){ 
+        if (!err && val ){
+          
+          user.email = val.major + '_' + val.minor;
+          user.profile.major = val.major;
+          user.profile.minor = val.minor;
+          
+          Accounts.createUser(user, function(err){
+            if (!err){
+              window.localStorage['pl_major'] = Meteor.user().profile.major;
+              window.localStorage['pl_minor'] = Meteor.user().profile.minor;
+
+              $state.go('tab.nearby');
+            } else{
+              console.log('createUser Error: ' + JSON.stringify(err));
+              ionicToast.show("Server overloaded (CreateUser) - try again", 'top', true, 2500);
+            }
+          })
+
+        } else{
+          ionicToast.show("Couldn't create psychic link (AppID) - try again", 'top', true, 2500);
+        }
+      });
+    };
 };

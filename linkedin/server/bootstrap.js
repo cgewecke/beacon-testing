@@ -3,7 +3,7 @@ if (Meteor.isServer) {
 
     // Set up counter
     if (AppInstance.find().count() === 0){
-      AppInstance.insert({counter: 0});
+      AppInstance.insert({major: 0, minor: 0});
     }
     
     if (Chats.find().count() === 0) {

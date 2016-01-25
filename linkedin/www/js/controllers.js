@@ -23,20 +23,12 @@ function NearbyCtrl ($scope, $reactive){
   }*/
 };
 
-function ProfileCtrl ($scope, $reactive){
+function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
   $reactive(this).attach($scope);
   
-  /*$scope.helpers({
-    nearbys: function () {
-      return Nearby.find();
-    }
-  });
- 
-  $scope.remove = remove;
- 
-  function remove (chat) {
-    Chats.remove(chat);
-  }*/
+  // PICTURE QUALITY ISSUE
+  //http://api.linkedin.com/v1/people/~/picture-urls::(original)
+  this.info = LinkedIn.me;
 };
 
 function ChatsCtrl ($scope, $reactive){

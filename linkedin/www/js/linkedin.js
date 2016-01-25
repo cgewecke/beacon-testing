@@ -23,11 +23,10 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
     var state = "randomstring";
 
     // DEVELOPMENT
-    var authToken = "AQV0d0RmptWuBrw9o0w9OIi7lVrjIKMuiguuFXJtRLVJG7oNujxzyIh2cQbPPLcclpQa6dWc-WK61wZ-Rpdzri1KyXNCs7kWach40r90KZRINCo4v9FeUJRmFq7NzooarHnae23pkW7LWV3Y2xye7byEiabPhpgasWpIESKBZ54jWVfHvag";
     
     // PRODUCTION 
     //var authToken = null;
-    
+    var authToken = "AQUklwGae4wHQfP5UKPT2Jh_hOogu_1vZF1-NTmb3wixWALFf-W2DYuHjI6ve-9Gd2_zpZggczo01Fuq3lKhPbl50VvwGWyz5TiSqYWG0FgqKySayANj9MdQqHErRA29ihOh5nfpWcfSOrgWtY1gZxToBTYIgZ3V71M8fQtQZwjvAEO8J1E";
 
     // ------------------------------   PUBLIC ------------------------------------
 	self.me = null;
@@ -43,14 +42,17 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
 	self.authenticate = function(){
 		var deferred = $q.defer();
 		$ionicPlatform.ready(function() {
-          $cordovaOauth.linkedin(id, sec, perm, state).then(
-         	function(result) {
-         		authToken = result.access_token;
-          		deferred.resolve();
-        	}, function(error) {
-                deferred.reject(error);
-            });
-        });
+
+      $cordovaOauth.linkedin(id, sec, perm, state).then(
+      function(result) {
+     		  authToken = result.access_token;
+          console.log('authToken = ' + authToken);
+      		deferred.resolve();
+
+    	}, function(error) {
+            deferred.reject(error);
+      });
+    });
 
 		return deferred.promise;	
 	}
@@ -63,17 +65,17 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
 		var url = me_root + options + protocol + authToken;
 
 		$http.jsonp(url)
-          .success(function(result) {
-          	self.me = result;
+      .success(function(result) {
 
-          	self.me.name = result.firstName + " " + result.lastName;
-          	deferred.resolve(self.me);
-          })
-          .error(function(error){
-          	deferred.reject(error);
-          });
+      	 self.me = result;
+      	 self.me.name = result.firstName + " " + result.lastName;
+      	 deferred.resolve(self.me);
+      })
+      .error(function(error){
+      	 deferred.reject(error);
+      });
 
-         return deferred.promise;		
+    return deferred.promise;		
 
 	}
 
@@ -86,18 +88,18 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
 		var url = self_root + options + protocol + authToken;
 
 		$http.jsonp(linkedInUrl)
-          .success(function(result) {
-          	
-          	result.name = result.firstName + " " + result.lastName;
-          	self.others.push(result);
+      .success(function(result) {
+      	
+      	 result.name = result.firstName + " " + result.lastName;
+      	 self.others.push(result);
 
-          	deferred.resolve(result);
-          })
-          .error(function(error){
-          	deferred.reject(error);
-          });
+      	 deferred.resolve(result);
+      })
+      .error(function(error){
+      	 deferred.reject(error);
+      });
 
-         return deferred.promise;	
+     return deferred.promise;	
 	}
 
 	// findOther(id): Returns a profile obj if id matches the id of an object
@@ -114,13 +116,13 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
 	// removeOther(id): Remove a profile obj from the self.others array if 
 	// a matching id is found. Returns true if successful, false otherwise
 	self.removeOther = function(id){
-        for (var i= 0; i < self.others; i++) {
-            if (id === self.others[i].id) {
-                self.others.splice(i, 1);
-                return true;   
-            }
+    for (var i= 0; i < self.others; i++) {
+        if (id === self.others[i].id) {
+            self.others.splice(i, 1);
+            return true;   
         }
-        return false;
+    }
+    return false;
 	}
 	
 };

@@ -1,3 +1,5 @@
+var routes_debug, routes_debugII;
+
 angular
   .module('linkedin')
   .config(config);
@@ -6,23 +8,23 @@ function config ($stateProvider, $urlRouterProvider) {
 
   $stateProvider
 
+  // Each tab has its own nav history stack:
+  .state('loading', {
+      url: '/loading',
+      templateUrl: 'templates/loading.html',
+      controller: 'LoadingCtrl'
+  })
+  .state('login', {
+      url: '/login',
+      templateUrl: 'templates/login.html',
+      controller: 'LoginCtrl'
+  })
+
   // setup an abstract state for the tabs directive
   .state('tab', {
     url: '/tab',
     abstract: true,
     templateUrl: 'templates/tabs.html',
-    resolve: {
-        user: ['$auth', function ($auth) {
-          return $auth.requireUser();
-      }]
-    }
-  })
-
-  // Each tab has its own nav history stack:
-  .state('login', {
-      url: '/login',
-      templateUrl: 'templates/login.html',
-      controller: 'LoginCtrl'
   })
 
   .state('tab.chats', {
@@ -39,7 +41,13 @@ function config ($stateProvider, $urlRouterProvider) {
       views: {
         'tab-nearby': {
           templateUrl: 'templates/nearby.html',
-          controller: 'NearbyCtrl'
+          controller: 'NearbyCtrl',
+          controllerAs: 'nearby'
+        }
+      },
+      resolve: {
+        user: function($auth){
+            return $auth.requireUser();
         }
       }
   })
@@ -50,6 +58,11 @@ function config ($stateProvider, $urlRouterProvider) {
           templateUrl: 'templates/tab-profile.html',
           controller: 'ProfileCtrl',
           controllerAs: 'profile'
+        }
+      },
+      resolve: {
+        user: function(LinkedIn){
+            return LinkedIn.initialize();
         }
       }
   })
@@ -65,7 +78,7 @@ function config ($stateProvider, $urlRouterProvider) {
 
   
   // if none of the above states are matched, use this as the fallback
-  //$urlRouterProvider.otherwise('/tab/chats');
-  $urlRouterProvider.otherwise('login');
+  $urlRouterProvider.otherwise('loading');
+  //$urlRouterProvider.otherwise('login');
 
 };

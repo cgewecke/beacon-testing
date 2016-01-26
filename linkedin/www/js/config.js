@@ -2,7 +2,8 @@ angular
   .module('linkedin')
   .run(run);
 
-function run ($ionicPlatform) {
+function run ($ionicPlatform, $auth, $state, $rootScope, LinkedIn ) {
+
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)

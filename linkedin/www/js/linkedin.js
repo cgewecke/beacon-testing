@@ -4,39 +4,71 @@ angular.module('linkedin')
   .service("LinkedIn", LinkedIn);
 
 
-function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
+function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
 
 	var self = this;
 
 	// ------------------------------   PRIVATE  ------------------------------------
 	
 	// LinkedIn profile data api call
-    var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,industry,specialties,summary,email-address)";
-    var protocol = "?callback=JSON_CALLBACK&format=jsonp&oauth2_access_token="
-    var me_root = "https://api.linkedin.com/v1/people/~";
-    var other_root = null;
+  var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,industry,specialties,summary,email-address)";
+  var protocol = "?callback=JSON_CALLBACK&format=jsonp&oauth2_access_token="
+  var me_root = "https://api.linkedin.com/v1/people/~";
+  var other_root = null;
 
-    // Keys
-    var id = "75rttrx3oxeeii"; // Security . . . .
-    var sec = "adcGXkzR4fH6e3zI";
-    var perm = ["r_basicprofile", "r_emailaddress"];
-    var state = "randomstring";
+  // Keys
+  var id = "75rttrx3oxeeii"; // Security . . . .
+  var sec = "adcGXkzR4fH6e3zI";
+  var perm = ["r_basicprofile", "r_emailaddress"];
+  var state = "randomstring";
 
-    // DEVELOPMENT
-    
-    // PRODUCTION 
-    //var authToken = null;
-    var authToken = "AQUklwGae4wHQfP5UKPT2Jh_hOogu_1vZF1-NTmb3wixWALFf-W2DYuHjI6ve-9Gd2_zpZggczo01Fuq3lKhPbl50VvwGWyz5TiSqYWG0FgqKySayANj9MdQqHErRA29ihOh5nfpWcfSOrgWtY1gZxToBTYIgZ3V71M8fQtQZwjvAEO8J1E";
+  // PRODUCTION 
+  //var authToken = null;
 
-    // ------------------------------   PUBLIC ------------------------------------
-	self.me = null;
+  // DEVELOPMENT
+  var authToken = "AQUklwGae4wHQfP5UKPT2Jh_hOogu_1vZF1-NTmb3wixWALFf-W2DYuHjI6ve-9Gd2_zpZggczo01Fuq3lKhPbl50VvwGWyz5TiSqYWG0FgqKySayANj9MdQqHErRA29ihOh5nfpWcfSOrgWtY1gZxToBTYIgZ3V71M8fQtQZwjvAEO8J1E";
+
+  // ------------------------------   PUBLIC ------------------------------------
+	
+  self.me = null;
 	self.others = [];
 
 	// setAuthToken: Convenience methods to set authToken when app is already
 	// authenticated from previous use.
 	self.setAuthToken = function(token){
-		self.me.authToken = authToken = token;
+		authToken = token;
 	}
+
+  // initialize(): Invoked in the routing resolve at app start - if user autologs into Meteor,
+  // we still need to fetch a fresh linkedin profile for them . . . 
+  self.initialize = function(){
+
+    var d = $q.defer();
+
+    $auth.requireUser().then(
+
+      function(userLoggedIn){
+
+        self.setAuthToken(Meteor.user().profile.authToken);
+        self.getMe().then(function(success){
+
+          console.log('autologged in');
+          d.resolve(true);
+        }, function(error){
+          console.log('couldnt get profile')
+          d.reject('AUTH_REQUIRED');
+        }); 
+      }, 
+      function(userLoggedOut){
+        console.log('requireUser error: ' + userLoggedOut);
+        d.reject('AUTH_REQUIRED');
+      }
+    );
+
+    return d.promise;
+    
+
+  }
 
 	// authenticate: Logs user into LinkedIn, sets authToken, returns promise
 	self.authenticate = function(){
@@ -69,6 +101,7 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
 
       	 self.me = result;
       	 self.me.name = result.firstName + " " + result.lastName;
+         self.me.authToken = authToken;
       	 deferred.resolve(self.me);
       })
       .error(function(error){
@@ -96,7 +129,7 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
       	 deferred.resolve(result);
       })
       .error(function(error){
-      	 deferred.reject(error);
+      	 deferred.reject();
       });
 
      return deferred.promise;	
@@ -124,5 +157,4 @@ function LinkedIn($http, $q, $cordovaOauth, $ionicPlatform){
     }
     return false;
 	}
-	
 };

@@ -14,8 +14,7 @@
   */
 
 // TO DO
-// Break linkedin login out to service
-// Write profile controller
+// 1. TEST AUTH TOKEN when logging in. . . . . kick back out to re-auth
 
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
@@ -60,6 +59,7 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
         password: LinkedIn.me.id + '_' + appHash,
         email: null,
         profile: {
+          authToken: LinkedIn.me.authToken,
           major: null,
           minor: null,
           appId: "332238CE-745A-4238-B90A-C79163A3C660",

@@ -3,34 +3,34 @@
     <div class="list card">
       
       <div class="item item-thumbnail-left profile-header">
-        <img ng-src="{{profile.info.pictureUrl}}">
-        <h2 class="profile-header-txt profile-bold" ng-bind="profile.info.name"></h2>
+        <img ng-src="{{profile.link.me.pictureUrl}}">
+        <h2 class="profile-header-txt profile-bold" ng-bind="profile.link.me.name"></h2>
         <br>
-        <p class="profile-header-txt" ng-bind="profile.info.industry"></p>
-        <p class="profile-header-txt" ng-bind="profile.info.location.name"></p>
+        <p class="profile-header-txt" ng-bind="profile.link.me.industry"></p>
+        <p class="profile-header-txt" ng-bind="profile.link.me.location.name"></p>
       </div>
 
       <div class="item">
-        <h2 ng-bind="profile.info.headline"></h2> 
+        <h2 ng-bind="profile.link.me.headline"></h2> 
       </div>
 
       <div class="item"> 
           Connections: 
-          <span ng-bind="profile.info.numConnections"></span>
+          <span ng-bind="profile.link.me.numConnections"></span>
       </div>
       <div class="item profile-content">
         <span> Background </span>
       </div>
       <div class="item item-body">
         <p class="profile-bold"> Summary </p>
-        <p ng-bind="profile.info.summary"></p>
+        <p ng-bind="profile.link.me.summary"></p>
       </div>
-      <div ng-show="profile.info.emailAddress" class="item profile-content">
+      <div ng-show="profile.link.me.emailAddress" class="item profile-content">
         <span> Email </span>
         <p class="profile-small"> (Tap plus to add to phone contacts) </p>
       </div>
-      <div ng-show="profile.info.emailAddress" class="item item-button-right">
-        {{profile.info.emailAddress}}
+      <div ng-show="profile.link.me.emailAddress" class="item item-button-right">
+        {{profile.link.me.emailAddress}}
         <button class="button button-positive">
           <i class="icon ion-ios-plus"></i>
         </button>

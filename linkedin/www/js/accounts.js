@@ -93,7 +93,7 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
   
             window.localStorage['pl_major'] = Meteor.user().profile.major;
             window.localStorage['pl_minor'] = Meteor.user().profile.minor;
-            
+            window.localStorage['pl_id'] = Meteor.user().username;
             $state.go('tab.nearby');
 
           })
@@ -119,6 +119,7 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
             if (!err){
               window.localStorage['pl_major'] = Meteor.user().profile.major;
               window.localStorage['pl_minor'] = Meteor.user().profile.minor;
+              window.localStorage['pl_id'] = Meteor.user().username;
 
               $state.go('tab.nearby');
             } else{

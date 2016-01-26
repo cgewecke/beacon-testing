@@ -1,5 +1,56 @@
 Meteor.methods({
 
+
+  //---------------- Connections Collections -------------------------
+  
+  // @function: newConnection
+  // @param: beaconIds [{transmitter: {uuid, major, minor}, receiver: username}]
+  newConnection(beaconIds){
+
+    console.log(JSON.stringify(beaconIds));
+
+    var transIds = beaconIds.transmitter;
+    var receiverId = beaconIds.receiver;
+    var linkedParams = 
+      [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
+        'location', 'industry', 'specialties', 'summary', 'email-address' ];
+
+    var receiver = Meteor.users.findOne({username: receiverId});
+    
+    var transmitter = Meteor.users.findOne({ $and: 
+        [{'profile.appId': transIds.uuid },
+         {'profile.minor': transIds.minor},
+         {'profile.major': transIds.major} 
+        ]});
+
+    if (transmitter && receiver){
+
+      var linkedin = Linkedin().init(transmitter.profile.authToken);
+      
+      linkedin.people.id(receiver.username, linkedParams, 
+        Meteor.bindEnvironment(
+          function(err, $in){
+            if (!err) {     
+              var connection = { 
+                transmitter: transmitter.username, 
+                receiver: receiver.username,
+                profile: $in
+              }
+
+              Connections.insert(connection);
+            } else {
+              console.log('Error: LinkedIn call failed');
+            }
+          }, function(err){
+            console.log('Error: Couldnt bind!!!');
+          })
+      );
+    }
+    //return {transmitter: transmitter, receiver: receiver};
+  },
+
+
+  // ---------------- Authentication Utilities -------------------------
   hasRegistered(name){
   
     var user = Meteor.users.find({username: name});
@@ -32,7 +83,7 @@ Meteor.methods({
     
   },
 
-
+  //---------------- Chats Collections -------------------------
   newMessage(message) {
     check(message, {
       text: String,

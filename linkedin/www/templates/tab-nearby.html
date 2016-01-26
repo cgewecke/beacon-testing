@@ -2,12 +2,14 @@
   <ion-content>
     <ion-list>
       <ion-item
-        ng-repeat="user in nearby.users"
+        ng-repeat="user in nearby.connections"
         class="item-chat item-remove-animate item-avatar item-icon-right"
-        type="item-text-wrap">
-        <img ng-src="{{user.pictureUrl}}">
-        <h2>{{user.name}}</h2>
-        <p>{{user.headline}}</p>
+        type="item-text-wrap"
+        href="#/tab/nearby/{{user.profile.id}}"
+        ng-click="nearby.notify()">
+        <img ng-src="{{user.profile.pictureUrl}}">
+        <h2>{{user.profile.name}}</h2>
+        <p>{{user.profile.headline}}</p>
         <span class="last-message-timestamp">Proximity</span>
         <i class="icon ion-chevron-right icon-accessory"></i>
 

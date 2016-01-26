@@ -20,6 +20,7 @@ function config ($stateProvider, $urlRouterProvider) {
       controller: 'LoginCtrl'
   })
 
+
   // setup an abstract state for the tabs directive
   .state('tab', {
     url: '/tab',
@@ -27,20 +28,12 @@ function config ($stateProvider, $urlRouterProvider) {
     templateUrl: 'templates/tabs.html',
   })
 
-  .state('tab.chats', {
-      url: '/chats',
-      views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
-        }
-      }
-  })
+  
   .state('tab.nearby', {
       url: '/nearby',
       views: {
         'tab-nearby': {
-          templateUrl: 'templates/nearby.html',
+          templateUrl: 'templates/tab-nearby.html',
           controller: 'NearbyCtrl',
           controllerAs: 'nearby'
         }
@@ -51,18 +44,42 @@ function config ($stateProvider, $urlRouterProvider) {
         }
       }
   })
+  .state('tab.nearby-profile', {
+    url: '/nearby/:userId',
+    views: {
+      'tab-nearby': {
+        templateUrl: 'templates/tab-profile.html',
+        controller: 'NearbyProfileCtrl',
+        controllerAs: 'vm'
+      }
+    },
+    resolve: {
+      user: function($auth){
+          return $auth.requireUser();
+      }
+    }
+  })
   .state('tab.profile', {
       url: '/profile',
       views: {
         'tab-profile': {
           templateUrl: 'templates/tab-profile.html',
           controller: 'ProfileCtrl',
-          controllerAs: 'profile'
+          controllerAs: 'vm'
         }
       },
       resolve: {
         user: function(LinkedIn){
             return LinkedIn.initialize();
+        }
+      }
+  })
+  .state('tab.chats', {
+      url: '/chats',
+      views: {
+        'tab-chats': {
+          templateUrl: 'templates/tab-chats.html',
+          controller: 'ChatsCtrl'
         }
       }
   })
@@ -72,6 +89,16 @@ function config ($stateProvider, $urlRouterProvider) {
       'tab-chats': {
         templateUrl: 'templates/chat-detail.html',
         controller: 'ChatDetailCtrl'
+      }
+    }
+  })
+  .state('tab.settings', {
+    url: '/settings',
+    views: {
+      'tab-settings': {
+        templateUrl: 'templates/settings.html',
+        controller: 'SettingsCtrl',
+        controllerAs: 'settings',
       }
     }
   })

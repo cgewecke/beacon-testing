@@ -4,41 +4,54 @@ angular.module('linkedin')
   .controller('ChatsCtrl', ChatsCtrl)
   .controller('ChatDetailCtrl', ChatDetailCtrl)
   .controller('NearbyCtrl', NearbyCtrl)
+  .controller('NearbyProfileCtrl', NearbyProfileCtrl)
   .controller('ProfileCtrl', ProfileCtrl)
-  .controller('LoadingCtrl', LoadingCtrl);
+  .controller('LoadingCtrl', LoadingCtrl)
+  .controller('SettingsCtrl', SettingsCtrl);
 
 
 function NearbyCtrl ($scope, $reactive, LinkedIn){
   $reactive(this).attach($scope);
   
-  this.users = [];
-  this.users.push(LinkedIn.me);
-  log_test = this.users;
-  /*$scope.helpers({
-    nearbys: function () {
-      return Nearby.find();
+  this.helpers({
+    connections: function () {
+      return Connections.find();
     }
   });
- 
-  $scope.remove = remove;
- 
-  function remove (chat) {
-    Chats.remove(chat);
-  }*/
+  //this.users = [];
+  //this.users.push(LinkedIn.me);
+  
+  this.notify = function(){
+    console.log('notify clicked');
+  }
+  
+};
+
+function NearbyProfileCtrl ($scope, $reactive, LinkedIn){
+  $reactive(this).attach($scope);
+  
+  this.user = LinkedIn.me;
+  this.viewTitle = this.user.name;
+
+
+  
 };
 
 function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
   $reactive(this).attach($scope);
    
-  console.log('params: ' + JSON.stringify($state.params) );
-  this.link = LinkedIn;
+  
+  this.user = LinkedIn.me;
+  this.viewTitle = "You";
+  console.log('user at profctrl init: ' + JSON.stringify(this.user) );
   
 };
 
-function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state ){
+function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
    
   console.log('ionic loading start' );
   
+
   $ionicLoading.show({
     content: 'Loading',
     animation: 'fade-in',
@@ -48,13 +61,30 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state ){
     showDelay: 0
   });
   
-  $ionicPlatform.ready(function(){
-    console.log('ionic loading end' );
-    $ionicLoading.hide();
-    $state.go('tab.profile');
-  });
+  $timeout(function(){
+    $ionicPlatform.ready(function(){
+      $ionicLoading.hide();
+      $state.go('tab.profile');
+    });
+  }, 2000)
   
 };
+
+function SettingsCtrl($scope, $reactive, $state) {
+  $reactive(this).attach($scope);
+
+  this.logout = logout;
+
+  ////////////
+
+  function logout() {
+    Meteor.logout((err) => {
+      $state.go('login');
+    });
+  }
+};
+
+
 function ChatsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
   

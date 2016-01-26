@@ -21,3 +21,4 @@ insecure                # Allow all DB writes from clients (for prototyping)
 momentjs:moment
 accounts-password
 accounts-base
+khamoud:linkedin-api

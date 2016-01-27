@@ -19,10 +19,10 @@
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
-  
+function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
+    $reactive(this).attach($scope);
     // GET TOKEN from github
-    
+    this.subscribe('users');
     var appHash = "Txc9";
     
     $scope.login = function(){
@@ -94,6 +94,7 @@ function LoginCtrl ($scope, $auth, $state, LinkedIn, ionicToast ){
             window.localStorage['pl_major'] = Meteor.user().profile.major;
             window.localStorage['pl_minor'] = Meteor.user().profile.minor;
             window.localStorage['pl_id'] = Meteor.user().username;
+            Meteor.users.update(Meteor.userId(), { $set: { 'profile.authToken': user.profile.authToken } });
             $state.go('tab.nearby');
 
           })

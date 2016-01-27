@@ -10,16 +10,17 @@ angular.module('linkedin')
   .controller('SettingsCtrl', SettingsCtrl);
 
 
-function NearbyCtrl ($scope, $reactive, LinkedIn){
+function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
   $reactive(this).attach($scope);
   
   this.subscribe('connections');
-  
   this.helpers({
     connections: function () {
       return Connections.find();
     }
   });
+  
+  
   //this.users = [];
   //this.users.push(LinkedIn.me);
   
@@ -57,18 +58,45 @@ function NearbyCtrl ($scope, $reactive, LinkedIn){
   
 };
 
-function NearbyProfileCtrl ($scope, $reactive, $stateParams, LinkedIn){
+function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $cordovaContacts, LinkedIn){
   $reactive(this).attach($scope);
 
-  console.log(JSON.stringify($stateParams));
+  // DB: Connections, get profile
+  this.subscribe('connections');
+
   this.helpers({
     connection: function () {
       return Connections.findOne({'profile.id': $stateParams.userId});
     }
   });
+
+  // Template vars
   this.user = this.connection.profile;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = this.user.name;
+
+  // Add to native contacts button
+  this.createContact = function(){
+    console.log('Entering createContact');
+    var contact ={
+      "displayName": this.user.name,
+      "emails": [
+            {
+                "value": this.user.emailAddress,
+                "type": "business"
+            }
+      ],
+      "birthday": Date('1/1/1900')
+    };
+    $ionicPlatform.ready(function(){
+      $cordovaContacts.save(contact).then(function(result) {
+
+          console.log(JSON.stringify(result));
+      }, function(error) {
+          console.log(error);
+      });
+    });
+  }
 };
 
 function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
@@ -95,12 +123,12 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
     showDelay: 0
   });
   
-  $timeout(function(){
+  //$timeout(function(){
     $ionicPlatform.ready(function(){
       $ionicLoading.hide();
       $state.go('tab.profile');
     });
-  }, 2000)
+  //}, 2000)
   
 };
 
@@ -112,7 +140,7 @@ function SettingsCtrl($scope, $reactive, $state) {
   ////////////
 
   function logout() {
-    Meteor.logout((err) => {
+    Meteor.logout(function(err){
       $state.go('login');
     });
   }

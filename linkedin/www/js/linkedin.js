@@ -23,10 +23,12 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
   var state = "randomstring";
 
   // PRODUCTION 
-  //var authToken = null;
+  var authToken = null;
 
   // DEVELOPMENT
-  var authToken = "AQUklwGae4wHQfP5UKPT2Jh_hOogu_1vZF1-NTmb3wixWALFf-W2DYuHjI6ve-9Gd2_zpZggczo01Fuq3lKhPbl50VvwGWyz5TiSqYWG0FgqKySayANj9MdQqHErRA29ihOh5nfpWcfSOrgWtY1gZxToBTYIgZ3V71M8fQtQZwjvAEO8J1E";
+  //var authToken = "AQXZydge9w2lL6bSdPK3AFlvvkObLHCZfML6_ekS--YBqc6jXQKi8aESefitTX1fQtdH4FT8flDdG3BZZDpb_wI2D5ux20-RJR779kD2hS_ox77rS9RsmV53RmWtnwRd0NkCkZVQvhJtxesJ0SKuaK0R7aTqa8VYZzE2654wup_QhfmBab8";
+  //var authToken = "AQUqZTYwibWdLvG6D_IU8CfuaYJDmUKIrYjEus-wimlR4Tpsc1dn1dfzu7llw3HnAMF53DTJsfc1MIHEJGM_BcPYV2JsVBZY_cB-LFrMqNyaieJXshEMj_jmCW4gzgdWpaPmGrhs0XBLBl_hW7TkUZBkK4tjyXI5lU4KbcRHkOZMKJJNPvg";
+  //var authToken = "AQUklwGae4wHQfP5UKPT2Jh_hOogu_1vZF1-NTmb3wixWALFf-W2DYuHjI6ve-9Gd2_zpZggczo01Fuq3lKhPbl50VvwGWyz5TiSqYWG0FgqKySayANj9MdQqHErRA29ihOh5nfpWcfSOrgWtY1gZxToBTYIgZ3V71M8fQtQZwjvAEO8J1E";
 
   // ------------------------------   PUBLIC ------------------------------------
 	
@@ -82,7 +84,7 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
       		deferred.resolve();
 
     	}, function(error) {
-            deferred.reject(error);
+          deferred.reject(error);
       });
     });
 

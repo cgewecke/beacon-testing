@@ -38,10 +38,14 @@ function config ($stateProvider, $urlRouterProvider) {
           controllerAs: 'nearby'
         }
       },
+
       resolve: {
-        user: function($auth){
+        user: ['LinkedIn',function(LinkedIn){
+            return LinkedIn.initialize();
+        }]
+        /*user: function($auth){
             return $auth.requireUser();
-        }
+        }*/
       }
   })
   .state('tab.nearby-profile', {
@@ -54,9 +58,9 @@ function config ($stateProvider, $urlRouterProvider) {
       }
     },
     resolve: {
-      user: function($auth){
+      user: ['$auth', function($auth){
           return $auth.requireUser();
-      }
+      }]
     }
   })
   .state('tab.profile', {
@@ -69,9 +73,9 @@ function config ($stateProvider, $urlRouterProvider) {
         }
       },
       resolve: {
-        user: function(LinkedIn){
+        user: ['LinkedIn',function(LinkedIn){
             return LinkedIn.initialize();
-        }
+        }]
       }
   })
   .state('tab.chats', {

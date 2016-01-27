@@ -13,7 +13,7 @@ if (Meteor.isServer) {
       var cons = [
 
       {
-        transmitter: "SA4tMdPaww",
+        transmitter: "ppDFpHPs9tgrHeto7Changed",
         receiver: "0",
         profile: {
            "emailAddress":"fake1@cyclop.se",
@@ -30,7 +30,7 @@ if (Meteor.isServer) {
           }
       },
       {
-        transmitter: "SA4tMdPaww",
+        transmitter: "ppDFpHPs9tgrHeto7",
         receiver: "1",
         profile:{"emailAddress":"fake2@cyclop.se",
            "firstName":"Alexander",
@@ -46,7 +46,7 @@ if (Meteor.isServer) {
           }
       },
       {
-        transmitter: "SA4tMdPaww",
+        transmitter: "ppDFpHPs9tgrHeto7",
         receiver: "2",
         profile:{"emailAddress":"fake3@cyclop.se",
            "firstName":"Ahmed",
@@ -62,7 +62,7 @@ if (Meteor.isServer) {
           }
       },
       {
-        transmitter: "SA4tMdPaww",
+        transmitter: "ppDFpHPs9tgrHeto7",
         receiver: "3",
         profile:{"emailAddress":"fake4@cyclop.se",
            "firstName":"Christian",
@@ -78,7 +78,7 @@ if (Meteor.isServer) {
           }
       },
       {
-        transmitter: "SA4tMdPaww",
+        transmitter: "ppDFpHPs9tgrHeto7",
         receiver: "555555",
         profile: {"emailAddress":"fake4@cyclop.se",
            "firstName":"Emil",

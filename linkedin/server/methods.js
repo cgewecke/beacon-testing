@@ -23,6 +23,9 @@ Meteor.methods({
 
     if (transmitter && receiver){
 
+      console.log('transmitter:');
+      console.log(JSON.stringify(transmitter));
+      
       var linkedin = Linkedin().init(transmitter.profile.authToken);
       
       linkedin.people.id(receiver.username, linkedParams, 
@@ -30,7 +33,7 @@ Meteor.methods({
           function(err, $in){
             if (!err) {     
               var connection = { 
-                transmitter: transmitter.username, 
+                transmitter: transmitter._id, 
                 receiver: receiver.username,
                 profile: $in
               }

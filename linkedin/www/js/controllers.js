@@ -13,6 +13,8 @@ angular.module('linkedin')
 function NearbyCtrl ($scope, $reactive, LinkedIn){
   $reactive(this).attach($scope);
   
+  this.subscribe('connections');
+  
   this.helpers({
     connections: function () {
       return Connections.find();
@@ -38,6 +40,20 @@ function NearbyCtrl ($scope, $reactive, LinkedIn){
   this.notify = function(){
     console.log('notify clicked');
   }
+
+  this.testPub = function(){
+
+    var pkg = {
+      transmitter: {
+        uuid: "332238CE-745A-4238-B90A-C79163A3C660",
+        major: 0,
+        minor: 10 
+      },
+      receiver: Meteor.user().username
+    }
+    Meteor.call('newConnection', pkg, function(err, connections){
+    })
+  };
   
 };
 

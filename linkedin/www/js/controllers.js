@@ -41,23 +41,27 @@ function NearbyCtrl ($scope, $reactive, LinkedIn){
   
 };
 
-function NearbyProfileCtrl ($scope, $reactive, LinkedIn){
+function NearbyProfileCtrl ($scope, $reactive, $stateParams, LinkedIn){
   $reactive(this).attach($scope);
-  
-  this.user = LinkedIn.me;
+
+  console.log(JSON.stringify($stateParams));
+  this.helpers({
+    connection: function () {
+      return Connections.findOne({'profile.id': $stateParams.userId});
+    }
+  });
+  this.user = this.connection.profile;
+  this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = this.user.name;
-
-
-  
 };
 
 function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
   $reactive(this).attach($scope);
-   
-  
+    
   this.user = LinkedIn.me;
+  this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = "You";
-  console.log('user at profctrl init: ' + JSON.stringify(this.user) );
+  
   
 };
 

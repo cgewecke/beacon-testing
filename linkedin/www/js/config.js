@@ -18,7 +18,7 @@ function run ($ionicPlatform, $auth, $state, $rootScope, LinkedIn ) {
     }
 
     // DB testing
-    $auth.waitForUser().then(function(){
+    /*$auth.waitForUser().then(function(){
       var pkg = {
         transmitter: {
           uuid: "332238CE-745A-4238-B90A-C79163A3C660",
@@ -34,6 +34,6 @@ function run ($ionicPlatform, $auth, $state, $rootScope, LinkedIn ) {
         //console.log('printing transmitter:');
         //console.log(JSON.stringify(connections.transmitter));
       })
-    })
+    })*/
   });
 }

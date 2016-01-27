@@ -36,6 +36,7 @@ Meteor.methods({
               }
 
               Connections.insert(connection);
+              console.log(JSON.stringify(connection.profile));
             } else {
               console.log('Error: LinkedIn call failed');
             }

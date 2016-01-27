@@ -21,6 +21,20 @@ function NearbyCtrl ($scope, $reactive, LinkedIn){
   //this.users = [];
   //this.users.push(LinkedIn.me);
   
+  this.clear = function(){
+    var pkg = {
+      transmitter: {
+        uuid: "332238CE-745A-4238-B90A-C79163A3C660",
+        major: 0,
+        minor: 10 
+      },
+      receiver: Meteor.user().username
+    }
+
+    Meteor.call('disconnect', pkg, function(err, result){
+      (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
+    })
+  }
   this.notify = function(){
     console.log('notify clicked');
   }

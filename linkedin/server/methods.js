@@ -7,8 +7,6 @@ Meteor.methods({
   // @param: beaconIds [{transmitter: {uuid, major, minor}, receiver: username}]
   newConnection(beaconIds){
 
-    console.log(JSON.stringify(beaconIds));
-
     var transIds = beaconIds.transmitter;
     var receiverId = beaconIds.receiver;
     var linkedParams = 
@@ -46,7 +44,38 @@ Meteor.methods({
           })
       );
     }
-    //return {transmitter: transmitter, receiver: receiver};
+    
+  },
+
+  disconnect(beaconIds){
+
+    var transIds = beaconIds.transmitter;
+    var receiverId = beaconIds.receiver;
+
+    var receiver = Meteor.users.findOne({username: receiverId});
+    
+    var transmitter = Meteor.users.findOne({ $and: 
+        [
+          {'profile.appId': transIds.uuid },
+          {'profile.minor': transIds.minor},
+          {'profile.major': transIds.major} 
+        ]});
+
+    if (transmitter && receiver){
+       Connections.remove({$and: 
+        [
+          {transmitter: transmitter.username}, 
+          {receiver: receiver.username}
+        
+        ]}, function(err){
+          console.log(JSON.stringify(err));
+          return err;
+        });
+       return 'Success'
+    } else {
+      console.log('Couldnt find users to disconnect')
+      return 'Discovery Failure';
+    }   
   },
 
 

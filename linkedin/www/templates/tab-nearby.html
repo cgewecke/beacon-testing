@@ -8,15 +8,17 @@
         href="#/tab/nearby/{{user.profile.id}}"
         ng-click="nearby.notify()">
         <img ng-src="{{user.profile.pictureUrl}}">
-        <h2>{{user.profile.name}}</h2>
+        <h2>{{user.profile.firstName}}&nbsp{{user.profile.lastName}}</h2>
         <p>{{user.profile.headline}}</p>
         <span class="last-message-timestamp">Proximity</span>
         <i class="icon ion-chevron-right icon-accessory"></i>
-
-        <ion-option-button class="button-assertive" ng-click="remove(chat)">
+        <ion-option-button class="button-assertive" >
           Delete
         </ion-option-button>
       </ion-item>
     </ion-list>
+    <button class="button button-full button-positive" ng-click="nearby.clear()">
+      Disconnect
+    </button> 
   </ion-content>
 </ion-view>

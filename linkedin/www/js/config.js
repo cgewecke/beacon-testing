@@ -29,10 +29,10 @@ function run ($ionicPlatform, $auth, $state, $rootScope, LinkedIn ) {
       }
       Meteor.call('newConnection', pkg, function(err, connections){
         console.log('printing receiver:');
-        console.log(JSON.stringify(connections.receiver));
+        //console.log(JSON.stringify(connections.receiver));
         console.log('');
-        console.log('printing transmitter:');
-        console.log(JSON.stringify(connections.transmitter));
+        //console.log('printing transmitter:');
+        //console.log(JSON.stringify(connections.transmitter));
       })
     })
   });

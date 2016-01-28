@@ -5,14 +5,12 @@
     animation: flash 1s;
 }
 
-.profile-footer.ng-hide-add{
-	-webkit-animation: slideOutDown 1s;
-    animation: slideOutDown 1s;
-    -webkit-animation-delay: 1.2s; /* Chrome, Safari, Opera */
-    animation-delay: 1.2s;
+.profile-footer{
+	-webkit-animation: slideOutDown 300ms;
+    animation: slideOutDown 300ms;
 }
 
 .item-chat.ng-enter {
-    -webkit-animation: slideInLeft 300ms;
-    animation: slideInLeft 300ms;
+    -webkit-animation: slideInLeft 500ms;
+    animation: slideInLeft 500ms;
 }

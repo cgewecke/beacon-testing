@@ -54,7 +54,8 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
   
 };
 
-function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $cordovaContacts, LinkedIn){
+function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $cordovaContacts, $timeout, LinkedIn){
+  
   $reactive(this).attach($scope);
 
   var self = this;
@@ -93,8 +94,17 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
     console.log('createContact: ' + JSON.stringify(contact));
    
     $cordovaContacts.save(contact).then(function(result) {
-        Meteor.call('addContact', self.connection._id); 
-        self.connection.contactAdded = true;
+        
+        $scope.flasher = true;
+        
+        $timeout(function(){
+        
+            $scope.exit = true;
+            Meteor.call('addContact', self.connection._id); 
+            self.connection.contactAdded = true;
+            
+        }, 1000)
+
         console.log(JSON.stringify(result));
     }, function(error) {
         console.log(error);

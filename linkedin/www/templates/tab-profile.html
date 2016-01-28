@@ -37,10 +37,10 @@
       
     </div>
   </ion-content>
-  <ion-footer-bar align-title="left" class="bar-stable profile-footer" ng-show="!vm.connection.contactAdded">
+  <ion-footer-bar align-title="left" class="bar-stable" ng-class="{'profile-footer': exit}" ng-show="!vm.connection.contactAdded">
   <h1 class="title" >
-    <span ng-show="!vm.connection.contactAdded"> Add {{vm.user.firstName}} to contacts</span>
-    <span class="profile-add-contact" ng-show="vm.connection.contactAdded">Added {{vm.user.firstName}} </span>
+    <span ng-show="!flasher"> Add {{vm.user.firstName}} to contacts</span>
+    <span class="profile-add-contact" ng-show="flasher">Added {{vm.user.firstName}} </span>
   </h1>
   <div class="buttons">
     <button class="button button-clear button-positive icon ion-ios-plus-outline" ng-click="vm.createContact()">

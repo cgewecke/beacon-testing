@@ -83,7 +83,7 @@ if (Meteor.isServer) {
         profile: {"emailAddress":"fake4@cyclop.se",
            "firstName":"Emil",
            "headline":"Tester at Cyclop.se",
-           "id":"SA4tMdPaww",
+           "id":"55555",
            "industry":"Internet",
            "lastName":"Torkensen",
            "location":{"country":{"code":"us"},

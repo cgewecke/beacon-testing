@@ -11,7 +11,7 @@ Meteor.methods({
     var receiverId = beaconIds.receiver;
     var linkedParams = 
       [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
-        'location', 'industry', 'specialties', 'summary', 'email-address' ];
+        'location', 'industry', 'specialties', 'summary', 'email-address', 'positions' ];
 
     var receiver = Meteor.users.findOne({username: receiverId});
     
@@ -39,6 +39,7 @@ Meteor.methods({
               }
 
               Connections.insert(connection);
+              console.log("PROFILE IN NEW CONNECTION");
               console.log(JSON.stringify(connection.profile));
             } else {
               console.log('Error: LinkedIn call failed');
@@ -49,6 +50,10 @@ Meteor.methods({
       );
     }
     
+  },
+
+  addContact(id){
+    Connections.update(id, {$set: {contactAdded: true}});
   },
 
   disconnect(beaconIds){

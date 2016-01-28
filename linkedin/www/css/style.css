@@ -1,1 +1,18 @@
 /* Empty. Add your own CSS if you like */
+.profile-add-contact.ng-hide-remove {
+	opacity: 8;
+    -webkit-animation: flash 1s;
+    animation: flash 1s;
+}
+
+.profile-footer.ng-hide-add{
+	-webkit-animation: slideOutDown 1s;
+    animation: slideOutDown 1s;
+    -webkit-animation-delay: 1.2s; /* Chrome, Safari, Opera */
+    animation-delay: 1.2s;
+}
+
+.item-chat.ng-enter {
+    -webkit-animation: slideInLeft 300ms;
+    animation: slideInLeft 300ms;
+}

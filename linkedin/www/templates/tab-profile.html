@@ -6,12 +6,15 @@
         <img ng-src="{{vm.user.pictureUrl}}">
         <h2 class="profile-header-txt profile-bold" ng-bind="vm.user.name"></h2>
         <br>
-        <p class="profile-header-txt" ng-bind="vm.user.industry"></p>
-        <p class="profile-header-txt" ng-bind="vm.user.location.name"></p>
+        <p class="profile-header-txt" ng-bind="vm.user.positions.values[0].title"></p>
+        <p class="profile-header-txt" ng-bind="vm.user.positions.values[0].company.name"></p>
       </div>
 
       <div class="item">
-        <h2 ng-bind="vm.user.headline"></h2> 
+          <span ng-bind="vm.user.industry"></span>
+           &nbsp|&nbsp
+          <span ng-bind="vm.user.location.name"></span>
+          
       </div>
 
       <div class="item"> 
@@ -27,15 +30,21 @@
       </div>
       <div ng-show="vm.user.emailAddress" class="item profile-content">
         <span> Email </span>
-        <p class="profile-small"> (Tap plus to add to phone contacts) </p>
       </div>
       <div ng-show="vm.user.emailAddress" class="item item-button-right">
         {{vm.user.emailAddress}}
-        <button class="button button-positive" ng-click="vm.createContact()">
-          <i class="icon ion-ios-plus"></i>
-        </button>
-       </div>
+      </div>
       
     </div>
   </ion-content>
+  <ion-footer-bar align-title="left" class="bar-stable profile-footer" ng-show="!vm.connection.contactAdded">
+  <h1 class="title" >
+    <span ng-show="!vm.connection.contactAdded"> Add {{vm.user.firstName}} to contacts</span>
+    <span class="profile-add-contact" ng-show="vm.connection.contactAdded">Added {{vm.user.firstName}} </span>
+  </h1>
+  <div class="buttons">
+    <button class="button button-clear button-positive icon ion-ios-plus-outline" ng-click="vm.createContact()">
+    </button>
+  </div>
+</ion-footer-bar>
 </ion-view>

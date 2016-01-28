@@ -20,10 +20,6 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
     }
   });
   
-  
-  //this.users = [];
-  //this.users.push(LinkedIn.me);
-  
   this.clear = function(){
     var pkg = {
       transmitter: {
@@ -61,6 +57,8 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
 function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $cordovaContacts, LinkedIn){
   $reactive(this).attach($scope);
 
+  var self = this;
+  
   // DB: Connections, get profile
   this.subscribe('connections');
 
@@ -77,25 +75,30 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
 
   // Add to native contacts button
   this.createContact = function(){
-    console.log('Entering createContact');
+    
     var contact ={
       "displayName": this.user.name,
-      "emails": [
-            {
-                "value": this.user.emailAddress,
-                "type": "business"
-            }
-      ],
+      "emails": (this.user.emailAddress) ? 
+        [{ "value": this.user.emailAddress, 
+           "type": "business" }] : null,
+      "organizations": (this.user.positions) ?
+        [{"type": "Company", 
+          "name": this.user.positions.values[0].company.name,
+          "title": this.user.positions.values[0].title 
+        }] : null,
+      "photos": [{"value": this.user.pictureUrl}],
       "birthday": Date('1/1/1900')
     };
-    $ionicPlatform.ready(function(){
-      $cordovaContacts.save(contact).then(function(result) {
-
-          console.log(JSON.stringify(result));
-      }, function(error) {
-          console.log(error);
-      });
-    });
+    
+    console.log('createContact: ' + JSON.stringify(contact));
+   
+    $cordovaContacts.save(contact).then(function(result) {
+        Meteor.call('addContact', self.connection._id); 
+        self.connection.contactAdded = true;
+        console.log(JSON.stringify(result));
+    }, function(error) {
+        console.log(error);
+    });    
   }
 };
 
@@ -103,6 +106,7 @@ function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
   $reactive(this).attach($scope);
     
   this.user = LinkedIn.me;
+  this.user.contactAdded = true;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = "You";
   
@@ -136,8 +140,6 @@ function SettingsCtrl($scope, $reactive, $state) {
   $reactive(this).attach($scope);
 
   this.logout = logout;
-
-  ////////////
 
   function logout() {
     Meteor.logout(function(err){

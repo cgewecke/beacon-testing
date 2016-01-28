@@ -11,7 +11,7 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
 	// ------------------------------   PRIVATE  ------------------------------------
 	
 	// LinkedIn profile data api call
-  var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,industry,specialties,summary,email-address)";
+  var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,industry,specialties,positions,summary,email-address)";
   var protocol = "?callback=JSON_CALLBACK&format=jsonp&oauth2_access_token="
   var me_root = "https://api.linkedin.com/v1/people/~";
   var other_root = null;
@@ -23,13 +23,11 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
   var state = "randomstring";
 
   // PRODUCTION 
-  var authToken = null;
+  //var authToken = null;
 
   // DEVELOPMENT
-  //var authToken = "AQXZydge9w2lL6bSdPK3AFlvvkObLHCZfML6_ekS--YBqc6jXQKi8aESefitTX1fQtdH4FT8flDdG3BZZDpb_wI2D5ux20-RJR779kD2hS_ox77rS9RsmV53RmWtnwRd0NkCkZVQvhJtxesJ0SKuaK0R7aTqa8VYZzE2654wup_QhfmBab8";
-  //var authToken = "AQUqZTYwibWdLvG6D_IU8CfuaYJDmUKIrYjEus-wimlR4Tpsc1dn1dfzu7llw3HnAMF53DTJsfc1MIHEJGM_BcPYV2JsVBZY_cB-LFrMqNyaieJXshEMj_jmCW4gzgdWpaPmGrhs0XBLBl_hW7TkUZBkK4tjyXI5lU4KbcRHkOZMKJJNPvg";
-  //var authToken = "AQUklwGae4wHQfP5UKPT2Jh_hOogu_1vZF1-NTmb3wixWALFf-W2DYuHjI6ve-9Gd2_zpZggczo01Fuq3lKhPbl50VvwGWyz5TiSqYWG0FgqKySayANj9MdQqHErRA29ihOh5nfpWcfSOrgWtY1gZxToBTYIgZ3V71M8fQtQZwjvAEO8J1E";
-
+  var authToken = "AQUSLINla5JwBM2NT5d0T9yOmvt129KRH5Q_qg6HbZ4SfodD727crZtd7lasi0YOVZC6WLlpcr3iGpRvrf1K394MxMcTyl3Iu-unT4yVeLptAXbgfA4fkW0aDAQMY5oPGV9haQQQvUbIxaF2JtMOCHc_HYVXW2d2mNj5W9CdNzUw4ZR3QaY";
+  
   // ------------------------------   PUBLIC ------------------------------------
 	
   self.me = null;

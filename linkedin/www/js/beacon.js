@@ -4,7 +4,7 @@ angular.module('linkedin')
   .service("Beacons", Beacons);
 
 
-function Beacons($q, $auth, $cordovaOauth, $ionicPlatform){
+function Beacons($cordovaBeacon){
 
 	var self = this;
 
@@ -21,72 +21,68 @@ function Beacons($q, $auth, $cordovaOauth, $ionicPlatform){
 		"05DEE885-E723-438F-B733-409E4DBFA694", //10
 	];
 
-	self.initialize = function(){};
-	self.transmit = function(){};
-	self.parseMonitorSignal = function(){};
+    var regions = [];
 
+	self.quantity = uuids.length;
 
-	document.addEventListener("deviceready", onDeviceReady, false);
+	// Needs to happen in $ionicPlatform.ready() in a $auth.waitForUser
+	self.initialize = function(){
 
-    function didDetermineStateForRegion(pluginResult) {
-    }
+		var profile, appBeacon;
 
-    function didStartMonitoringForRegion (pluginResult) {
-    }
-    function didExitRegion(pluginResult) {
-        $cordovaLocalNotification.add({
-        id: 30244234234,
-        title: "Good By!",
-        text: "Hope to see you again."
-            }).then(function () {
-            });
-    }
+        // Init region array
+        setUpRegions();
 
-    function didEnterRegion (pluginResult) {
-        $cordovaLocalNotification.add({
-        title: "Welcome",
-        text: "Tap to launch app"
-            }).then(function () {
+        // Set device to wake app up when killed/backgrounded
+		$cordovaBeacon.requestAlwaysAuthorization();
 
-            });
+		// Monitor all uuids
+		angular.forEach(regions, function(region){
+            $cordovaBeacon.startMonitoringForRegion(region);
+        })
 
-    };
-    function didRangeBeaconsInRegion (pluginResult) {
+        // Register handlers
+        $rootScope.$on("$cordovaBeacon:didEnterRegion", function(result){
+            onEntry(result);
+        });
+		$rootScope.$on("$cordovaBeacon:didExitRegion", function(result){
+            onExit(result);
+        });
+        $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function(result){
+            onCapture(result);
+        });
 
-    }
+        // Transmit
+        profile = Meteor.user().profile;
+        appBeacon = $cordovaBeacon.createBeaconRegion(
+            profile.beaconName,
+            profile.appId,
+            parseInt(profile.major),
+            parseInt(profile.minor)
+        });
 
-    function onDeviceReady() {
-        // Now safe to use device APIs
-        function createBeacon(uuid,nofiyState) {
+        $cordovaBeacon.startAdvertising();
+	};
 
-            var uuid = uuid; // mandatory
-            var identifier = 'estimote'; // mandatory
-
-            // throws an error if the parameters are not valid
-            var beaconRegion = new cordova.plugins.locationManager.BeaconRegion(identifier, uuid);
-            beaconRegion.notifyEntryStateOnDisplay = true;
-            return beaconRegion;
+    // setUpRegions(): initialize an array beaconRegion obj of all our possible uuid vals
+    function setUpRegions(){
+        for (int i = 0; i < uuids.length; i++){
+            regions.push( $cordovaBeacon.createBeaconRegion('r_' + i, uuids[i]);
         }
-        var delegate = new cordova.plugins.locationManager.Delegate();
-        delegate.didDetermineStateForRegion = didDetermineStateForRegion;
+    }
+    
+    function onEntry(result){
+        angular.forEach(regions, function(region){
+            $cordovaBeacon.startRangingBeaconsInRegion(region);
+        })
+    };
 
-        delegate.didStartMonitoringForRegion = didStartMonitoringForRegion;
+    function onExit(result){
+        // Remove self from connections
+    }
 
-        delegate.didRangeBeaconsInRegion = didRangeBeaconsInRegion;
-        delegate.didEnterRegion = didEnterRegion;
-        delegate.didExitRegion = didExitRegion;
-
-        var beaconRegion = createBeacon('02681445-8D1B-4F58-99D4-B25F4B129A58',true);
-        // var beaconRegionBlue = createBeacon('02681445-8D1B-4F58-99D4-B25F4B129A58',1,,true);
-        cordova.plugins.locationManager.setDelegate(delegate);
-
-        // required in iOS 8+
-        //cordova.plugins.locationManager.requestWhenInUseAuthorization();
-        cordova.plugins.locationManager.requestAlwaysAuthorization();
-        cordova.plugins.locationManager.startMonitoringForRegion(beaconRegion)
-        .fail(console.error)
-        .done();
-
+    function onCapture(result){
+        // add self to connections
     }
 
 }

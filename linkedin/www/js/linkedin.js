@@ -150,7 +150,7 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
 	// removeOther(id): Remove a profile obj from the self.others array if 
 	// a matching id is found. Returns true if successful, false otherwise
 	self.removeOther = function(id){
-    for (var i= 0; i < self.others; i++) {
+    for (var i= 0; i < self.others.length; i++) {
         if (id === self.others[i].id) {
             self.others.splice(i, 1);
             return true;   

@@ -1,6 +1,6 @@
 // Service for initializing, transmitting and receiving beacons signal
 
-angular.module('linkedin')
+/*angular.module('linkedin')
   .service("Beacons", Beacons);
 
 
@@ -11,8 +11,6 @@ function Beacons($q, $auth, $cordovaOauth, $ionicPlatform){
 	self.initialize = function(){};
 	self.transmit = function(){};
 	self.parseMonitorSignal = function(){};
-
-	self.
 
 	document.addEventListener("deviceready", onDeviceReady, false);
 
@@ -77,4 +75,4 @@ function Beacons($q, $auth, $cordovaOauth, $ionicPlatform){
 
     }
 
-}
+}*/

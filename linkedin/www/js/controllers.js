@@ -88,7 +88,7 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
           "title": this.user.positions.values[0].title 
         }] : null,
       "photos": [{"value": this.user.pictureUrl}],
-      "birthday": Date('1/1/1900')
+      "birthday": Date('5/5/1973')
     };
     
     console.log('createContact: ' + JSON.stringify(contact));
@@ -162,17 +162,9 @@ function SettingsCtrl($scope, $reactive, $state) {
 function ChatsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
   
-  this.helpers({
-    chats: function () {
-      return Chats.find();
-    }
-  });
- 
-  this.remove = remove;
- 
-  function remove (chat) {
-    Chats.remove(chat);
-  }
+  var ref = window.cordova.InAppBrowser.open("localhost/callback.html", '_blank');
+  console.log('window: ' + JSON.stringify(ref));
+
 };
 
 

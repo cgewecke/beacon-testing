@@ -78,11 +78,35 @@ function Beacons($cordovaBeacon){
     };
 
     function onExit(result){
-        // Remove self from connections
-    }
 
-    function onCapture(result){
-        // add self to connections
+        var userId = result.major + '_' + result.minor + '_' + result.uuid;
+        
+        Meteor.call('disconnect', pkg, function(err, success){
+            (err) ? 
+                console.log(JSON.stringify(err)) : 
+                console.log(JSON.stringify(success)); 
+        })
+    };
+
+    function onCapture(beacons){
+
+
+        var localId = window.localStorage['pl_id']
+        var receiver = (localId) ? localId : Meteor.user().email;
+        var transmitter, pkg;
+
+        if (receiver){
+            angular.forEach(beacons, function(beacon){
+
+                pkg = {
+                   transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid,
+                   receiver: receiver,
+                   proximity: beacon.proximity 
+                };
+                
+                Meteor.call('newConnection', pkg, function(err, connections){})
+            })
+        }
     }
 
 }

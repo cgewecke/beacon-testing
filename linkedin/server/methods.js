@@ -7,20 +7,15 @@ Meteor.methods({
   // @param: beaconIds [{transmitter: {uuid, major, minor}, receiver: username}]
   newConnection(beaconIds){
 
-    var transIds = beaconIds.transmitter;
+    var transId = beaconIds.transmitter;
     var receiverId = beaconIds.receiver;
     var linkedParams = 
       [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
         'location', 'industry', 'specialties', 'summary', 'email-address', 'positions' ];
 
-    var receiver = Meteor.users.findOne({username: receiverId});
+    var receiver = Meteor.users.findOne({email: receiverId});
+    var transmitter = Meteor.users.findOne({ email: transId });
     
-    var transmitter = Meteor.users.findOne({ $and: 
-        [{'profile.appId': transIds.uuid },
-         {'profile.minor': transIds.minor},
-         {'profile.major': transIds.major} 
-        ]});
-
     if (transmitter && receiver){
 
       console.log('transmitter:');
@@ -34,7 +29,8 @@ Meteor.methods({
             if (!err) {     
               var connection = { 
                 transmitter: transmitter._id, 
-                receiver: receiver.username,
+                receiver: receiver._id,
+                proximity: beaconIds.proximity,
                 profile: $in
               }
 
@@ -58,23 +54,17 @@ Meteor.methods({
 
   disconnect(beaconIds){
 
-    var transIds = beaconIds.transmitter;
+    var transId = beaconIds.transmitter;
     var receiverId = beaconIds.receiver;
 
-    var receiver = Meteor.users.findOne({username: receiverId});
-    
-    var transmitter = Meteor.users.findOne({ $and: 
-        [
-          {'profile.appId': transIds.uuid },
-          {'profile.minor': transIds.minor},
-          {'profile.major': transIds.major} 
-        ]});
+    var receiver = Meteor.users.findOne({email: receiverId});
+    var transmitter = Meteor.users.findOne({ email: transId });
 
     if (transmitter && receiver){
        Connections.remove({$and: 
         [
-          {transmitter: transmitter.username}, 
-          {receiver: receiver.username}
+          {transmitter: transmitter._id}, 
+          {receiver: receiver._id}
         
         ]}, function(err){
           console.log(JSON.stringify(err));
@@ -82,7 +72,6 @@ Meteor.methods({
         });
        return 'Success'
     } else {
-      console.log('Couldnt find users to disconnect')
       return 'Discovery Failure';
     }   
   },

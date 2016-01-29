@@ -1,21 +1,3 @@
-/* SAMPLE LINKEDIN OUTPUT 
-{"firstName":"Penelope",
-  "headline":"Software Engineer at Cyclop.se",
-  "id":"SA4tMdPaww",
-  "lastName":"Cyclops",
-  "location":{
-    "country":{
-      "code":"us"},
-    "name":"Portland, Oregon Area" },
-  "numConnections":0,
-  "pictureUrl":"https://media.licdn.com/mpr/mprx/0_PotKeB6H-pimuLtZrperfXFHnVOmdNYvKaXOaGPd…UoO85keUUp7fKJzxMBu8_5kOUpafKkNMMBPwCKWzsdCLQxHzH3jI9YZYa6OQK15rV1y2pzo1_o",
-  "siteStandardProfileRequest":{
-    "url":"https://www.linkedin.com/profile/view?id=473444799&authType=name&authToken=gcD9&trk=api*a4769661*s5086301*"}}
-  */
-
-// TO DO
-// 1. TEST AUTH TOKEN when logging in. . . . . kick back out to re-auth
-
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
@@ -89,9 +71,7 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
           
           $auth.waitForUser().then(function(){
   
-            window.localStorage['pl_major'] = Meteor.user().profile.major;
-            window.localStorage['pl_minor'] = Meteor.user().profile.minor;
-            window.localStorage['pl_id'] = Meteor.user().username;
+            window.localStorage['pl_id'] = Meteor.user().email;
             Meteor.users.update(Meteor.userId(), { $set: { 'profile.authToken': user.profile.authToken } });
             $state.go('tab.nearby');
 
@@ -111,7 +91,7 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
         if (!err && val ){
 
           user.profile.appId = Beacons.getUUID(val.minor);
-          user.profile.beaconName = 'PsychicLink_' + (val.minor % Beacons.quantity);
+          user.profile.beaconName = 'r_' + (val.minor % Beacons.quantity);
           user.profile.major = val.major;
           user.profile.minor = val.minor;
 
@@ -119,11 +99,10 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
           
           Accounts.createUser(user, function(err){
             if (!err){
-              window.localStorage['pl_major'] = Meteor.user().profile.major;
-              window.localStorage['pl_minor'] = Meteor.user().profile.minor;
-              window.localStorage['pl_id'] = Meteor.user().username;
-
+  
+              window.localStorage['pl_id'] = user.email;
               $state.go('tab.nearby');
+              
             } else{
               console.log('createUser Error: ' + JSON.stringify(err));
               ionicToast.show("Server overloaded (CreateUser) - try again", 'top', true, 2500);

@@ -62,9 +62,7 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
           authToken: LinkedIn.me.authToken,
           major: null,
           minor: null,
-          appId: "332238CE-745A-4238-B90A-C79163A3C660",
-          chatId: "59688D19-8259-4DDF-819D-E0FA49BC48A1",
-          lookId: "C605A9BE-81FF-4FDD-989A-E5F0322C24D6",
+          appId: null,
           session: null
         }
       };
@@ -111,10 +109,13 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
 
       Meteor.call( 'getUniqueAppId', function(err, val){ 
         if (!err && val ){
-          
-          user.email = val.major + '_' + val.minor;
+
+          user.profile.appId = Beacons.getUUID(val.minor);
+          user.profile.beaconName = 'PsychicLink_' + (val.minor % Beacons.quantity);
           user.profile.major = val.major;
           user.profile.minor = val.minor;
+
+          user.email = val.major + '_' + val.minor + '_' + user.profile.appId;
           
           Accounts.createUser(user, function(err){
             if (!err){

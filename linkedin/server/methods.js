@@ -7,14 +7,12 @@ Meteor.methods({
   // @param: beaconIds [{transmitter: {uuid, major, minor}, receiver: username}]
   newConnection(beaconIds){
 
-    var transId = beaconIds.transmitter;
-    var receiverId = beaconIds.receiver;
     var linkedParams = 
       [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
         'location', 'industry', 'specialties', 'summary', 'email-address', 'positions' ];
 
-    var receiver = Meteor.users.findOne({email: receiverId});
-    var transmitter = Meteor.users.findOne({ email: transId });
+    var receiver = Meteor.users.findOne({email: beaconIds.receiver});
+    var transmitter = Meteor.users.findOne({ email: beaconIds.transmitter });
     
     if (transmitter && receiver){
 
@@ -44,6 +42,8 @@ Meteor.methods({
             console.log('Error: Couldnt bind!!!');
           })
       );
+    } else {
+      console.log("ERROR - new connection, couldn't db locate trans or reciever");
     }
     
   },
@@ -54,11 +54,8 @@ Meteor.methods({
 
   disconnect(beaconIds){
 
-    var transId = beaconIds.transmitter;
-    var receiverId = beaconIds.receiver;
-
-    var receiver = Meteor.users.findOne({email: receiverId});
-    var transmitter = Meteor.users.findOne({ email: transId });
+    var receiver = Meteor.users.findOne({email: beaconIds.receiver});
+    var transmitter = Meteor.users.findOne({ email: beaconIds.transmitter });
 
     if (transmitter && receiver){
        Connections.remove({$and: 
@@ -88,6 +85,7 @@ Meteor.methods({
   },
 
   getUniqueAppId(){
+    
     var instance = AppInstance.findOne();
     if (instance){
       

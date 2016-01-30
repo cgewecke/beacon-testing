@@ -23,10 +23,10 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
   var state = "randomstring";
 
   // PRODUCTION 
-  //var authToken = null;
+  var authToken = null;
 
   // DEVELOPMENT
-  var authToken = "AQVa9NRSAPy9XozyimSLON58NYqVEQiGNerVr9QC9iSmAZFsV6yCB0YxgEHt5OjS4cnE5gB0rCpr-XIHigtTOLbnBZvQb_CBkWzZPzSyTK5kZSLcMOmjigcGU7W_FLz6VI2zyZjtzEU8zphEsxb6iasa4e_Sw8qNAN6hdqB-qklf-G0Yj1o";
+  //var authToken = "AQVa9NRSAPy9XozyimSLON58NYqVEQiGNerVr9QC9iSmAZFsV6yCB0YxgEHt5OjS4cnE5gB0rCpr-XIHigtTOLbnBZvQb_CBkWzZPzSyTK5kZSLcMOmjigcGU7W_FLz6VI2zyZjtzEU8zphEsxb6iasa4e_Sw8qNAN6hdqB-qklf-G0Yj1o";
   //var authToken = "AQUSLINla5JwBM2NT5d0T9yOmvt129KRH5Q_qg6HbZ4SfodD727crZtd7lasi0YOVZC6WLlpcr3iGpRvrf1K394MxMcTyl3Iu-unT4yVeLptAXbgfA4fkW0aDAQMY5oPGV9haQQQvUbIxaF2JtMOCHc_HYVXW2d2mNj5W9CdNzUw4ZR3QaY";
   
   // ------------------------------   PUBLIC ------------------------------------

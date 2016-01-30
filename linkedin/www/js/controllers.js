@@ -21,15 +21,11 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
   });
   
   this.clear = function(){
+    
     var pkg = {
-      transmitter: {
-        uuid: "332238CE-745A-4238-B90A-C79163A3C660",
-        major: 0,
-        minor: 10 
-      },
-      receiver: Meteor.user().username
+      transmitter: Meteor.user().email,
+      receiver: Meteor.user().email
     }
-
     Meteor.call('disconnect', pkg, function(err, result){
       (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
     })
@@ -41,12 +37,8 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
   this.testPub = function(){
 
     var pkg = {
-      transmitter: {
-        uuid: "332238CE-745A-4238-B90A-C79163A3C660",
-        major: 0,
-        minor: 10 
-      },
-      receiver: Meteor.user().username
+      transmitter: Meteor.user().email,
+      receiver: Meteor.user().email
     }
     Meteor.call('newConnection', pkg, function(err, connections){
     })

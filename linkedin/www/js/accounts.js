@@ -1,9 +1,11 @@
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
+function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast ){
     $reactive(this).attach($scope);
+    
     // GET TOKEN from github
+    
     this.subscribe('users');
     var appHash = "Txc9";
     
@@ -90,13 +92,19 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, ionicToast ){
       Meteor.call( 'getUniqueAppId', function(err, val){ 
         if (!err && val ){
 
-          user.profile.appId = Beacons.getUUID(val.minor);
-          user.profile.beaconName = 'r_' + (val.minor % Beacons.quantity);
+          var i = val.minor % Beacons.quantity; // Index to select uuid
+
+          user.profile.appId = Beacons.getUUID(i);
+          user.profile.beaconName = 'r_' + i;
           user.profile.major = val.major;
           user.profile.minor = val.minor;
 
           user.email = val.major + '_' + val.minor + '_' + user.profile.appId;
           
+          // DEBUGGING
+          console.log("CREATE ACCOUNT: CLIENT");
+          console.log(JSON.stringify(user));
+
           Accounts.createUser(user, function(err){
             if (!err){
   

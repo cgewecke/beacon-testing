@@ -25,15 +25,18 @@ function Beacons($cordovaBeacon){
 
 	self.quantity = uuids.length;
 
+    self.getUUID = function(index){
+        console.log("getUUID index =" + index);
+        return uuids[index];
+    };
+
 	// Needs to happen in $ionicPlatform.ready() in a $auth.waitForUser
 	self.initialize = function(){
 
 		var profile, appBeacon;
 
-        // Init region array
+        // Init region array. Set device to wake app up when killed/backgrounded
         setUpRegions();
-
-        // Set device to wake app up when killed/backgrounded
 		$cordovaBeacon.requestAlwaysAuthorization();
 
 		// Monitor all uuids
@@ -59,17 +62,17 @@ function Beacons($cordovaBeacon){
             profile.appId,
             parseInt(profile.major),
             parseInt(profile.minor)
-        });
+        );
 
         $cordovaBeacon.startAdvertising();
 	};
 
     // setUpRegions(): initialize an array beaconRegion obj of all our possible uuid vals
     function setUpRegions(){
-        for (int i = 0; i < uuids.length; i++){
-            regions.push( $cordovaBeacon.createBeaconRegion('r_' + i, uuids[i]);
+        for (var i = 0; i < uuids.length; i++){
+            regions.push( $cordovaBeacon.createBeaconRegion('r_' + i, uuids[i]));
         }
-    }
+    };
     
     function onEntry(result){
         angular.forEach(regions, function(region){
@@ -77,15 +80,31 @@ function Beacons($cordovaBeacon){
         })
     };
 
-    function onExit(result){
+    function onExit(beacon){
 
-        var userId = result.major + '_' + result.minor + '_' + result.uuid;
+        var localId = window.localStorage['pl_id']
+        var receiver = (localId) ? localId : Meteor.user().email;
+        var transmitter, pkg;
         
-        Meteor.call('disconnect', pkg, function(err, success){
-            (err) ? 
-                console.log(JSON.stringify(err)) : 
-                console.log(JSON.stringify(success)); 
-        })
+        console.log("OnExit - receiver: " + receiver);
+
+        if (receiver && beacon){
+
+            pkg = {
+               transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid,
+               receiver: receiver,
+            };
+            
+            Meteor.call('disconnect', pkg, function(err, success){
+                (err) ? 
+                    console.log(JSON.stringify(err)) : 
+                    console.log(JSON.stringify(success)); 
+            })
+        } else {
+            console.log("Error: receiver - " + receiver + " beacons: " + beacons.length);
+        }
+        
+        
     };
 
     function onCapture(beacons){
@@ -95,7 +114,7 @@ function Beacons($cordovaBeacon){
         var receiver = (localId) ? localId : Meteor.user().email;
         var transmitter, pkg;
 
-        if (receiver){
+        if (receiver && beacons.length){
             angular.forEach(beacons, function(beacon){
 
                 pkg = {
@@ -106,7 +125,9 @@ function Beacons($cordovaBeacon){
                 
                 Meteor.call('newConnection', pkg, function(err, connections){})
             })
+        } else {
+            console.log("Error: receiver - " + receiver + " beacons: " + beacons.length);
         }
-    }
+    };
 
 }

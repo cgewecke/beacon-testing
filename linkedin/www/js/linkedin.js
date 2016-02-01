@@ -26,10 +26,11 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
   var authToken = null;
 
   // DEVELOPMENT
-  //var authToken = "AQVa9NRSAPy9XozyimSLON58NYqVEQiGNerVr9QC9iSmAZFsV6yCB0YxgEHt5OjS4cnE5gB0rCpr-XIHigtTOLbnBZvQb_CBkWzZPzSyTK5kZSLcMOmjigcGU7W_FLz6VI2zyZjtzEU8zphEsxb6iasa4e_Sw8qNAN6hdqB-qklf-G0Yj1o";
-  //var authToken = "AQUSLINla5JwBM2NT5d0T9yOmvt129KRH5Q_qg6HbZ4SfodD727crZtd7lasi0YOVZC6WLlpcr3iGpRvrf1K394MxMcTyl3Iu-unT4yVeLptAXbgfA4fkW0aDAQMY5oPGV9haQQQvUbIxaF2JtMOCHc_HYVXW2d2mNj5W9CdNzUw4ZR3QaY";
-  
-  // ------------------------------   PUBLIC ------------------------------------
+  //var authToken = "AQUJhAcbjyNryn9IXT5pzVG55RnJatko_BWqEfF3K25JFxRC-G8l7d9XAXysHqbPcdUfgSv-wWZzkk06mJuqYAWCGSNVduRzmuhWerFgW20n7jEZaxremlVk4WbowLgcifH45AdKvH937oyuJA2EA4Ss7bVXXHf5CFiV4Fq8tlmyLFPDSRE";
+  //var authToken = "AQV-oc8wPTyhOYwS-YgpWHnIWIZ-6hbAEngzsyXP2vMRG6-JszhUVS8dQ7FMWReZ20_BJG5IXvRc1Zcurg14r5amIAD4AxuquClVRQes8SOFiHXxUAcyL43OpAZ9dWIRiYY-NtoB1eo0S0xPdgMGqxpzFGK-BIS6ZjV0NHF-4sfLfBMSTD4";
+  //var authToken = "AQXazFMVa1RYDvKYmEBsbiJPHceRDQ5Rw_ZXKDxLet1Hrtuyv2k3PdZt3YEgwIswTmJ93V0IhbSQv8ZzzH9djwWyI9EAttfjiyqpv80nPYPP7NjC_SG3hck429vNzG2gtFIcfE83BPQTiFlHZFRwsLhff7ouxGy-CrM7AYeb_KBRBtZ0Qu4";
+  //var authToken = "AQUQx7XeK5AksUBUfQnQkJkBA2uM3Xg5t-GzcIkamlSq6YMFeUk3Z1stLd130C1TezHVKKZ_KaOq7xBQPZ1VBG9Gl_hPhYygFeLj1Ih2Py_c8CETkW6L6eFII0BFERk5k6oh3NR_tHfXEj-B48i-pdOwCQYPzYJwkdEukcAfvoFMyDlT2hs";
+    // ------------------------------   PUBLIC ------------------------------------
 	
   self.me = null;
 	self.others = [];
@@ -103,6 +104,7 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
       	 self.me = result;
       	 self.me.name = result.firstName + " " + result.lastName;
          self.me.authToken = authToken;
+         
       	 deferred.resolve(self.me);
       })
       .error(function(error){

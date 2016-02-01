@@ -2,7 +2,7 @@ angular
   .module('linkedin')
   .run(run);
 
-function run ($ionicPlatform, $auth, $state, $rootScope, LinkedIn ) {
+function run ($ionicPlatform, $auth, $state, Beacons ) {
 
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -16,6 +16,11 @@ function run ($ionicPlatform, $auth, $state, $rootScope, LinkedIn ) {
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+
+    // Run beacons
+    $auth.waitForUser().then(function(){
+        Beacons.initialize();
+    });
 
   });
 }

@@ -3,7 +3,7 @@ if (Meteor.isServer) {
     console.log('running startup');
     // Set up counter
     if (AppInstance.find().count() === 0){
-      AppInstance.insert({major: 0, minor: 0});
+      AppInstance.insert({major: 1, minor: 1});
     }
     
     Connections.remove({});

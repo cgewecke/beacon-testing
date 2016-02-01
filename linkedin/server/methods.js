@@ -3,6 +3,11 @@ Meteor.methods({
 
   //---------------- Connections Collections -------------------------
   
+  ping(pkg){
+
+    console.log('Got pinged: ' + JSON.stringify(pkg));
+  }, 
+
   // @function: newConnection
   // @param: beaconIds [{transmitter: {uuid, major, minor}, receiver: username}]
   newConnection(beaconIds){
@@ -96,7 +101,7 @@ Meteor.methods({
         minor = minor + 1;
       } else {
         major = major + 1;
-        minor = 0;
+        minor = 1;
       }
 
       AppInstance.update(instance._id, {major: major, minor: minor}); 

@@ -68,12 +68,13 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicTo
     // REGISTERED: Login with password. Update our user w/current linkedIn profile
     // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
     function loginWithAccount(user){
+      console.log('Logging in with account');
       Meteor.loginWithPassword(user.username, user.password, function(err){
         if (!err){
           
           $auth.waitForUser().then(function(){
   
-            window.localStorage['pl_id'] = Meteor.user().email;
+            window.localStorage['pl_id'] = Meteor.user().emails[0].address;
             Meteor.users.update(Meteor.userId(), { $set: { 'profile.authToken': user.profile.authToken } });
             $state.go('tab.nearby');
 

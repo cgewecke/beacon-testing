@@ -10,7 +10,7 @@ angular.module('linkedin')
   .controller('SettingsCtrl', SettingsCtrl);
 
 
-function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
+function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons){
   $reactive(this).attach($scope);
   
   this.subscribe('connections');
@@ -19,6 +19,8 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn){
       return Connections.find();
     }
   });
+
+  this.initBeacon = Beacons.initialize;
   
   this.clear = function(){
     

@@ -24,6 +24,7 @@ function Beacons($rootScope, $cordovaBeacon){
     var regions = [];
 
 	self.quantity = uuids.length;
+    self.lock = false;
 
     self.getUUID = function(index){
         return uuids[index];
@@ -118,7 +119,7 @@ function Beacons($rootScope, $cordovaBeacon){
         if (receiver && beacon){
 
             pkg = {
-               transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid,
+               transmitter: beacon.uuid,
                receiver: receiver,
             };
             
@@ -155,11 +156,14 @@ function Beacons($rootScope, $cordovaBeacon){
                    proximity: beacon.proximity 
                 };
                 
-                //console.log('CAPTURED: ' + JSON.stringify(pkg));
-                //pkg.message = "CAPTURED";
-                //Meteor.call('ping', pkg, function(err, connections){});
-                
-                Meteor.call('newConnection', pkg, function(err, connections){})
+                if (!self.lock){
+                    self.lock = true;            
+                    Meteor.call('newConnection', pkg, function(err, connections){
+                        self.lock = false;
+                    })
+                } else {
+                    console.log('Server busy in On Capture');
+                }
             })
         } else {
             //console.log("Error: capture - " + receiver + " beacons: " + beacons.length);

@@ -96,8 +96,8 @@ if (Meteor.isServer) {
 
       ];
       for (var i = 0; i < cons.length; i++) {
-        console.log('inserting connections');
-        Connections.insert(cons[i]);
+        //console.log('inserting connections');
+        //Connections.insert(cons[i]);
       }
     }
     

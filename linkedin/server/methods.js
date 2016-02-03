@@ -25,14 +25,15 @@ Meteor.methods({
       if(beaconIds.proximity != existing.proximity){
         Connections.update(existing._id, {$set: { proximity: beaconIds.proximity, isNew: false }});
         console.log('updated proximity: ' + JSON.stringify(existing));
+        return true;
       }
       
     } else if (transmitter && receiver){
-
-      console.log('transmitter:');
-      console.log(JSON.stringify(transmitter));
       
-      var linkedin = Linkedin().init(transmitter.profile.authToken);
+      // This is bad. There is no guarantee this token will be any good
+      // since it expires every 60 days and we don't know if the receiver
+      // ever uses this app.
+      var linkedin = Linkedin().init(receiver.profile.authToken);
       
       linkedin.people.url(receiver.profile.profileUrl, linkedParams, 
         Meteor.bindEnvironment(
@@ -41,6 +42,7 @@ Meteor.methods({
               var connection = { 
                 transmitter: transmitter._id, 
                 receiver: receiver._id,
+                transUUID: transmitter.profile.appId,
                 proximity: beaconIds.proximity,
                 isNew: true,
                 profile: $in
@@ -49,15 +51,22 @@ Meteor.methods({
               Connections.insert(connection);
               console.log("PROFILE IN NEW CONNECTION");
               console.log(JSON.stringify(connection.profile));
+              return connection;
             } else {
-              console.log('Error: LinkedIn call failed');
+              error = 'NEW CONNECTION ERROR: LinkedIn call failed';
+              console.log(error);
+              return error
             }
           }, function(err){
-            console.log('Error: Couldnt bind!!!');
+            error = 'NEW CONNECTION ERROR: Couldnt bind!!!';
+            console.log(error);
+            return error;
           })
       );
     } else {
-      console.log("ERROR - new connection, couldn't db locate trans or reciever");
+      error = "NEW CONNECTION ERROR - new connection, couldn't db locate trans or reciever"
+      console.log(error);
+      return (error)
     }
     
   },
@@ -68,21 +77,22 @@ Meteor.methods({
 
   disconnect(beaconIds){
 
-    console.log('Disconnecting');
+    console.log('Disconnecting: ' + JSON.stringify(beaconIds));
     var receiver = Accounts.findUserByEmail(beaconIds.receiver);
-    var transmitter = Accounts.findUserByEmail(beaconIds.transmitter);
+    var transmitter = beaconIds.transmitter;
 
     if (transmitter && receiver){
        Connections.remove({$and: 
         [
-          {transmitter: transmitter._id}, 
+          {transUUID: transmitter}, 
           {receiver: receiver._id}
         
         ]}, function(err){
           console.log(JSON.stringify(err));
           return err;
         });
-       return 'Success'
+       console.log('Successful removal');
+       return 'Success';
     } else {
       return 'Discovery Failure';
     }   

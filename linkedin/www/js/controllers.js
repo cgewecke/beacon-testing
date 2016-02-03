@@ -33,7 +33,7 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, $timeout){
   this.clear = function(){
     
     var pkg = {
-      transmitter: Meteor.user().emails[0].address,
+      transmitter: Meteor.user().profile.appId,
       receiver: Meteor.user().emails[0].address,
     }
     Meteor.call('disconnect', pkg, function(err, result){

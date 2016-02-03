@@ -1,15 +1,41 @@
 Meteor.methods({
 
 
-  //---------------- Connections Collections -------------------------
-  
+  //---------------- Logging/Debugging -------------------------
   ping(pkg){
 
     console.log('Got pinged: ' + JSON.stringify(pkg));
   }, 
 
+  //---------------- Notifications -------------------------
+  // @function: notify
+  // @param: info {target: _id, notification: {} }
+  // Adds a notification to the receiver's notifications array, increments their notify count 
+  notify(info){
+    
+    Meteor.users.update({_id: target},{
+      $inc: {'profile.notifyCount': 1 },
+      $push: {'profile.notifications': info.notification} 
+    });
+
+  },
+
+
+  // @function: resetNotifyCounter
+  // @param: info {target: _id, notification: {} }
+  // Resets notifyCount to zero (for updating client side badges etc. . .)
+  resetNotifyCounter(){
+    Meteor.users.update({_id: Meteor.userId()}, {$set: {'profile.notifyCount': 0}});
+  },
+
+  addContact(id){
+    Connections.update(id, {$set: {contactAdded: true}});
+  },
+
+
+  //---------------- Connections -------------------------
   // @function: newConnection
-  // @param: beaconIds [{transmitter: {uuid, major, minor}, receiver: username}]
+  // @param: beaconIds [{transmitter: email, receiver: email}]
   newConnection(beaconIds){
 
     var linkedParams = 
@@ -32,7 +58,7 @@ Meteor.methods({
       
       // This is bad. There is no guarantee this token will be any good
       // since it expires every 60 days and we don't know if the receiver
-      // ever uses this app.
+      // ever uses this app. Apply for search API? 
       var linkedin = Linkedin().init(receiver.profile.authToken);
       
       linkedin.people.url(receiver.profile.profileUrl, linkedParams, 
@@ -71,10 +97,8 @@ Meteor.methods({
     
   },
 
-  addContact(id){
-    Connections.update(id, {$set: {contactAdded: true}});
-  },
-
+  // @function: disconnect
+  // @param: beaconIds [{transmitter: uuid, receiver: email}]
   disconnect(beaconIds){
 
     console.log('Disconnecting: ' + JSON.stringify(beaconIds));

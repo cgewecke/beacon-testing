@@ -1,0 +1,17 @@
+<ion-view view-title="Notifications">
+  <ion-content>
+    <ion-list>
+      <ion-item
+        ng-repeat="note in Meteor.user().profile.notifications"
+        class="item-chat item-avatar item-icon-right"
+        type="item-text-wrap">
+        <img ng-src="{{note.pictureUrl}}">
+        <h2>{{note.name}}</h2>
+        <p> Checked your profile 
+          <span class="last-message-timestamp">{{note.timestamp}}</span>
+        </p>
+        <!-- <i class="icon ion-chevron-right icon-accessory"></i> -->
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>

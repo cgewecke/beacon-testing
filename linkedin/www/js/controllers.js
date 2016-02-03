@@ -92,15 +92,13 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
           "name": this.user.positions.values[0].company.name,
           "title": this.user.positions.values[0].title 
         }] : null,
-      "photos": [{"value": this.user.pictureUrl}] //,
-      //"birthday": Date('5/5/1973')
+      "photos": [{"value": this.user.pictureUrl}],
+      "birthday": Date('5/5/1973')
     };
     
     console.log('createContact: ' + JSON.stringify(contact));
-   
+    $scope.flasher = true;
     $cordovaContacts.save(contact).then(function(result) {
-        
-        $scope.flasher = true;
         
         $timeout(function(){
         
@@ -112,6 +110,7 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
 
         console.log(JSON.stringify(result));
     }, function(error) {
+        $scope.flasher = false;
         console.log(error);
     });    
   }

@@ -75,6 +75,21 @@ function config ($stateProvider, $urlRouterProvider) {
         }]
       }
   })
+  .state('tab.notifications', {
+      url: '/notifications',
+      views: {
+        'tab-notifications': {
+          templateUrl: 'templates/tab-notifications.html',
+          controller: 'NotificationsCtrl',
+          controllerAs: 'vm'
+        }
+      },
+      resolve: {
+        user: ['$auth', function($auth){
+            return $auth.requireUser();
+        }]
+      }
+  })
   .state('tab.chats', {
       url: '/chats',
       views: {

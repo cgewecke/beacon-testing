@@ -10,7 +10,30 @@
     animation: slideOutDown 300ms;
 }
 
-.item-chat.ng-enter {
+.item-chat.new-item.ng-enter {
     -webkit-animation: slideInLeft 500ms;
     animation: slideInLeft 500ms;
+}
+
+.authenticate-container {
+	color: white;
+    background-color: #BECDDE;
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    height: 100%;
+}
+
+.authenticate-container.spacer {
+    -webkit-flex: 1;
+}
+
+.spinner svg{
+
+  	width: 96px !important;
+ 	height: 96px !important;
+}
+
+.authenticate-container.loading {
+
+  	//background-color: transparent !important;
 }

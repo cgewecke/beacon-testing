@@ -9842,3 +9842,6 @@ a.button {
 .profile-small {
   font-size: 12px;
   opacity: .8 !important; }
+
+.loading-container {
+  background-color: #BECDDE; }

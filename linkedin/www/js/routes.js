@@ -40,12 +40,9 @@ function config ($stateProvider, $urlRouterProvider) {
       },
 
       resolve: {
-        user: ['LinkedIn',function(LinkedIn){
+        link: ['LinkedIn',function(LinkedIn){
             return LinkedIn.initialize();
         }]
-        /*user: function($auth){
-            return $auth.requireUser();
-        }*/
       }
   })
   .state('tab.nearby-profile', {

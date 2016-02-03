@@ -8,6 +8,6 @@ Meteor.publish('connections', function () {
   	console.log('userId rejected in connections');
   	return;
   }
-  //console.log("ThisId: " + this.userId);
-  return Connections.find( {transmitter: this.userId } );
+  console.log("ThisId: " + this.userId);
+  return Connections.find();
 });

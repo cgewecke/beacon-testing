@@ -1,17 +1,24 @@
 // A service for interacting w/ the LinkedIn api
 
+
+
+// TO DO - in the middle of rewriting accounts to have public url. Check code in ionic serve.
+//
+
+
+
 angular.module('linkedin')
   .service("LinkedIn", LinkedIn);
 
 
-function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
+function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, Beacons){
 
 	var self = this;
 
 	// ------------------------------   PRIVATE  ------------------------------------
 	
 	// LinkedIn profile data api call
-  var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,industry,specialties,positions,summary,email-address)";
+  var options = ":(id,num-connections,picture-url,first-name,last-name,headline,location,industry,specialties,positions,summary,email-address,public-profile-url)";
   var protocol = "?callback=JSON_CALLBACK&format=jsonp&oauth2_access_token="
   var me_root = "https://api.linkedin.com/v1/people/~";
   var other_root = null;
@@ -26,11 +33,12 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
   var authToken = null;
 
   // DEVELOPMENT
-  //var authToken = "AQUJhAcbjyNryn9IXT5pzVG55RnJatko_BWqEfF3K25JFxRC-G8l7d9XAXysHqbPcdUfgSv-wWZzkk06mJuqYAWCGSNVduRzmuhWerFgW20n7jEZaxremlVk4WbowLgcifH45AdKvH937oyuJA2EA4Ss7bVXXHf5CFiV4Fq8tlmyLFPDSRE";
-  //var authToken = "AQV-oc8wPTyhOYwS-YgpWHnIWIZ-6hbAEngzsyXP2vMRG6-JszhUVS8dQ7FMWReZ20_BJG5IXvRc1Zcurg14r5amIAD4AxuquClVRQes8SOFiHXxUAcyL43OpAZ9dWIRiYY-NtoB1eo0S0xPdgMGqxpzFGK-BIS6ZjV0NHF-4sfLfBMSTD4";
-  //var authToken = "AQXazFMVa1RYDvKYmEBsbiJPHceRDQ5Rw_ZXKDxLet1Hrtuyv2k3PdZt3YEgwIswTmJ93V0IhbSQv8ZzzH9djwWyI9EAttfjiyqpv80nPYPP7NjC_SG3hck429vNzG2gtFIcfE83BPQTiFlHZFRwsLhff7ouxGy-CrM7AYeb_KBRBtZ0Qu4";
-  //var authToken = "AQUQx7XeK5AksUBUfQnQkJkBA2uM3Xg5t-GzcIkamlSq6YMFeUk3Z1stLd130C1TezHVKKZ_KaOq7xBQPZ1VBG9Gl_hPhYygFeLj1Ih2Py_c8CETkW6L6eFII0BFERk5k6oh3NR_tHfXEj-B48i-pdOwCQYPzYJwkdEukcAfvoFMyDlT2hs";
-    // ------------------------------   PUBLIC ------------------------------------
+  if ($rootScope.DEV){
+    var authToken = "AQXfohqykdt1tw-ibGw3HrARScrAvrverPbO3sjG7eeek87qmA3X7x7uEDB0Qqzqxl1Kw-bNaf6R8OPM-OkQIvi0LmmQVs41aghmIDEUO3qqR_EALWbKRU8dUM_N-UpVB2nwiMUOyiWWYayNwyuft2wRMew73vyhwDBqZmqrPAgIgsH6Vw0"; 
+  };
+  
+
+  // ------------------------------   PUBLIC ------------------------------------
 	
   self.me = null;
 	self.others = [];
@@ -47,25 +55,30 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
 
     var d = $q.defer();
 
-    $auth.requireUser().then(
+    if (!self.me){
+      $auth.requireUser().then(
 
-      function(userLoggedIn){
+        function(userLoggedIn){
 
-        self.setAuthToken(Meteor.user().profile.authToken);
-        self.getMe().then(function(success){
+          self.setAuthToken(Meteor.user().profile.authToken);
+          self.getMe().then(function(success){
 
-          console.log('autologged in');
-          d.resolve(true);
-        }, function(error){
-          console.log('couldnt get profile')
+            console.log('autologged in');
+            Beacons.initialize();
+            d.resolve(true);
+          }, function(error){
+            console.log('couldnt get profile')
+            d.reject('AUTH_REQUIRED');
+          }); 
+        }, 
+        function(userLoggedOut){
+          console.log('requireUser error: ' + userLoggedOut);
           d.reject('AUTH_REQUIRED');
-        }); 
-      }, 
-      function(userLoggedOut){
-        console.log('requireUser error: ' + userLoggedOut);
-        d.reject('AUTH_REQUIRED');
-      }
-    );
+        }
+      );
+    } else {
+      d.resolve(true);
+    }
 
     return d.promise;
     
@@ -104,7 +117,7 @@ function LinkedIn($http, $q, $auth, $cordovaOauth, $ionicPlatform){
       	 self.me = result;
       	 self.me.name = result.firstName + " " + result.lastName;
          self.me.authToken = authToken;
-         
+         console.log("Checking obj in getME: " + JSON.stringify(self.me));
       	 deferred.resolve(self.me);
       })
       .error(function(error){

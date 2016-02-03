@@ -3,14 +3,15 @@
     <ion-list>
       <ion-item
         ng-repeat="user in nearby.connections"
-        class="item-chat item-remove-animate item-add-animate item-avatar item-icon-right"
+        class="item-chat item-avatar item-icon-right"
+        ng-class="{'new-item': user.isNew }"
         type="item-text-wrap"
         href="#/tab/nearby/{{user.profile.id}}"
         ng-click="nearby.notify()">
         <img ng-src="{{user.profile.pictureUrl}}">
         <h2>{{user.profile.firstName}}&nbsp{{user.profile.lastName}}</h2>
         <p>{{user.profile.headline}}</p>
-        <span class="last-message-timestamp">Proximity</span>
+        <span class="last-message-timestamp">{{user.proximity}} | {{user.isNew}}</span>
         <i class="icon ion-chevron-right icon-accessory"></i>
         <ion-option-button class="button-assertive" >
           Delete
@@ -28,3 +29,5 @@
     </button> 
   </ion-content>
 </ion-view>
+
+<!--  -->

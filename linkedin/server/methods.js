@@ -16,17 +16,25 @@ Meteor.methods({
       [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
         'location', 'industry', 'specialties', 'summary', 'email-address', 'positions' ];
 
-    var receiver = Meteor.users.findOne({email: beaconIds.receiver});
-    var transmitter = Meteor.users.findOne({ email: beaconIds.transmitter });
-    
-    if (transmitter && receiver){
+    var receiver = Accounts.findUserByEmail(beaconIds.receiver);
+    var transmitter = Accounts.findUserByEmail(beaconIds.transmitter);
+    var existing = Connections.findOne({$and: [{transmitter: transmitter._id}, {receiver: receiver._id}]});
+
+    if (existing){
+
+      if(beaconIds.proximity != existing.proximity){
+        Connections.update(existing._id, {$set: { proximity: beaconIds.proximity, isNew: false }});
+        console.log('updated proximity: ' + JSON.stringify(existing));
+      }
+      
+    } else if (transmitter && receiver){
 
       console.log('transmitter:');
       console.log(JSON.stringify(transmitter));
       
       var linkedin = Linkedin().init(transmitter.profile.authToken);
       
-      linkedin.people.id(receiver.username, linkedParams, 
+      linkedin.people.url(receiver.profile.profileUrl, linkedParams, 
         Meteor.bindEnvironment(
           function(err, $in){
             if (!err) {     
@@ -34,6 +42,7 @@ Meteor.methods({
                 transmitter: transmitter._id, 
                 receiver: receiver._id,
                 proximity: beaconIds.proximity,
+                isNew: true,
                 profile: $in
               }
 
@@ -59,8 +68,9 @@ Meteor.methods({
 
   disconnect(beaconIds){
 
-    var receiver = Meteor.users.findOne({email: beaconIds.receiver});
-    var transmitter = Meteor.users.findOne({ email: beaconIds.transmitter });
+    console.log('Disconnecting');
+    var receiver = Accounts.findUserByEmail(beaconIds.receiver);
+    var transmitter = Accounts.findUserByEmail(beaconIds.transmitter);
 
     if (transmitter && receiver){
        Connections.remove({$and: 
@@ -81,7 +91,7 @@ Meteor.methods({
 
   // ---------------- Authentication Utilities -------------------------
   hasRegistered(name){
-  
+    console.log('ENTERING HAS hasRegistered');
     var user = Meteor.users.find({username: name});
     if (user.count()) 
       return true;

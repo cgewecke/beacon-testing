@@ -10,14 +10,22 @@ angular.module('linkedin')
   .controller('SettingsCtrl', SettingsCtrl);
 
 
-function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons){
+function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, $timeout){
   $reactive(this).attach($scope);
   
-  this.subscribe('connections');
-  this.helpers({
-    connections: function () {
-      return Connections.find();
-    }
+  var self=this;
+
+  // Wrapping this in a timeout is apparently necessary in some cases -
+  // esp when coming from the login screen. No idea why. 
+  $timeout(function(){
+
+    self.subscribe('connections');
+
+    self.helpers({
+      connections: function () {
+        return Connections.find( {transmitter: Meteor.userId() } )
+      }
+    });
   });
 
   this.initBeacon = Beacons.initialize;
@@ -25,8 +33,8 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons){
   this.clear = function(){
     
     var pkg = {
-      transmitter: Meteor.user().email,
-      receiver: Meteor.user().email
+      transmitter: Meteor.user().emails[0].address,
+      receiver: Meteor.user().emails[0].address,
     }
     Meteor.call('disconnect', pkg, function(err, result){
       (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
@@ -38,9 +46,12 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons){
 
   this.testPub = function(){
 
+    Meteor.call('ping', Meteor.user().emails[0].address, function(err, connections){});
+
     var pkg = {
-      transmitter: Meteor.user().email,
-      receiver: Meteor.user().email
+      transmitter: Meteor.user().emails[0].address,
+      receiver: Meteor.user().emails[0].address,
+      proximity: Math.random()
     }
     Meteor.call('newConnection', pkg, function(err, connections){
     })
@@ -81,8 +92,8 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
           "name": this.user.positions.values[0].company.name,
           "title": this.user.positions.values[0].title 
         }] : null,
-      "photos": [{"value": this.user.pictureUrl}],
-      "birthday": Date('5/5/1973')
+      "photos": [{"value": this.user.pictureUrl}] //,
+      //"birthday": Date('5/5/1973')
     };
     
     console.log('createContact: ' + JSON.stringify(contact));
@@ -121,22 +132,9 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
    
   console.log('ionic loading start' );
   
-
-  $ionicLoading.show({
-    content: 'Loading',
-    animation: 'fade-in',
-    showBackdrop: true,
-    hideOnStateChange: true,
-    maxWidth: 200,
-    showDelay: 0
-  });
-  
-  //$timeout(function(){
-    $ionicPlatform.ready(function(){
-      $ionicLoading.hide();
+  $ionicPlatform.ready(function(){
       $state.go('tab.profile');
-    });
-  //}, 2000)
+  });
   
 };
 

@@ -2,7 +2,7 @@ angular
   .module('linkedin')
   .run(run);
 
-function run ($ionicPlatform, $auth, $state, Beacons ) {
+function run ($ionicPlatform, $rootScope, $auth, $state, Beacons ) {
 
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -17,10 +17,7 @@ function run ($ionicPlatform, $auth, $state, Beacons ) {
       StatusBar.styleDefault();
     }
 
-    // Run beacons
-    $auth.waitForUser().then(function(){
-        Beacons.initialize();
-    });
+    $rootScope.DEV = true;
 
   });
 }

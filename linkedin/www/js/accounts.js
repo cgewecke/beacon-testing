@@ -1,25 +1,34 @@
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast ){
-    $reactive(this).attach($scope);
+function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast ){
+    //$reactive(this).attach($scope);
     
     // GET TOKEN from github
-    
-    this.subscribe('users');
+    $scope.DEV = $rootScope.DEV;
+
+
+    //this.subscribe('users');
     var appHash = "Txc9";
     
+    $scope.loggingIn = false;
+
     $scope.login = function(){
 
+      $scope.loggingIn = true;
       LinkedIn.authenticate().then(function(){
+        console.log('Authenticated');
         LinkedIn.getMe().then(function(){
+          console.log('Calling meteor login');
           meteorLogin();
         },
         function(error){
+          $scope.loggingIn = false;
           console.log('Linkedin data api call bad: ' + error)
         });
 
       }, function(error){
+        $scope.loggingIn = false;
         ionicToast.show("Couldn't get your LinkedIn profile. Try again.", 'top', true, 2500);
         console.log('Linkedin login call bad: ' + JSON.stringify(error));
 
@@ -44,6 +53,7 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicTo
         email: null,
         profile: {
           authToken: LinkedIn.me.authToken,
+          profileUrl: LinkedIn.me.publicProfileUrl,
           major: null,
           minor: null,
           appId: null,
@@ -56,13 +66,16 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicTo
         
         if (!err){
         
+          console.log("ABOUT TO LOGIN WITH ACCOUNT: " + JSON.stringify(LinkedIn.me));
+
           (registered) ? loginWithAccount(user) : createAccount(user); 
         
         } else {
+          $scope.loggingIn = false;
           console.log('Registration error');
         }
       })            
-      console.log(JSON.stringify(LinkedIn.me));
+      
     }
 
     // REGISTERED: Login with password. Update our user w/current linkedIn profile
@@ -76,11 +89,14 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicTo
   
             window.localStorage['pl_id'] = Meteor.user().emails[0].address;
             Meteor.users.update(Meteor.userId(), { $set: { 'profile.authToken': user.profile.authToken } });
+            Beacons.initialize();
+            $scope.loggingIn = false;
             $state.go('tab.nearby');
 
           })
         
         } else {
+          $scope.loggingIn = false;
           ionicToast.show("Couldn't log in to Psychic Link. (Password) Try again.", 'top', true, 2500);
         }
       });
@@ -110,15 +126,19 @@ function LoginCtrl ($scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicTo
             if (!err){
   
               window.localStorage['pl_id'] = user.email;
+              Beacons.initialize();
+              $scope.loggingIn = false;
               $state.go('tab.nearby');
               
             } else{
               console.log('createUser Error: ' + JSON.stringify(err));
+              $scope.loggingIn = false;
               ionicToast.show("Server overloaded (CreateUser) - try again", 'top', true, 2500);
             }
           })
 
         } else{
+          $scope.loggingIn = false;
           ionicToast.show("Couldn't create psychic link (AppID) - try again", 'top', true, 2500);
         }
       });

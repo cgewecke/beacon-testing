@@ -32,6 +32,8 @@ function Beacons($rootScope, $cordovaBeacon){
 	// Needs to happen in $ionicPlatform.ready() in a $auth.waitForUser
 	self.initialize = function(){
 
+        if ($rootScope.DEV === true) return;
+
         console.log('Initializing beacons');
 
 		var profile, appBeacon;
@@ -61,11 +63,6 @@ function Beacons($rootScope, $cordovaBeacon){
             onCapture(result);
         });
 
-        /*$rootScope.$on("$cordovaBeacon:didDetermineStateForRegion", function (event, pluginResult) {
-              $scope.didDetermineStateForRegionLog += '-----' + '\n';
-              $scope.didDetermineStateForRegionLog += JSON.stringify(pluginResult) + '\n';
-        });*/
-
         // Transmit
         profile = Meteor.user().profile;
         appBeacon = $cordovaBeacon.createBeaconRegion(
@@ -91,22 +88,15 @@ function Beacons($rootScope, $cordovaBeacon){
     
     function onEntry(result){
 
-        //* DEV
-        console.log('ON ENTRY: BEACON PARAM');
-        console.log(JSON.stringify(result));
-        var beacon;
         
-        
-        //console.log('ON ENTRY: ' + JSON.stringify(pkg));
-        Meteor.call('ping on entry', beacon, function(err, connections){});
+        // DEV
+        result.message = "ENTERING";
+        Meteor.call('ping', result, function(err, connections){});
 
-        /*angular.forEach(regions, function(region){
-            $cordovaBeacon.startRangingBeaconsInRegion(region);
-        })
-        var b = $cordovaBeacon.createBeaconRegion(beacon.identifier, beacon.uuid, null, null, true);
-        console.log("BEACON REGION in entry: " + JSON.stringify(b));
+        /*var region = result.region;
+        var beacon= $cordovaBeacon.createBeaconRegion(region.identifier, region.uuid, null, null, true);
 
-        $cordovaBeacon.startRangingBeaconsInRegion(b).then(function(){
+        $cordovaBeacon.startRangingBeaconsInRegion(beacon).then(function(){
             console.log('started ranging')
         }, function(error){
             console.log("error starting ranging" + JSON.stringify(error));
@@ -116,18 +106,15 @@ function Beacons($rootScope, $cordovaBeacon){
     function onExit(result){
 
         // DEV
-        console.log('ON EXIT: BEACON PARAM');
-        console.log(JSON.stringify(result));
-        Meteor.call('ping on exit', result, function(err, connections){});
+        result.message = "EXITING";
+        Meteor.call('ping', result, function(err, connections){});
 
+        var transmitter, pkg, beacon;
         var localId = window.localStorage['pl_id']
         var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();
-        var transmitter, pkg, beacon;
-
+        
         beacon = result.region;
         
-        console.log("OnExit - receiver: " + receiver);
-
         if (receiver && beacon){
 
             pkg = {
@@ -135,12 +122,12 @@ function Beacons($rootScope, $cordovaBeacon){
                receiver: receiver,
             };
             
-            console.log('EXITING: ' + JSON.stringify(pkg));
-            /*Meteor.call('disconnect', pkg, function(err, success){
+            Meteor.call('disconnect', pkg, function(err, success){
                 (err) ? 
                     console.log(JSON.stringify(err)) : 
                     console.log(JSON.stringify(success)); 
-            })*/
+            });
+
         } else {
             console.log("Error: receiver - " + receiver + " beacons: " + beacons.length);
         }
@@ -155,14 +142,10 @@ function Beacons($rootScope, $cordovaBeacon){
         //console.log(JSON.stringify(beacons));
         var beacons = result.beacons
         if (beacons.length){
+
             var localId = window.localStorage['pl_id'];
-            var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();
-
-            console.log(receiver);
-            
+            var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();            
             var transmitter, pkg;
-
-            console.log('IN CAPTURE: ');
 
             angular.forEach(beacons, function(beacon){
 
@@ -172,13 +155,11 @@ function Beacons($rootScope, $cordovaBeacon){
                    proximity: beacon.proximity 
                 };
                 
-                console.log('CAPTURED: ' + JSON.stringify(pkg));
-                $cordovaBeacon.isAdvertising().then(function(result){
-                    pkg.isAdvertising = result;
-                    Meteor.call('ping', pkg, function(err, connections){});
-                })
+                //console.log('CAPTURED: ' + JSON.stringify(pkg));
+                //pkg.message = "CAPTURED";
+                //Meteor.call('ping', pkg, function(err, connections){});
                 
-                //Meteor.call('newConnection', pkg, function(err, connections){})
+                Meteor.call('newConnection', pkg, function(err, connections){})
             })
         } else {
             //console.log("Error: capture - " + receiver + " beacons: " + beacons.length);

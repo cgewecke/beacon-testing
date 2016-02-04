@@ -42,8 +42,17 @@ function config ($stateProvider, $urlRouterProvider) {
       },
 
       resolve: {
-        link: ['LinkedIn',function(LinkedIn){
+        user: ['$auth', function($auth){
+          return $auth.requireUser();
+        }],
+        linkInit: ['LinkedIn', 'user',function(LinkedIn, user){
             return LinkedIn.initialize();
+        }],
+        beaconInit: ['Beacons', 'linkInit', function(Beacons, linkInit){
+            return Beacons.initialize();
+        }],
+        pushInit: ['Notify', 'beaconInit', function(Notify, beaconInit){
+            return Notify.initialize(beaconInit);
         }]
       }
   })

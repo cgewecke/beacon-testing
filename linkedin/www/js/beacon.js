@@ -4,7 +4,7 @@ angular.module('linkedin')
   .service("Beacons", Beacons);
 
 
-function Beacons($rootScope, $cordovaBeacon){
+function Beacons($rootScope, $q, $cordovaBeacon){
 
 	var self = this;
 
@@ -24,6 +24,7 @@ function Beacons($rootScope, $cordovaBeacon){
     var regions = [];
 
 	self.quantity = uuids.length;
+    self.initialized = false;
     self.lock = false;
 
     self.getUUID = function(index){
@@ -33,8 +34,11 @@ function Beacons($rootScope, $cordovaBeacon){
 	// Needs to happen in $ionicPlatform.ready() in a $auth.waitForUser
 	self.initialize = function(){
 
-        if ($rootScope.DEV === true) return;
+        console.log('ENTERING BEACON INITIALIZE');
+        var deferred = $q.defer();
 
+        if ($rootScope.DEV || self.initialized ) { deferred.resolve(); return deferred; }
+           
         console.log('Initializing beacons');
 
 		var profile, appBeacon;
@@ -78,6 +82,9 @@ function Beacons($rootScope, $cordovaBeacon){
 
         $cordovaBeacon.startAdvertising(appBeacon);
 
+        self.initialized = true;
+        deferred.resolve();
+        return deferred;
 	};
 
     // setUpRegions(): initialize an array beaconRegion obj of all our possible uuid vals
@@ -88,20 +95,10 @@ function Beacons($rootScope, $cordovaBeacon){
     };
     
     function onEntry(result){
-
-        
+   
         // DEV
         result.message = "ENTERING";
         Meteor.call('ping', result, function(err, connections){});
-
-        /*var region = result.region;
-        var beacon= $cordovaBeacon.createBeaconRegion(region.identifier, region.uuid, null, null, true);
-
-        $cordovaBeacon.startRangingBeaconsInRegion(beacon).then(function(){
-            console.log('started ranging')
-        }, function(error){
-            console.log("error starting ranging" + JSON.stringify(error));
-        });*/
     };
 
     function onExit(result){
@@ -138,10 +135,8 @@ function Beacons($rootScope, $cordovaBeacon){
 
     function onCapture(result){
 
-        // DEV
-        //console.log('ON CAPTURE: BEACONS PARAM');
-        //console.log(JSON.stringify(beacons));
         var beacons = result.beacons
+
         if (beacons.length){
 
             var localId = window.localStorage['pl_id'];

@@ -1,10 +1,44 @@
 angular.module('linkedin')
   .service("Notify", Notify);
 
-function Notify(LinkedIn){
+function Notify($q, $rootScope, LinkedIn, $cordovaPush){
 	
 	var self = this;
 	var error;
+
+	// Must go in after device ready && user logged in.
+	self.initialize = function(init){
+	
+		var deferred = $q.defer();
+
+		if($rootScope.DEV || Meteor.user().profile.pushToken){
+			console.log('in resolution at register');
+			deferred.resolve();
+
+		} else {
+
+			var iosConfig = {
+			    "sound": true,
+			    "alert": true,
+			};
+	 
+		    $cordovaPush.register(iosConfig).then(function(deviceToken) {
+		 
+		      console.log("deviceToken: " + deviceToken)
+		      Meteor.users.update({ _id: Meteor.userId }, {$set: {'profile.pushToken' : deviceToken}});
+		      deferred.resolve();
+
+		    }, function(err) {
+		       error = 'NOTIFICATIONS ERROR: registering for pushToken';
+		       console.log(error);
+		       console.log(err);
+		       deferred.reject();
+		    });
+		}
+
+		return deferred.promise;
+
+	};
 
 	// sawProfile: param user is the user seen
 	self.sawProfile = function(userId){

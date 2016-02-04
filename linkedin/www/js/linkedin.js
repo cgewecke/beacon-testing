@@ -53,6 +53,7 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
   // we still need to fetch a fresh linkedin profile for them . . . 
   self.initialize = function(){
 
+    console.log('ENTERING LINKEDIN INIT')
     var d = $q.defer();
 
     if (!self.me){
@@ -64,7 +65,6 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
           self.getMe().then(function(success){
 
             console.log('autologged in');
-            Beacons.initialize();
             d.resolve(true);
           }, function(error){
             console.log('couldnt get profile')

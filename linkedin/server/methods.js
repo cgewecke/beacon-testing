@@ -59,10 +59,13 @@ Meteor.methods({
       // ever uses this app. Apply for search API? 
       var linkedin = Linkedin().init(receiver.profile.authToken);
       
-      linkedin.people.url(receiver.profile.profileUrl, linkedParams, 
+      linkedin.people.me(linkedParams, 
         Meteor.bindEnvironment(
           function(err, $in){
-            if (!err) {     
+
+            // LinkIn call success: Add connection
+            if (!err || !$in.errorCode) {     
+
               var connection = { 
                 transmitter: transmitter._id, 
                 receiver: receiver._id,
@@ -76,13 +79,18 @@ Meteor.methods({
               console.log("PROFILE IN NEW CONNECTION");
               console.log(JSON.stringify(connection.profile));
               return connection;
+
+            // LinkIn call failure: Bad token ?  
             } else {
               error = 'NEW CONNECTION ERROR: LinkedIn call failed';
               console.log(error);
+              console.log($in.message);
               return error
             }
+
+          // Bind Environment error  
           }, function(err){
-            error = 'NEW CONNECTION ERROR: Couldnt bind!!!';
+            error = 'NEW CONNECTION ERROR: Couldnt bubd';
             console.log(error);
             return error;
           })

@@ -16,7 +16,7 @@ function TabsCtrl ($scope, $reactive ){
 
   this.helpers({
       notifyCount: function () {
-        return Meteor.user().profile.notifyCount;
+        if (Meteor.user()) return Meteor.user().profile.notifyCount;
       }
   });  
 };
@@ -167,9 +167,9 @@ function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
 function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
    
   console.log('ionic loading start' );
-  
+
   $ionicPlatform.ready(function(){
-      $state.go('tab.profile');
+      $state.go('tab.nearby');
   });
   
 };

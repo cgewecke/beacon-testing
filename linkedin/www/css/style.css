@@ -33,6 +33,14 @@
  	height: 96px !important;
 }
 
+.align-left{
+    text-align: left;
+}
+
+.align-right{
+    text-align: right;
+}
+
 .authenticate-container.loading {
 
   	//background-color: transparent !important;

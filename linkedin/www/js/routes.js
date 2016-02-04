@@ -26,6 +26,8 @@ function config ($stateProvider, $urlRouterProvider) {
     url: '/tab',
     abstract: true,
     templateUrl: 'templates/tabs.html',
+    controller: 'TabsCtrl',
+    controllerAs: 'vm'
   })
 
   
@@ -87,7 +89,10 @@ function config ($stateProvider, $urlRouterProvider) {
       resolve: {
         user: ['$auth', function($auth){
             return $auth.requireUser();
-        }]
+        }],
+        checked: ['Notify', function(Notify){
+            return Notify.checkedNotifications();
+        }],
       }
   })
   .state('tab.chats', {

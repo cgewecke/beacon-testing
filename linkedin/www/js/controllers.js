@@ -7,10 +7,46 @@ angular.module('linkedin')
   .controller('NearbyProfileCtrl', NearbyProfileCtrl)
   .controller('ProfileCtrl', ProfileCtrl)
   .controller('LoadingCtrl', LoadingCtrl)
-  .controller('SettingsCtrl', SettingsCtrl);
+  .controller('SettingsCtrl', SettingsCtrl)
+  .controller('NotificationsCtrl', NotificationsCtrl)
+  .controller('TabsCtrl', TabsCtrl);
 
+function TabsCtrl ($scope, $reactive ){
+  $reactive(this).attach($scope);
 
-function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, $timeout){
+  this.helpers({
+      notifyCount: function () {
+        return Meteor.user().profile.notifyCount;
+      }
+  });  
+};
+
+function NotificationsCtrl ($scope, $reactive, Notify, $timeout ){
+  $reactive(this).attach($scope);
+  
+  this.helpers({
+      notifications: function () {
+        return Meteor.user().profile.notifications;
+      }
+  });
+  
+  this.testNotify = function(){
+    Notify.sawProfile(Meteor.userId());
+  }
+
+  this.clearNotes = function(){
+    Meteor.users.update({_id: Meteor.userId()}, 
+      {$set: 
+        {'profile.notifications' : [],
+         'profile.notifyCount' : 0
+        }
+      }
+    );
+  };
+  log_test = this;
+};
+
+function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, Notify, $timeout){
   $reactive(this).attach($scope);
   
   var self=this;
@@ -40,8 +76,9 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, $timeout){
       (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
     })
   }
-  this.notify = function(){
-    console.log('notify clicked');
+
+  this.notify = function(user){
+    Notify.sawProfile(user.receiver);
   }
 
   this.testPub = function(){

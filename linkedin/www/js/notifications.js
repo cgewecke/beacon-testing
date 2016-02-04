@@ -17,13 +17,14 @@ function Notify(LinkedIn){
 				type: 'sawProfile',
 				sender: Meteor.userId(),
 				pictureUrl: LinkedIn.me.pictureUrl,
-				name: LinkedIn.me.firstName + '_' + LinkedIn.me.lastName,
+				name: LinkedIn.me.firstName + ' ' + LinkedIn.me.lastName,
 				location: null,
 				timestamp: new Date()
 			}
 			
 		};
 
+		console.log('calling notify in client:' + JSON.stringify(info));
 		Meteor.call('notify', info, function(err, result){
 			if (!err){
 				return result;
@@ -46,6 +47,7 @@ function Notify(LinkedIn){
 	};
 
 	self.checkedNotifications = function(){
+
 		Meteor.call('resetNotifyCounter', null, function(err, result){
 			if (!err){
 				return result;
@@ -54,6 +56,7 @@ function Notify(LinkedIn){
 				console.log(error);
 			}
 		});
+		return true;
 	};
 
 }

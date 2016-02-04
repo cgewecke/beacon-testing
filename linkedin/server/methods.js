@@ -12,12 +12,11 @@ Meteor.methods({
   // @param: info {target: _id, notification: {} }
   // Adds a notification to the receiver's notifications array, increments their notify count 
   notify(info){
-    
-    Meteor.users.update({_id: target},{
+    console.log('in notify');
+    Meteor.users.update({_id: info.target},{
       $inc: {'profile.notifyCount': 1 },
       $push: {'profile.notifications': info.notification} 
     });
-
   },
 
 
@@ -31,7 +30,6 @@ Meteor.methods({
   addContact(id){
     Connections.update(id, {$set: {contactAdded: true}});
   },
-
 
   //---------------- Connections -------------------------
   // @function: newConnection

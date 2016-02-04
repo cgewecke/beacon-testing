@@ -7,7 +7,7 @@
         ng-class="{'new-item': user.isNew }"
         type="item-text-wrap"
         href="#/tab/nearby/{{user.profile.id}}"
-        ng-click="nearby.notify()">
+        ng-click="nearby.notify(user)">
         <img ng-src="{{user.profile.pictureUrl}}">
         <h2>{{user.profile.firstName}}&nbsp{{user.profile.lastName}}</h2>
         <p>{{user.profile.headline}}</p>

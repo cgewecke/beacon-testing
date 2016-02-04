@@ -52,7 +52,7 @@ function config ($stateProvider, $urlRouterProvider) {
             return Beacons.initialize();
         }],
         pushInit: ['Notify', 'beaconInit', function(Notify, beaconInit){
-            return Notify.initialize(beaconInit);
+            return Notify.initialize();
         }]
       }
   })

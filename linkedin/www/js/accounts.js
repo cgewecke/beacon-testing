@@ -56,6 +56,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
           profileUrl: LinkedIn.me.publicProfileUrl,
           notifications: [],
           notifyCount: 0,
+          pushToken: null,
           major: null,
           minor: null,
           appId: null,

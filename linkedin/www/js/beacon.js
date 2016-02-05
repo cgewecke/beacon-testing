@@ -34,7 +34,6 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 	// Needs to happen in $ionicPlatform.ready() in a $auth.waitForUser
 	self.initialize = function(){
 
-        console.log('ENTERING BEACON INITIALIZE');
         var deferred = $q.defer();
 
         if ($rootScope.DEV || self.initialized ) { deferred.resolve(); return deferred; }
@@ -151,14 +150,8 @@ function Beacons($rootScope, $q, $cordovaBeacon){
                    proximity: beacon.proximity 
                 };
                 
-                if (!self.lock){
-                    self.lock = true;            
-                    Meteor.call('newConnection', pkg, function(err, connections){
-                        self.lock = false;
-                    })
-                } else {
-                    console.log('Server busy in On Capture');
-                }
+                Meteor.call('newConnection', pkg, function(err, result){});
+                
             })
         } else {
             //console.log("Error: capture - " + receiver + " beacons: " + beacons.length);

@@ -103,8 +103,8 @@ Meteor.methods({
               }
 
               Connections.insert(connection);
-              console.log("PROFILE IN NEW CONNECTION");
-              console.log(JSON.stringify(connection.profile));
+              console.log("inserting in new connection");
+              //console.log(JSON.stringify(connection.profile));
               return connection;
 
             // LinkIn call failure: Bad token ?  

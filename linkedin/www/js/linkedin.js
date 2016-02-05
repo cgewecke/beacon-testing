@@ -34,7 +34,7 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
 
   // DEVELOPMENT
   if ($rootScope.DEV){
-    var authToken = "AQXfohqykdt1tw-ibGw3HrARScrAvrverPbO3sjG7eeek87qmA3X7x7uEDB0Qqzqxl1Kw-bNaf6R8OPM-OkQIvi0LmmQVs41aghmIDEUO3qqR_EALWbKRU8dUM_N-UpVB2nwiMUOyiWWYayNwyuft2wRMew73vyhwDBqZmqrPAgIgsH6Vw0"; 
+    var authToken = "AQVbgtGfhhYoSZW3T5S03kKflia0FZjBICTUo5ZXA7iILf1GW9gT9oldhrIxPzZ6PrH-_LucseZfzSt19_hCucgfwFnR6h7LAIkrWLTBHxHcYVu5-z8JtFCfOWvHabA9Z7l9FhYPhtMM810LY_ZQkc36lSd4eJWS5bp6XnUOh1Piqxtlzf4"; 
   };
   
 

@@ -48,11 +48,11 @@ function config ($stateProvider, $urlRouterProvider) {
         linkInit: ['LinkedIn', 'user',function(LinkedIn, user){
             return LinkedIn.initialize();
         }],
-        beaconInit: ['Beacons', 'linkInit', function(Beacons, linkInit){
-            return Beacons.initialize();
-        }],
-        pushInit: ['Notify', 'beaconInit', function(Notify, beaconInit){
+        pushInit: ['Notify', 'linkInit', function(Notify, linkInit){
             return Notify.initialize();
+        }],
+        beaconInit: ['Beacons', 'pushInit', function(Beacons, pushInit){
+            return Beacons.initialize();
         }]
       }
   })

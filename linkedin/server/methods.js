@@ -7,16 +7,33 @@ Meteor.methods({
     console.log('Got pinged: ' + JSON.stringify(pkg));
   }, 
 
+  pushTest(){
+    Push.sendAPN("79b229d8a40309c5498c75fba2b2c16a5cf6065be976c89e3c0f25ec2870633a", 
+      {from: 'push',title: 'Congratulations',text: 'You can now Push to this device!'});
+  },
   //---------------- Notifications -------------------------
   // @function: notify
   // @param: info {target: _id, notification: {} }
   // Adds a notification to the receiver's notifications array, increments their notify count 
   notify(info){
     console.log('in notify');
+
+    var target, note;
+
+    // Device Notify
     Meteor.users.update({_id: info.target},{
       $inc: {'profile.notifyCount': 1 },
       $push: {'profile.notifications': info.notification} 
     });
+
+    // Push Notify  
+    target = Meteor.users.findOne({_id: info.target});
+    
+    if (target && target.profile.pushToken){
+      console.log("Token:" + target.profile.pushToken);
+      note = { from: 'push', text: info.notification.name + ' checked your profile.'};
+      Push.sendAPN(target.profile.pushToken, note);
+    }
   },
 
 
@@ -36,13 +53,23 @@ Meteor.methods({
   // @param: beaconIds [{transmitter: email, receiver: email}]
   newConnection(beaconIds){
 
+    var existing = null;
     var linkedParams = 
       [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
         'location', 'industry', 'specialties', 'summary', 'email-address', 'positions' ];
 
     var receiver = Accounts.findUserByEmail(beaconIds.receiver);
     var transmitter = Accounts.findUserByEmail(beaconIds.transmitter);
-    var existing = Connections.findOne({$and: [{transmitter: transmitter._id}, {receiver: receiver._id}]});
+
+    if (transmitter && receiver){
+    
+      existing = Connections.findOne({$and: [{transmitter: transmitter._id}, {receiver: receiver._id}]});
+    
+    } else {
+
+      console.log("Beacons ids are bad: " + JSON.stringify(beaconIds));
+      return;
+    }
 
     if (existing){
 
@@ -52,7 +79,7 @@ Meteor.methods({
         return true;
       }
       
-    } else if (transmitter && receiver){
+    } else {
       
       // This is bad. There is no guarantee this token will be any good
       // since it expires every 60 days and we don't know if the receiver
@@ -95,11 +122,7 @@ Meteor.methods({
             return error;
           })
       );
-    } else {
-      error = "NEW CONNECTION ERROR - new connection, couldn't db locate trans or reciever"
-      console.log(error);
-      return (error)
-    }
+    } 
     
   },
 

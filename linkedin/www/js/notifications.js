@@ -11,21 +11,21 @@ function Notify($q, $rootScope, LinkedIn, $cordovaPush){
 	
 		var deferred = $q.defer();
 
-		if($rootScope.DEV || Meteor.user().profile.pushToken){
+		if($rootScope.DEV || !Meteor.user()){
 			console.log('in resolution at register');
 			deferred.resolve();
 
-		} else {
+		} else if (!Meteor.user().profile.pushToken) {
 
 			var iosConfig = {
 			    "sound": true,
 			    "alert": true,
 			};
-	 
+	 		console.log('Entering notify initialize');
 		    $cordovaPush.register(iosConfig).then(function(deviceToken) {
 		 
 		      console.log("deviceToken: " + deviceToken)
-		      Meteor.users.update({ _id: Meteor.userId }, {$set: {'profile.pushToken' : deviceToken}});
+		      Meteor.users.update({ _id: Meteor.userId() }, {$set: {'profile.pushToken' : deviceToken}});
 		      deferred.resolve();
 
 		    }, function(err) {
@@ -34,6 +34,9 @@ function Notify($q, $rootScope, LinkedIn, $cordovaPush){
 		       console.log(err);
 		       deferred.reject();
 		    });
+		    
+		} else {
+			deferred.resolve();
 		}
 
 		return deferred.promise;

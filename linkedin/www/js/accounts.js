@@ -45,7 +45,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
 
 
     function meteorLogin(){
-
+      console.log('defining user in meteorLogin')
       // User object
       var user = {
         username: LinkedIn.me.id,
@@ -64,6 +64,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
         }
       };
 
+      console.log('going into hasRegistered');
       // Check registration
       Meteor.call('hasRegistered', user.username, function(err, registered ){
         

@@ -43,6 +43,11 @@ function NotificationsCtrl ($scope, $reactive, Notify, $timeout ){
       }
     );
   };
+
+  this.pushTest = function(){
+    Meteor.call('pushTest');
+  };
+  
   log_test = this;
 };
 

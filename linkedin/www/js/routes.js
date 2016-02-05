@@ -53,6 +53,9 @@ function config ($stateProvider, $urlRouterProvider) {
         }],
         beaconInit: ['Beacons', 'pushInit', function(Beacons, pushInit){
             return Beacons.initialize();
+        }],
+        geoInit: ['GeoLocate', 'beaconInit', function(GeoLocate, beaconInit){
+            return GeoLocate.initialize();
         }]
       }
   })

@@ -36,7 +36,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 
         var deferred = $q.defer();
 
-        if ($rootScope.DEV || self.initialized ) { deferred.resolve(); return deferred; }
+        if ($rootScope.DEV || $rootScope.beaconsOFF || self.initialized  ) { deferred.resolve(); return deferred; }
            
         console.log('Initializing beacons');
 

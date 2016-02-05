@@ -1,7 +1,7 @@
 angular.module('linkedin')
   .service("Notify", Notify);
 
-function Notify($q, $rootScope, LinkedIn, $cordovaPush){
+function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	
 	var self = this;
 	var error;
@@ -46,30 +46,34 @@ function Notify($q, $rootScope, LinkedIn, $cordovaPush){
 	// sawProfile: param user is the user seen
 	self.sawProfile = function(userId){
 		
+		console.log('entering saw profile');
 		if (!LinkedIn.me) return;
 
-		var info = {
-			target: userId,
-			notification: {
-				type: 'sawProfile',
-				sender: Meteor.userId(),
-				pictureUrl: LinkedIn.me.pictureUrl,
-				name: LinkedIn.me.firstName + ' ' + LinkedIn.me.lastName,
-				location: null,
-				timestamp: new Date()
-			}
-			
-		};
+		GeoLocate.getAddress().then(function(location){
+			console.log('through get address');
+			var info = {
+				target: userId,
+				notification: {
+					type: 'sawProfile',
+					sender: Meteor.userId(),
+					pictureUrl: LinkedIn.me.pictureUrl,
+					name: LinkedIn.me.firstName + ' ' + LinkedIn.me.lastName,
+					location: location,
+					timestamp: new Date()
+				}
+				
+			};
 
-		console.log('calling notify in client:' + JSON.stringify(info));
-		Meteor.call('notify', info, function(err, result){
-			if (!err){
-				return result;
-			} else {
-				error = 'NOTIFICATIONS ERROR: calling meteor in "seeProfile"';
-				console.log(error);
-			}
-		});
+			console.log('calling notify in client:' + JSON.stringify(info));
+			Meteor.call('notify', info, function(err, result){
+				if (!err){
+					return result;
+				} else {
+					error = 'NOTIFICATIONS ERROR: calling meteor in "seeProfile"';
+					console.log(error);
+				}
+			});
+		});		
 	};
 
 	self.chatted = function(user){

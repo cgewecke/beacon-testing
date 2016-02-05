@@ -173,9 +173,11 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
    
   console.log('ionic loading start' );
 
+ 
   $ionicPlatform.ready(function(){
       $state.go('tab.nearby');
   });
+  
   
 };
 

@@ -22,10 +22,13 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 	];
 
     var regions = [];
+    var lastDate = new Date();
+    var lastBeacon = null;
 
 	self.quantity = uuids.length;
     self.initialized = false;
     self.lock = false;
+
 
     self.getUUID = function(index){
         return uuids[index];
@@ -106,6 +109,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         result.message = "EXITING";
         Meteor.call('ping', result, function(err, connections){});
 
+
         var transmitter, pkg, beacon;
         var localId = window.localStorage['pl_id']
         var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();
@@ -157,5 +161,21 @@ function Beacons($rootScope, $q, $cordovaBeacon){
             //console.log("Error: capture - " + receiver + " beacons: " + beacons.length);
         }
     };
+
+    function throttle(beacon){
+        
+        var curDate = new Date();
+        var diff = Math.abs(curDate - lastDate);
+        lastDate = curDate;
+        lastBeacon = beacon;
+
+        if ( diff < 500 && lastBeacon.uuid === beacon.uuid ){
+            Meteor.call('ping', {message: 'THROTTLE: ' + Math.abs(curDate - lastDate) });
+            return false;
+        } else {
+            return true;
+        } 
+
+    }
 
 }

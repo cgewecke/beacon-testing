@@ -173,7 +173,6 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
    
   console.log('ionic loading start' );
 
- 
   $ionicPlatform.ready(function(){
       $state.go('tab.nearby');
   });
@@ -197,9 +196,6 @@ function SettingsCtrl($scope, $reactive, $state) {
 function ChatsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
   
-  var ref = window.cordova.InAppBrowser.open("localhost/callback.html", '_blank');
-  console.log('window: ' + JSON.stringify(ref));
-
 };
 
 

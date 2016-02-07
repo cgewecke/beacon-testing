@@ -5,7 +5,7 @@ angular
  
 function proximityFilter ($rootScope) {
   return function (proximity) {
-  	if ($rootScope.DEV || !proximity) return;
+  	if ($rootScope.DEV || !proximity) return proximity;
    
     var distance = proximity.substring(9);
     return "Proximity: " + distance;

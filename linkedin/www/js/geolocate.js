@@ -49,30 +49,30 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 			                    // No address
 			                    } else {
 			                        deferred.resolve('');
-			                        console.log('GEOLOCATE no results for position');
+			                        console.log('GEOLOCATE: no maps results for position');
 			                    }
 
 			                // Geocoder call fail
 			                } else {
 			                    deferred.resolve('');
-			                    console.log('GEOLOCATE maps error' + status);
+			                    console.log('GEOLOCATE: google.maps.geocode error: ' + status);
 			                }
 			            });
 			        // Maps or vals bad    
            			} else {
            				deferred.resolve('');
-           				console.log('GEOLOCATE null vals or bad maps');
+           				console.log('GEOLOCATE: no position vals or no google.maps');
            			}	
            	    // No coordinates in position
       			} else {
       				deferred.resolve('');
-      				console.log('GEOLOCATE null position');
+      				console.log('GEOLOCATE no $cordova.geolocation position object');
       			}    	
 
       		// $cordova layer failure	
 		    }, function(err) {
 		      deferred.resolve('');
-		      console.log('GEOLOCATE $cordovaGeolocation error:' + JSON.stringify(err))
+		      console.log('GEOLOCATE: $cordovaGeolocation error:' + JSON.stringify(err))
 		    }
 		);
 

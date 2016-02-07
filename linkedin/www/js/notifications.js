@@ -12,7 +12,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 		var deferred = $q.defer();
 
 		if($rootScope.DEV || !Meteor.user()){
-			console.log('in resolution at register');
+
 			deferred.resolve();
 
 		} else if (!Meteor.user().profile.pushToken) {
@@ -46,11 +46,10 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	// sawProfile: param user is the user seen
 	self.sawProfile = function(userId){
 		
-		console.log('entering saw profile');
 		if (!LinkedIn.me) return;
 
 		GeoLocate.getAddress().then(function(location){
-			console.log('through get address');
+			
 			var info = {
 				target: userId,
 				notification: {
@@ -58,13 +57,12 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 					sender: Meteor.userId(),
 					pictureUrl: LinkedIn.me.pictureUrl,
 					name: LinkedIn.me.firstName + ' ' + LinkedIn.me.lastName,
-					location: location,
+					location: location.split(',').slice(0, -2).join(', '),
 					timestamp: new Date()
 				}
 				
 			};
 
-			console.log('calling notify in client:' + JSON.stringify(info));
 			Meteor.call('notify', info, function(err, result){
 				if (!err){
 					return result;

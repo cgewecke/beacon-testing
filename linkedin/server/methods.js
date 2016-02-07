@@ -62,8 +62,16 @@ Meteor.methods({
     var transmitter = Accounts.findUserByEmail(beaconIds.transmitter);
 
     if (transmitter && receiver){
-    
-      existing = Connections.findOne({$and: [{transmitter: transmitter._id}, {receiver: receiver._id}]});
+
+      Connections.upsert(
+        {$and: [{transmitter: transmitter._id}, {receiver: receiver._id}]}, 
+        {$set: { 
+          transmitter: transmitter._id, 
+          receiver: receiver._id,
+          transUUID: transmitter.profile.appId,
+          proximity: beaconIds.proximity,}
+        }
+      );
     
     } else {
 
@@ -71,7 +79,7 @@ Meteor.methods({
       return;
     }
 
-    if (existing){
+    /*if (existing){
 
       if(beaconIds.proximity != existing.proximity){
         Connections.update(existing._id, {$set: { proximity: beaconIds.proximity, isNew: false }});
@@ -122,7 +130,7 @@ Meteor.methods({
             return error;
           })
       );
-    } 
+    } */
     
   },
 

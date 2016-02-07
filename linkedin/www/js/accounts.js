@@ -2,13 +2,9 @@ angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
 function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast ){
-    //$reactive(this).attach($scope);
     
-    // GET TOKEN from github
     $scope.DEV = $rootScope.DEV;
 
-
-    //this.subscribe('users');
     var appHash = "Txc9";
     
     $scope.loggingIn = false;

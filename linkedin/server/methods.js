@@ -31,7 +31,7 @@ Meteor.methods({
     
     if (target && target.profile.pushToken){
       console.log("Token:" + target.profile.pushToken);
-      note = { from: 'push', text: info.notification.name + ' checked your profile.'};
+      note = { from: 'push', text: info.notification.name + ' checked your profile.', sound: 'ping.aiff'};
       Push.sendAPN(target.profile.pushToken, note);
     }
   },
@@ -69,7 +69,7 @@ Meteor.methods({
           transmitter: transmitter._id, 
           receiver: receiver._id,
           transUUID: transmitter.profile.appId,
-          proximity: beaconIds.proximity,}
+          proximity: beaconIds.proximity }
         }
       );
     
@@ -78,60 +78,6 @@ Meteor.methods({
       console.log("Beacons ids are bad: " + JSON.stringify(beaconIds));
       return;
     }
-
-    /*if (existing){
-
-      if(beaconIds.proximity != existing.proximity){
-        Connections.update(existing._id, {$set: { proximity: beaconIds.proximity, isNew: false }});
-        console.log('updated proximity: ' + JSON.stringify(existing));
-        return true;
-      }
-      
-    } else {
-      
-      // This is bad. There is no guarantee this token will be any good
-      // since it expires every 60 days and we don't know if the receiver
-      // ever uses this app. Apply for search API? 
-      var linkedin = Linkedin().init(receiver.profile.authToken);
-      
-      linkedin.people.me(linkedParams, 
-        Meteor.bindEnvironment(
-          function(err, $in){
-
-            // LinkIn call success: Add connection
-            if (!err || !$in.errorCode) {     
-
-              var connection = { 
-                transmitter: transmitter._id, 
-                receiver: receiver._id,
-                transUUID: transmitter.profile.appId,
-                proximity: beaconIds.proximity,
-                isNew: true,
-                profile: $in
-              }
-
-              Connections.insert(connection);
-              console.log("inserting in new connection");
-              //console.log(JSON.stringify(connection.profile));
-              return connection;
-
-            // LinkIn call failure: Bad token ?  
-            } else {
-              error = 'NEW CONNECTION ERROR: LinkedIn call failed';
-              console.log(error);
-              console.log($in.message);
-              return error
-            }
-
-          // Bind Environment error  
-          }, function(err){
-            error = 'NEW CONNECTION ERROR: Couldnt bubd';
-            console.log(error);
-            return error;
-          })
-      );
-    } */
-    
   },
 
   // @function: disconnect

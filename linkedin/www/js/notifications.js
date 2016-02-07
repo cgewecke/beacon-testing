@@ -15,7 +15,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 
 			deferred.resolve();
 
-		} else if (!Meteor.user().profile.pushToken) {
+		} else if (!Meteor.user().profile.pushToken || window.localStorage['pl_newInstall'] === 'true') {
 
 			var iosConfig = {
 			    "sound": true,
@@ -24,8 +24,9 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	 		console.log('Entering notify initialize');
 		    $cordovaPush.register(iosConfig).then(function(deviceToken) {
 		 
-		      console.log("deviceToken: " + deviceToken)
+		      console.log("deviceToken: " + deviceToken + 'newInstall: ' + window.localStorage['pl_newInstall']);
 		      Meteor.users.update({ _id: Meteor.userId() }, {$set: {'profile.pushToken' : deviceToken}});
+		      window.localStorage['pl_newInstall'] = 'false';
 		      deferred.resolve();
 
 		    }, function(err) {

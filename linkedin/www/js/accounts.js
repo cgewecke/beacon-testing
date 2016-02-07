@@ -87,6 +87,10 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
           
           $auth.waitForUser().then(function(){
   
+            (!window.localStorage['pl_newInstall']) ? 
+              window.localStorage['pl_newInstall'] = 'true' : 
+              false;
+
             window.localStorage['pl_id'] = Meteor.user().emails[0].address;
             Meteor.users.update(Meteor.userId(), { $set: { 'profile.authToken': user.profile.authToken } });
             $scope.loggingIn = false;
@@ -125,6 +129,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
             if (!err){
   
               window.localStorage['pl_id'] = user.email;
+              window.localStorage['pl_newInstall'] = 'true';
               $scope.loggingIn = false;
               $state.go('tab.nearby');
               

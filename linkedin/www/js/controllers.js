@@ -14,14 +14,14 @@ angular.module('linkedin')
 function TabsCtrl ($scope, $reactive ){
   $reactive(this).attach($scope);
 
-  this.helpers({
-      notifyCount: function () {
-        if (Meteor.user()) return Meteor.user().profile.notifyCount;
-      }
-  });  
+    this.helpers({
+        notifyCount: function () {
+          return Meteor.user().profile.notifyCount;
+        }
+    });  
 };
 
-function NotificationsCtrl ($scope, $reactive, Notify, $timeout ){
+function NotificationsCtrl ($scope, $reactive, Notify ){
   $reactive(this).attach($scope);
   
   this.helpers({
@@ -48,25 +48,21 @@ function NotificationsCtrl ($scope, $reactive, Notify, $timeout ){
     Meteor.call('pushTest');
   };
   
-  log_test = this;
 };
 
-function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, Notify, $timeout){
+function NearbyCtrl ($scope, $rootScope, $reactive, $auth, LinkedIn, Beacons, Notify, subscription, $timeout){
   $reactive(this).attach($scope);
   
   var self=this;
 
-  // Wrapping this in a timeout is apparently necessary in some cases -
-  // esp when coming from the login screen. No idea why. 
-  $timeout(function(){
+  if (!subscription){
+    console.log('Subscription failed in NearbyCtrl');
+  }
 
-    self.subscribe('connections');
-
-    self.helpers({
+  self.helpers({
       connections: function () {
         return Connections.find( {transmitter: Meteor.userId() } )
       }
-    });
   });
 
   this.initBeacon = Beacons.initialize;
@@ -93,10 +89,9 @@ function NearbyCtrl ($scope, $reactive, $auth, LinkedIn, Beacons, Notify, $timeo
     var pkg = {
       transmitter: Meteor.user().emails[0].address,
       receiver: Meteor.user().emails[0].address,
-      proximity: Math.random()
+      proximity: Math.random().toString()
     }
-    Meteor.call('newConnection', pkg, function(err, connections){
-    })
+    Meteor.call('newConnection', pkg, function(err, connections){})
   };
   
 };

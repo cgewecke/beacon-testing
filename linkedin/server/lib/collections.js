@@ -13,6 +13,7 @@ Connections.after.insert(function (userId, doc) {
     var receiver = Meteor.users.findOne({_id: doc.receiver});
 
     if (receiver){
+    	
 	    // This is bad. There is no guarantee this token will be any good
 		// since it expires every 60 days and we don't know if the receiver
 		// ever uses this app. Apply for search API? 

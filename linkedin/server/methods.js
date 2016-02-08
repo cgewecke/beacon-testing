@@ -20,6 +20,18 @@ Meteor.methods({
 
     var target, note;
 
+    check(info, {
+      target: String,
+      notification: {
+        type: String,
+        sender: String,
+        pictureUrl: String,
+        name: String,
+        location: String,
+        timestamp: Date
+      }
+    });
+
     // Device Notify
     Meteor.users.update({_id: info.target},{
       $inc: {'profile.notifyCount': 1 },
@@ -44,14 +56,28 @@ Meteor.methods({
     Meteor.users.update({_id: Meteor.userId()}, {$set: {'profile.notifyCount': 0}});
   },
 
+  // @function: addContact
+  // @param: _id (Meteor user id)
+  // Ticks a boolean so that add contact button can be hidden in the client
+  // when that connection has already been added
   addContact(id){
+    check(id, String);
     Connections.update(id, {$set: {contactAdded: true}});
   },
 
   //---------------- Connections -------------------------
   // @function: newConnection
   // @param: beaconIds [{transmitter: email, receiver: email}]
+  //
+  // Upserts a record into Connections - the profile of the receiver
+  // is added in a collection.after block located in server/collections.js
   newConnection(beaconIds){
+    
+    check(beaconIds, {
+      transmitter: String,
+      receiver: String,
+      proximity: String
+    })
 
     var existing = null;
     var linkedParams = 
@@ -82,7 +108,14 @@ Meteor.methods({
 
   // @function: disconnect
   // @param: beaconIds [{transmitter: uuid, receiver: email}]
+  // Removes a matching items from connections. Called by
+  // the client's onExit method in the Beacons service
   disconnect(beaconIds){
+
+    check( beaconIds, {
+      transmitter: String,
+      receiver: String
+    });
 
     console.log('Disconnecting: ' + JSON.stringify(beaconIds));
     var receiver = Accounts.findUserByEmail(beaconIds.receiver);
@@ -107,7 +140,9 @@ Meteor.methods({
 
 
   // ---------------- Authentication Utilities -------------------------
+
   hasRegistered(name){
+    check(name, String);
     console.log('ENTERING HAS hasRegistered');
     var user = Meteor.users.find({username: name});
     if (user.count()) 

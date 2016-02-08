@@ -16,7 +16,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 		var deferred = $q.defer();
 
 		if ($rootScope.DEV){
-			deferred.resolve(); 
+			deferred.resolve(''); 
 			return deferred.promise; 
 		}
 

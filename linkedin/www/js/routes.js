@@ -27,7 +27,13 @@ function config ($stateProvider, $urlRouterProvider) {
     abstract: true,
     templateUrl: 'templates/tabs.html',
     controller: 'TabsCtrl',
-    controllerAs: 'vm'
+    controllerAs: 'vm',
+    resolve: {
+        user: ['$auth', function($auth){
+          return $auth.requireUser();
+        }]
+    }
+
   })
 
   
@@ -53,6 +59,16 @@ function config ($stateProvider, $urlRouterProvider) {
         }],
         beaconInit: ['Beacons', 'pushInit', function(Beacons, pushInit){
             return Beacons.initialize();
+        }],
+        subscription: ['$q', 'beaconInit', function ($q, beaconInit) {
+            var deferred = $q.defer();
+     
+            var sub = Meteor.subscribe('connections', {
+              onReady: function(){ deferred.resolve(sub) },
+              onStop:  function(){ deferred.resolve(null) }
+            });
+     
+            return deferred.promise;
         }]
       }
   })

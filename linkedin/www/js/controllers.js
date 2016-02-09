@@ -60,31 +60,41 @@ function NotificationsCtrl ($scope, $reactive, Notify ){
        template: '<div id="map"></div>',
        link: function searchboxEventHandlers(scope, elem, attrs){
 
-          function loadMap(){};
+          var token = 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA';
+          var id = 'epilepone.2f443807';
 
-          var map = L.map('map').setView([51.505, -0.09], 18);
-          L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-              attribution: '',
-              zoomControl: false,
-              id: 'epilepone.2f443807',
-              accessToken: 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA'
-          }).addTo(map);
+          loadMap();
 
-          var pulsingIcon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
-          var marker = L.marker([51.505, -0.09],{icon: pulsingIcon}).addTo(map);
+          function loadMap(){
+            GeoLocate.getAddress().then(function(){
+              var map = L.map('map').setView([GeoLocate.lat, GeoLocate.lng], 18);
+              L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                  attribution: '',
+                  zoomControl: false,
+                  id: id,
+                  accessToken: token 
+              }).addTo(map);
+
+              var pulsingIcon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
+              var marker = L.marker([GeoLocate.lat, GeoLocate.lng],{icon: pulsingIcon}).addTo(map);
+            })
+          };
        }
     };
  };
 
-function NearbyCtrl ($scope, $rootScope, $reactive, $auth, LinkedIn, Beacons, Notify, subscription, $timeout){
+function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscription){
   $reactive(this).attach($scope);
   
   var self = this;
-  console.log('creating NearbyCtrl');
+
   // Slides
   self.listSlide = 0
   self.mapSlide = 1;
   self.slide = 0; 
+  self.geolocate = GeoLocate;
+
+  log_test = self;
 
   if (!subscription){
     console.log('Subscription failed in NearbyCtrl');
@@ -96,15 +106,18 @@ function NearbyCtrl ($scope, $rootScope, $reactive, $auth, LinkedIn, Beacons, No
       }
   });
 
-  self.initBeacon = Beacons.initialize;
-
   this.maps = function(slide){
     if (slide === self.mapSlide){
       console.log('maps!')
 
     }
   };
+
+  this.notify = function(user){
+    Notify.sawProfile(user.receiver);
+  }
   
+  // ------------------ -----  TESTING ----------------------------------
   this.clear = function(){
     
     var pkg = {
@@ -114,10 +127,6 @@ function NearbyCtrl ($scope, $rootScope, $reactive, $auth, LinkedIn, Beacons, No
     Meteor.call('disconnect', pkg, function(err, result){
       (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
     })
-  }
-
-  this.notify = function(user){
-    Notify.sawProfile(user.receiver);
   }
 
   this.testPub = function(){

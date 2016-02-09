@@ -17,7 +17,10 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 		var deferred = $q.defer();
 
 		if ($rootScope.DEV){
-			deferred.resolve(''); 
+			self.address = '777 Debugger Ave, New York City';
+			self.lat = 51.505;
+			self.lng = -0.09;
+			deferred.resolve(self.address); 
 			return deferred.promise; 
 		}
 

@@ -67,3 +67,16 @@
 .leaflet-bar{
     border: none !important;
 }
+
+
+.icon-badge {
+  position: absolute;
+    top: 4%;
+    right: 33%;
+    right: calc(50% - 21px);
+    padding: 1px 6px;
+    height: auto;
+    font-size: 12px;
+    line-height: 16px;
+    pointer-events: none;
+}

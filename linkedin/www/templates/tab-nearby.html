@@ -1,4 +1,12 @@
 <ion-view view-title="Nearby">
+  <ion-nav-buttons side="right" >
+    <button class="button button-clear button-positive icon ion-ios-person-outline"
+            ng-show="vm.connections.length && vm.slide === vm.mapSlide"
+            ng-click="vm.slide=vm.listSlide"></button> 
+    <span class="badge badge-assertive icon-badge" ng-bind="vm.connections.length"
+          ng-show="vm.connections.length && vm.slide === vm.mapSlide"></span>   
+  </ion-nav-buttons>
+
   <ion-content>
     <ion-slide-box active-slide="vm.slide" auto-play="false" show-pager="false" on-slide-changed="vm.maps(index)">
       <ion-slide>
@@ -30,10 +38,9 @@
       </ion-slide>
       <ion-slide> 
         <ion-header-bar align-title="left" class="bar-transparent"> 
-          <h1 class="title"> Address </h1>
+          <h1 class="title">{{vm.geolocate.address}}</h1>
           <div class="buttons">
-          <button class="button button-clear button-positive icon ion-ios-plus-outline">
-          </button>
+
         </div>
         </ion-header-bar>
         

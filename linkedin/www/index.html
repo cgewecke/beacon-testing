@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
-    <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src  'self' 'unsafe-inline' *">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; img-src *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src  'self' 'unsafe-inline' *">
     <title></title>
 
 
@@ -11,6 +11,8 @@
     <link href="css/ionic.app.css" rel="stylesheet">
     <link href="css/animate.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="lib/leaflet/leaflet.css" rel="stylesheet"/>
+    <link href="lib/leaflet-pulse-icon/src/L.Icon.Pulse.css" rel="stylesheet"/>
 
     <!-- ionic/angularjs js -->
     <script src="lib/ionic/js/ionic.bundle.js"></script>
@@ -24,10 +26,12 @@
     <script src="lib/ngCordova/dist/ng-cordova.js"></script>
     <script src="lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js"></script>
     <script src="lib/ionic-toast/dist/ionic-toast.bundle.min.js"></script>
+    <script src="lib/leaflet/leaflet.js"></script>
+    <script src="lib/leaflet-pulse-icon/src/L.Icon.Pulse.js"></script>
+
 
     <!-- 3rd party network loaded APIs js -->
     <script src="https://maps.googleapis.com/maps/api/js"></script>
-    
 
     <!-- cordova script (this will be a 404 during development) -->
     <script src="cordova.js"></script>

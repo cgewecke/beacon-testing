@@ -43,7 +43,7 @@ function config ($stateProvider, $urlRouterProvider) {
         'tab-nearby': {
           templateUrl: 'templates/tab-nearby.html',
           controller: 'NearbyCtrl',
-          controllerAs: 'nearby'
+          controllerAs: 'vm'
         }
       },
 

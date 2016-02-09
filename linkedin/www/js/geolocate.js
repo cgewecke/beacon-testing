@@ -9,6 +9,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	
 	self.lat = null;
 	self.lng = null;
+	self.address = null;
 
 	self.getAddress = function(){
 
@@ -44,33 +45,39 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 			                    // OK
 			                    if (results[1]) {
 			                    	console.log('Got address: ' + JSON.stringify(results));
-			                        deferred.resolve(results[1].formatted_address);
+			                    	self.address = results[1].formatted_address.split(',').slice(0, -2).join(', '),
+			                        deferred.resolve(self.address);
 
 			                    // No address
 			                    } else {
+			                    	self.address = '';
 			                        deferred.resolve('');
 			                        console.log('GEOLOCATE: no maps results for position');
 			                    }
 
 			                // Geocoder call fail
 			                } else {
+			                	self.address = '';
 			                    deferred.resolve('');
 			                    console.log('GEOLOCATE: google.maps.geocode error: ' + status);
 			                }
 			            });
 			        // Maps or vals bad    
            			} else {
+           				self.address = '';
            				deferred.resolve('');
            				console.log('GEOLOCATE: no position vals or no google.maps');
            			}	
            	    // No coordinates in position
       			} else {
+      				self.address = '';
       				deferred.resolve('');
       				console.log('GEOLOCATE no $cordova.geolocation position object');
       			}    	
 
       		// $cordova layer failure	
 		    }, function(err) {
+		      self.address = '';
 		      deferred.resolve('');
 		      console.log('GEOLOCATE: $cordovaGeolocation error:' + JSON.stringify(err))
 		    }

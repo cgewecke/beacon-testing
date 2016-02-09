@@ -1,31 +1,63 @@
 <ion-view view-title="Nearby">
   <ion-content>
-    <ion-list>
-      <ion-item
-        ng-repeat="user in nearby.connections"
-        class="item-chat item-avatar item-icon-right"
-        ng-class="{'new-item': user.isNew }"
-        type="item-text-wrap"
-        href="#/tab/nearby/{{user.profile.id}}"
-        ng-click="nearby.notify(user)"
-        ng-show="user.profile">
-        <img ng-src="{{user.profile.pictureUrl}}">
-        <h2>{{user.profile.firstName}}&nbsp{{user.profile.lastName}}</h2>
-        <p>{{user.profile.headline}}</p>
-        <span class="last-message-timestamp">{{user.proximity | proximityFilter }}</span>
-        <i class="icon ion-chevron-right icon-accessory"></i>
-      </ion-item>
-    </ion-list>
-    <button class="button button-full button-positive" ng-click="nearby.testPub()">
-      Test newConnection
-    </button> 
-    <button class="button button-full button-positive" ng-click="nearby.clear()">
-      Test disconnect
-    </button> 
-    <button class="button button-full button-positive" ng-click="nearby.initBeacon()">
-      Test beacons initialize
-    </button> 
-  </ion-content>
+    <ion-slide-box active-slide="vm.slide" auto-play="false" show-pager="false" on-slide-changed="vm.maps(index)">
+      <ion-slide>
+        <ion-list>
+          <ion-item
+            ng-repeat="user in vm.connections"
+            class="item-chat item-avatar item-icon-right"
+            ng-class="{'new-item': user.isNew }"
+            type="item-text-wrap"
+            href="#/tab/nearby/{{user.profile.id}}"
+            ng-click="vm.notify(user)"
+            ng-show="user.profile">
+            <img ng-src="{{user.profile.pictureUrl}}">
+            <h2>{{user.profile.firstName}}&nbsp{{user.profile.lastName}}</h2>
+            <p>{{user.profile.headline}}</p>
+            <span class="last-message-timestamp">{{user.proximity | proximityFilter }}</span>
+            <i class="icon ion-chevron-right icon-accessory"></i>
+          </ion-item>
+        </ion-list>
+        <button class="button button-full button-positive" ng-click="vm.testPub()">
+          Test newConnection
+        </button> 
+        <button class="button button-full button-positive" ng-click="vm.clear()">
+          Test disconnect
+        </button> 
+        <button class="button button-full button-positive" ng-click="vm.initBeacon()">
+          Test beacons initialize
+        </button> 
+      </ion-slide>
+      <ion-slide> 
+        <ion-header-bar align-title="left" class="bar-transparent"> 
+          <h1 class="title"> Address </h1>
+          <div class="buttons">
+          <button class="button button-clear button-positive icon ion-ios-plus-outline">
+          </button>
+        </div>
+        </ion-header-bar>
+        
+        <beacon-map> 
+        </beacon-map>
+      </ion-slide>
+    </ion-slide-box>
+  </ion-content> 
+  <ion-footer-bar align-title="left" class="bar-stable" >
+    <span class="col col-20"></span>
+    <span class="button-bar">
+      <button class="button button-positive icon-left ion-ios-list-outline"
+              ng-class="{'button-outline': !(vm.slide === vm.listSlide)}"
+              ng-click="vm.slide=vm.listSlide">
+        List
+      </button>
+      <button class="button button-positive icon-left ion-ios-location-outline"
+              ng-class="{'button-outline': !(vm.slide === vm.mapSlide)}"
+              ng-click="vm.slide=vm.mapSlide">
+        Map
+      </button>
+    </span>
+    <span class="col col-20"></span>
+</ion-footer-bar>
 </ion-view>
 
 <!--  -->

@@ -20,7 +20,7 @@ function TabsCtrl ($scope, $reactive ){
 
     this.helpers({
         notifyCount: function () {
-          return Meteor.user().profile.notifyCount;
+          if(Meteor.user()) return Meteor.user().profile.notifyCount;
         }
     });  
 };
@@ -231,19 +231,29 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
   console.log('ionic loading start' );
 
   $ionicPlatform.ready(function(){
-      //$state.go('tab.nearby');
-      $state.go('setup');
+      $state.go('tab.nearby');
+      //$state.go('setup');
   });
   
   
 };
 
-function SettingsCtrl($scope, $reactive, $state) {
+function SettingsCtrl($scope, $rootScope, $state, $reactive) {
   $reactive(this).attach($scope);
 
-  this.logout = logout;
+  this.rootScope = $rootScope;
 
-  function logout() {
+  this.helpers({
+      canPush: function () {
+        if(Meteor.user() && Meteor.user().profile.pushToken){
+          return true;
+        } else {
+          return false;
+        }
+      }
+  });
+
+  this.logout = function() {
     Meteor.logout(function(err){
       $state.go('login');
     });

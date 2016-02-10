@@ -14,7 +14,9 @@ Meteor.methods({
   //---------------- Notifications -------------------------
   // @function: notify
   // @param: info {target: _id, notification: {} }
+  //
   // Adds a notification to the receiver's notifications array, increments their notify count 
+
   notify(info){
     console.log('in notify');
 
@@ -43,7 +45,13 @@ Meteor.methods({
     
     if (target && target.profile.pushToken){
       console.log("Token:" + target.profile.pushToken);
-      note = { from: 'push', text: info.notification.name + ' checked your profile.', sound: 'ping.aiff'};
+      
+      note = { 
+        from: 'push', 
+        text: info.notification.name + ' checked your profile.', 
+        sound: 'ping.aiff'
+      };
+      
       Push.sendAPN(target.profile.pushToken, note);
     }
   },

@@ -74,6 +74,9 @@ function config ($stateProvider, $urlRouterProvider) {
             });
      
             return deferred.promise;
+        }], 
+        geo: ['GeoLocate', 'subscription', function(GeoLocate, subscription){
+            return GeoLocate.setup();
         }]
       }
   })
@@ -149,7 +152,12 @@ function config ($stateProvider, $urlRouterProvider) {
       'tab-settings': {
         templateUrl: 'templates/settings.html',
         controller: 'SettingsCtrl',
-        controllerAs: 'settings',
+        controllerAs: 'vm',
+      },
+      resolve: {
+        user: ['$auth', function($auth){
+            return $auth.requireUser();
+        }],
       }
     }
   })

@@ -1,7 +1,19 @@
 <ion-view view-title="Settings">
   <ion-content>
-    <div class="padding text-center">
-      <button ng-click="settings.logout()" class="button button-clear button-assertive">Logout</button>
-    </div>
+  	<div class="list">
+  		<ion-toggle class="item-icon-left" 
+  					 ng-model="vm.rootScope.canGeolocate" ng-checked="vm.rootScope.canGeolocate">
+          <i class="icon ion-ios-navigate-outline"></i> Location Services
+        </ion-toggle></i>
+        <ion-toggle class="item-icon-left"
+        			ng-model="vm.canPush" ng-checked="vm.canPush">
+          <i class="icon ion-ios-bell-outline"></i> Push Notifications
+        </ion-toggle>
+	    <div class="item item-icon-left item-button-right">
+	      <i class="icon ion-android-wifi"></i>
+	      Turn iBeacons Off
+	      <button ng-click="vm.logout()" class="button button-outline button-assertive">Logout</button>
+	    </div>
+	</div>
   </ion-content>
 </ion-view>

@@ -45,6 +45,10 @@
   	
 }
 
+/* Settings */
+.settings-info{
+    padding-left: 10px;
+}
 .item-icon-left.setup{
     padding-left: 70px; 
 }

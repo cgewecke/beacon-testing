@@ -11,6 +11,29 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	self.lng = null;
 	self.address = null;
 
+	self.setup = function(){
+		var deferred = $q.defer();
+
+		if ($rootScope.DEV){
+			deferred.resolve(self.address); 
+			return deferred.promise; 
+		}
+		
+		$cordovaGeolocation.getCurrentPosition(posOptions).then(
+
+			function (success){
+		    	$rootScope.canGeolocate = true;
+		    	console.log('Geolocation enabled')
+		    	deferred.resolve();
+		    }, function (error){
+		    	$rootScope.canGeolocate = false;
+		    	console.log('Geolocation disabled');
+		    	deferred.resolve();
+		    }
+		);
+		return deferred.promise;
+	}
+
 	self.getAddress = function(){
 
 		console.log('entering get address');

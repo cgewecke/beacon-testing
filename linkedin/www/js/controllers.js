@@ -12,7 +12,8 @@ angular.module('linkedin')
   .controller('LoadingCtrl', LoadingCtrl)
   .controller('SettingsCtrl', SettingsCtrl)
   .controller('NotificationsCtrl', NotificationsCtrl)
-  .controller('TabsCtrl', TabsCtrl);
+  .controller('TabsCtrl', TabsCtrl)
+  .controller('SetupCtrl', SetupCtrl);
 
 function TabsCtrl ($scope, $reactive ){
   $reactive(this).attach($scope);
@@ -22,6 +23,20 @@ function TabsCtrl ($scope, $reactive ){
           return Meteor.user().profile.notifyCount;
         }
     });  
+};
+
+function SetupCtrl ($scope, $state ){
+  this.ready = false;
+
+  this.accept = function(){
+    this.ready = false;
+    $state.go('tab.nearby');
+  };
+
+  this.reject = function(){
+    $state.go('login');
+  };
+
 };
 
 function NotificationsCtrl ($scope, $reactive, Notify ){
@@ -216,7 +231,8 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
   console.log('ionic loading start' );
 
   $ionicPlatform.ready(function(){
-      $state.go('tab.nearby');
+      //$state.go('tab.nearby');
+      $state.go('setup');
   });
   
   

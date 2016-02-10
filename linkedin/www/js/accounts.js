@@ -131,7 +131,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
               window.localStorage['pl_id'] = user.email;
               window.localStorage['pl_newInstall'] = 'true';
               $scope.loggingIn = false;
-              $state.go('tab.nearby');
+              $state.go('setup');
               
             } else{
               console.log('createUser Error: ' + JSON.stringify(err));

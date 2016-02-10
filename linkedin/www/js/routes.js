@@ -19,7 +19,12 @@ function config ($stateProvider, $urlRouterProvider) {
       templateUrl: 'templates/login.html',
       controller: 'LoginCtrl'
   })
-
+  .state('setup', {
+      url: '/setup',
+      templateUrl: 'templates/setup.html',
+      controller: 'SetupCtrl',
+      controllerAs: 'vm'
+  })
 
   // setup an abstract state for the tabs directive
   .state('tab', {

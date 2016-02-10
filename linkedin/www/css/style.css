@@ -45,8 +45,19 @@
   	
 }
 
+.item-icon-left.setup{
+    padding-left: 70px; 
+}
+
+i.icon.setup{
+    font-size: 49px;
+}
+/* Map CSS */
 #map{
     height: 500px;
+}
+#map.platform-ipad{
+    height: 1000px;
 }
 
 .leaflet-control-zoom-out{
@@ -67,7 +78,6 @@
 .leaflet-bar{
     border: none !important;
 }
-
 
 .icon-badge {
   position: absolute;

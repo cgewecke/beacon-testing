@@ -52,16 +52,24 @@
 .item-icon-left.setup{
     padding-left: 70px; 
 }
+.smaller{
+    font-size: 11px !important;
+}
 
 i.icon.setup{
     font-size: 49px;
 }
 /* Map CSS */
-#map{
+beacon-map{
     height: 500px;
 }
-#map.platform-ipad{
+
+beacon-map.ipad{
     height: 1000px;
+}
+
+#map{
+    height: inherit;
 }
 
 .leaflet-control-zoom-out{
@@ -72,9 +80,9 @@ i.icon.setup{
     visibility: hidden !important;
 }
 
-.bar.bar-transparent {
+.bar.bar-grey {
 
-    background-color: transparent;
+    background-color: #D6D6D6;
     background-image: linear-gradient(0deg, #e6b500, #e6b500 50%, transparent 50%);
     color: #444; 
 }
@@ -82,6 +90,7 @@ i.icon.setup{
 .leaflet-bar{
     border: none !important;
 }
+
 
 .icon-badge {
   position: absolute;

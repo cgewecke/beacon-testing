@@ -5,8 +5,6 @@ angular.module('linkedin')
   .controller('ChatDetailCtrl', ChatDetailCtrl)
 
   .controller('NearbyCtrl', NearbyCtrl)
-  .directive('beaconMap', BeaconMap)
-  
   .controller('NearbyProfileCtrl', NearbyProfileCtrl)
   .controller('ProfileCtrl', ProfileCtrl)
   .controller('LoadingCtrl', LoadingCtrl)
@@ -68,35 +66,6 @@ function NotificationsCtrl ($scope, $reactive, Notify ){
   
 };
 
-// Element
- function BeaconMap(GeoLocate){
-    return {
-       restrict: 'E',  
-       template: '<div id="map"></div>',
-       link: function searchboxEventHandlers(scope, elem, attrs){
-
-          var token = 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA';
-          var id = 'epilepone.2f443807';
-
-          loadMap();
-
-          function loadMap(){
-            GeoLocate.getAddress().then(function(){
-              var map = L.map('map').setView([GeoLocate.lat, GeoLocate.lng], 18);
-              L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-                  attribution: '',
-                  zoomControl: false,
-                  id: id,
-                  accessToken: token 
-              }).addTo(map);
-
-              var pulsingIcon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
-              var marker = L.marker([GeoLocate.lat, GeoLocate.lng],{icon: pulsingIcon}).addTo(map);
-            })
-          };
-       }
-    };
- };
 
 function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscription){
   $reactive(this).attach($scope);
@@ -177,6 +146,9 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
   this.user = this.connection.profile;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = this.user.name;
+  this.currentUser = Meteor.user().username;
+
+  console.log(this.user.id + '  ' + this.currentUser)
 
   // Add to native contacts button
   this.createContact = function(){
@@ -219,10 +191,9 @@ function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
   $reactive(this).attach($scope);
     
   this.user = LinkedIn.me;
-  this.user.contactAdded = true;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = "You";
-  
+  this.currentUser = Meteor.user().username;
   
 };
 
@@ -238,26 +209,22 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
   
 };
 
-function SettingsCtrl($scope, $rootScope, $state, $reactive) {
-  $reactive(this).attach($scope);
+function SettingsCtrl($scope, $state, GeoLocate, Notify, ionicToast) {
 
-  this.rootScope = $rootScope;
-
-  this.helpers({
-      canPush: function () {
-        if(Meteor.user() && Meteor.user().profile.pushToken){
-          return true;
-        } else {
-          return false;
-        }
-      }
-  });
+  var message = "Go to Settings > LinkedIn in your device's settings menu to change this."
+  this.geolocate = {enabled: true};
+  this.notify = {enabled: true};
 
   this.logout = function() {
     Meteor.logout(function(err){
       $state.go('login');
     });
   }
+
+  this.toast = function(){
+    ionicToast.show(message, 'middle', true, 2500);
+  }
+  
 };
 
 

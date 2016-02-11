@@ -1,15 +1,67 @@
 angular.module('linkedin')
-  .service("GeoLocate", GeoLocate);
+  .service("GeoLocate", GeoLocate)
+  .directive("beaconMap", BeaconMap);
 
+
+// Element
+ function BeaconMap(GeoLocate){
+    return {
+       restrict: 'E',   
+       scope: {slide: '=slide'},
+       template: '<div id="map"></div>',
+       link: function searchboxEventHandlers(scope, elem, attrs){
+
+       	  var map, marker, icon;
+
+          var token = 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA';
+          var id = 'epilepone.2f443807';
+
+
+          if (ionic.Platform.isIPad()){
+          	elem.addClass('ipad');
+          }
+
+          scope.$watch('slide', function(newVal, oldVal){
+          
+          	if (newVal === 1){
+          		(map === undefined) ? loadMap(): updateMap();
+          	};
+          })
+        
+          function loadMap(){
+            GeoLocate.getAddress().then(function(){
+              map = L.map('map').setView([GeoLocate.lat, GeoLocate.lng], 16);
+              L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+                  attribution: '',
+                  zoomControl: false,
+                  id: id,
+                  accessToken: token 
+              }).addTo(map);
+
+              icon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
+              marker = L.marker([GeoLocate.lat, GeoLocate.lng],{icon: icon}).addTo(map);
+            })
+          };
+
+          function updateMap(){
+          	GeoLocate.getAddress().then(function(){
+              map.setView([GeoLocate.lat, GeoLocate.lng], 16);
+              marker.setLatLng([GeoLocate.lat, GeoLocate.lng]);
+            });
+          }
+       }
+    };
+ };
 
 function GeoLocate($rootScope, $q, $cordovaGeolocation){
 
 	var self = this;
-	var posOptions = {timeout: 10000, enableHighAccuracy: false};
+	var posOptions = {timeout: 60000, enableHighAccuracy: false};
 	
 	self.lat = null;
 	self.lng = null;
 	self.address = null;
+	self.enabled = false;
 
 	self.setup = function(){
 		var deferred = $q.defer();
@@ -22,11 +74,11 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 		$cordovaGeolocation.getCurrentPosition(posOptions).then(
 
 			function (success){
-		    	$rootScope.canGeolocate = true;
+		    	self.enabled = true;
 		    	console.log('Geolocation enabled')
 		    	deferred.resolve();
 		    }, function (error){
-		    	$rootScope.canGeolocate = false;
+		    	self.enabled = false;
 		    	console.log('Geolocation disabled');
 		    	deferred.resolve();
 		    }
@@ -50,6 +102,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 		// Get current pos
 		$cordovaGeolocation.getCurrentPosition(posOptions)
 		    .then(function (position) {
+		    	self.enabled = true;
 		    	console.log("entering getCurrentPosition " + JSON.stringify(position));
 		    	// Check coords exist
 		    	if (position.coords){
@@ -70,7 +123,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 			                    
 			                    // OK
 			                    if (results[1]) {
-			                    	console.log('Got address: ' + JSON.stringify(results));
+			                    	console.log('Got address: ' + JSON.stringify(results[1].formatted_address));
 			                    	self.address = results[1].formatted_address.split(',').slice(0, -2).join(', '),
 			                        deferred.resolve(self.address);
 
@@ -104,6 +157,9 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
       		// $cordova layer failure	
 		    }, function(err) {
 		      self.address = '';
+		      self.lat = 0;
+		      self.lng = 0;
+		      self.enabled = false;
 		      deferred.resolve('');
 		      console.log('GEOLOCATE: $cordovaGeolocation error:' + JSON.stringify(err))
 		    }

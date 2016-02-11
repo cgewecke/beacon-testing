@@ -1,15 +1,33 @@
+<!--
+..... 
+Settings: iOS service permissions & information about enabling/disabling these. Also logout. 
+@controller: SettingsCtrl as vm 
+@state: 'settings'
+.....
+-->
 <ion-view view-title="Settings">
   <ion-content>
   	<div class="list">
-  		<ion-toggle class="item-icon-left" 
-  					 ng-model="vm.rootScope.canGeolocate" ng-checked="vm.rootScope.canGeolocate">
-          <i class="icon ion-ios-navigate-outline"></i> Location Services
-        </ion-toggle></i>
-        <ion-toggle class="item-icon-left"
-        			ng-model="vm.canPush" ng-checked="vm.canPush">
-          <i class="icon ion-ios-bell-outline"></i> Push Notifications
-        </ion-toggle>
-	    <div class="item item-icon-left item-button-right">
+      <!-- Location Services -->
+  		<div class="item item-icon-left item-button-right item-text-wrap"
+           ng-click="vm.toast()">
+          <i class="icon ion-ios-navigate-outline"></i> 
+          Location Services
+          <button class="button button-clear button-balanced" ng-show="vm.geolocate.enabled"> ON </button>
+          <button class="button button-clear button-assertive" ng-show="!vm.geolocate.enabled"> OFF </button>
+      </div>
+
+      <!-- Push Notifications -->
+      <div class="item item-icon-left item-button-right item-text-wrap"
+            ng-click="vm.toast()">
+          <i class="icon ion-ios-bell-outline"></i> 
+          Push Notifications
+          <button class="button button-clear button-balanced" ng-show="vm.geolocate.enabled"> ON </button>
+          <button class="button button-clear button-assertive" ng-show="!vm.geolocate.enabled"> OFF </button>
+      </div>
+
+      <!-- iBeacons / Logout -->
+	    <div class="item item-icon-left item-button-right item-text-wrap">
 	      <i class="icon ion-android-wifi"></i>
 	      Turn iBeacons Off
 	      <button ng-click="vm.logout()" class="button button-outline button-assertive">Logout</button>

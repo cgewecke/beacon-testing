@@ -1,7 +1,7 @@
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 
-function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast ){
+function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast, $timeout ){
     
     $scope.DEV = $rootScope.DEV;
 
@@ -87,20 +87,20 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
           
           $auth.waitForUser().then(function(){
   
-            (!window.localStorage['pl_newInstall']) ? 
-              window.localStorage['pl_newInstall'] = 'true' : 
-              false;
-
             window.localStorage['pl_id'] = Meteor.user().emails[0].address;
             Meteor.users.update(Meteor.userId(), { $set: { 'profile.authToken': user.profile.authToken } });
-            $scope.loggingIn = false;
-
+            
             if (!window.localStorage['pl_newInstall']){
               window.localStorage['pl_newInstall'] = 'true';
               $state.go('setup'); 
             } else {
               $state.go('tab.nearby');
             }
+            // Does this run?
+            $timeout(function(){
+              console.log('running after statechange');
+              $scope.loggingIn = false;
+            }, 3000);
           })
         
         } else {
@@ -135,8 +135,13 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
   
               window.localStorage['pl_id'] = user.email;
               window.localStorage['pl_newInstall'] = 'true';
-              $scope.loggingIn = false;
               $state.go('setup');
+
+              // Does this run?
+              $timeout(function(){
+                console.log('running after statechange');
+                $scope.loggingIn = false;
+              }, 3000);
               
             } else{
               console.log('createUser Error: ' + JSON.stringify(err));

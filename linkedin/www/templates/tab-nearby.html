@@ -1,12 +1,4 @@
 <ion-view view-title="Nearby">
-  <ion-nav-buttons side="right" >
-    <button class="button button-clear button-positive icon ion-ios-person-outline"
-            ng-show="vm.connections.length && vm.slide === vm.mapSlide"
-            ng-click="vm.slide=vm.listSlide"></button> 
-    <span class="badge badge-assertive icon-badge" ng-bind="vm.connections.length"
-          ng-show="vm.connections.length && vm.slide === vm.mapSlide"></span>   
-  </ion-nav-buttons>
-
   <ion-content>
     <ion-slide-box active-slide="vm.slide" auto-play="false" show-pager="false" on-slide-changed="vm.maps(index)">
       <ion-slide>
@@ -36,19 +28,25 @@
           Test beacons initialize
         </button> 
       </ion-slide>
+      <!-- Map Slide -->
       <ion-slide> 
-        <ion-header-bar align-title="left" class="bar-transparent"> 
+         <ion-header-bar align-title="left" class="bar-grey"> 
           <h1 class="title">{{vm.geolocate.address}}</h1>
           <div class="buttons">
-
-        </div>
+            <button class="button button-clear button-positive icon ion-ios-person"
+                    ng-show="vm.connections.length && vm.slide === vm.mapSlide"
+                    ng-click="vm.slide=vm.listSlide"></button> 
+            <span class="badge badge-assertive icon-badge" ng-bind="vm.connections.length"
+                  ng-show="vm.connections.length && vm.slide === vm.mapSlide"></span>   
+          </div>
         </ion-header-bar>
-        
-        <beacon-map> 
-        </beacon-map>
+        <beacon-map slide="vm.slide"></beacon-map>
       </ion-slide>
+
     </ion-slide-box>
   </ion-content> 
+
+  <!-- Slide Toggle -->
   <ion-footer-bar align-title="left" class="bar-stable" >
     <span class="col col-20"></span>
     <span class="button-bar">

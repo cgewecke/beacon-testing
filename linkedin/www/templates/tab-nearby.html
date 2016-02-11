@@ -1,6 +1,8 @@
 <ion-view view-title="Nearby">
   <ion-content>
+    <!-- SLIDES -->
     <ion-slide-box active-slide="vm.slide" auto-play="false" show-pager="false" on-slide-changed="vm.maps(index)">
+      <!-- List Slide -->
       <ion-slide>
         <ion-list>
           <ion-item
@@ -18,15 +20,7 @@
             <i class="icon ion-chevron-right icon-accessory"></i>
           </ion-item>
         </ion-list>
-        <button class="button button-full button-positive" ng-click="vm.testPub()">
-          Test newConnection
-        </button> 
-        <button class="button button-full button-positive" ng-click="vm.clear()">
-          Test disconnect
-        </button> 
-        <button class="button button-full button-positive" ng-click="vm.initBeacon()">
-          Test beacons initialize
-        </button> 
+       
       </ion-slide>
       <!-- Map Slide -->
       <ion-slide> 
@@ -42,10 +36,30 @@
         </ion-header-bar>
         <beacon-map slide="vm.slide"></beacon-map>
       </ion-slide>
-
     </ion-slide-box>
   </ion-content> 
 
+  <!-- Scanning Cover for empty connections table, list view -->
+  <section class="authenticate-container fade" 
+           ng-show="!vm.connections.length && vm.slide === vm.listSlide">
+    <div class="col spacer"></div>
+    <div class="col button-row text-center"> 
+      <div> <ion-spinner class="auth-spinner spinner-stable" icon="ripple"></ion-spinner> </div>
+      <div> <span> Scanning </span> </div>
+    </div>
+    <div class="col spacer"></div>    
+  </section>
+
+  <!-- FOOTERS -->
+
+  <!-- Home Button for map view -->
+  <ion-footer-bar align-title="left" class="bar-subfooter bar-transparent"
+        ng-show="(vm.slide === vm.mapSlide)">
+    <button class="button button-clear" ng-click='vm.geolocate.updateMap()'>
+      <i class="icon positive ion-ios-home"></i>
+    </button> 
+  </ion-footer-bar>
+  
   <!-- Slide Toggle -->
   <ion-footer-bar align-title="left" class="bar-stable" >
     <span class="col col-20"></span>

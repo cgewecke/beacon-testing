@@ -41,10 +41,6 @@
     text-align: right;
 }
 
-.authenticate-container.loading {
-  	
-}
-
 /* Settings */
 .settings-info{
     padding-left: 10px;
@@ -61,7 +57,7 @@ i.icon.setup{
 }
 /* Map CSS */
 beacon-map{
-    height: 500px;
+    height: 600px;
 }
 
 beacon-map.ipad{
@@ -86,6 +82,13 @@ beacon-map.ipad{
     background-image: linear-gradient(0deg, #e6b500, #e6b500 50%, transparent 50%);
     color: #444; 
 }
+
+.bar.bar-transparent{
+    border-color: none;
+    background-color: transparent;
+    background-image: none;
+}
+
 
 .leaflet-bar{
     border: none !important;

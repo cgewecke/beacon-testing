@@ -85,7 +85,17 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         $cordovaBeacon.startAdvertising(appBeacon);
 
         self.initialized = true;
-        deferred.resolve();
+
+        // Check authorization before resolving
+        $cordovaBeacon.requestAuthorizationStatus().then(
+            function(status){
+                console.log('BEACON AUTH CHECK: ' + status);
+                deferred.resolve();
+            }, function(error){
+                console.log('BEACON AUTH CHECK ERROR: ' + error);
+            }
+        );
+        
         return deferred;
 	};
 

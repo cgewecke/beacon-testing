@@ -1,27 +1,24 @@
 <ion-view view-title="Notifications">
   <ion-content>
     <ion-list>
-      <ion-item
-        ng-repeat="note in vm.notifications"
-        class="item-chat item-avatar item-icon-right"
-        type="item-text-wrap">
+      <ion-item ng-repeat="note in vm.notifications | orderBy:'-timestamp'"
+                class="item-chat item-avatar item-icon-right"
+                type="item-text-wrap">
+                <!-- href="#/tab/notifications/{{note.sender}}"> -->
         <img ng-src="{{note.pictureUrl}}">
         <h2>{{note.name}}</h2>
         <p> <span> Checked your profile </span> 
             <span class="last-message-timestamp">{{note.timestamp | timeFilter}}</span>
         </p>
         <p> <span class="last-message-timestamp">{{note.location}}</span> </p>
-        <i class="icon ion-chevron-right icon-accessory"></i> 
+        <!-- <i class="icon ion-chevron-right icon-accessory"></i> -->
       </ion-item>
+
+      <!-- No Notifications --> 
+      <ion-item type="item-text-wrap" ng-show="!vm.notifications.length"> 
+        You have no notifications.
+      </ion-item>
+
     </ion-list>
-    <button class="button button-full button-positive" ng-click="vm.testNotify()">
-      Test notification
-    </button>
-    <button class="button button-full button-positive" ng-click="vm.clearNotes()">
-      Clear
-    </button>
-    <button class="button button-full button-positive" ng-click="vm.pushTest()">
-      PushTest
-    </button>
   </ion-content>
 </ion-view>

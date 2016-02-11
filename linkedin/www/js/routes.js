@@ -128,6 +128,21 @@ function config ($stateProvider, $urlRouterProvider) {
         }],
       }
   })
+  .state('tab.notifications-profile', {
+    url: '/notifications/:userId',
+    views: {
+      'tab-notifications': {
+        templateUrl: 'templates/tab-profile.html',
+        controller: 'NotificationsProfileCtrl',
+        controllerAs: 'vm'
+      }
+    },
+    resolve: {
+      user: ['$auth', function($auth){
+          return $auth.requireUser();
+      }]
+    }
+  })
   .state('tab.chats', {
       url: '/chats',
       views: {

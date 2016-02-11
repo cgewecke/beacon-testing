@@ -2,66 +2,40 @@ angular.module('linkedin')
   .service("GeoLocate", GeoLocate)
   .directive("beaconMap", BeaconMap);
 
-
+// TO DO -- MOVE loadMap, updateMap into geoLocate, 
 // Element
- function BeaconMap(GeoLocate){
+ function BeaconMap(GeoLocate, $rootScope){
     return {
        restrict: 'E',   
        scope: {slide: '=slide'},
        template: '<div id="map"></div>',
        link: function searchboxEventHandlers(scope, elem, attrs){
 
-       	  var map, marker, icon;
+			ionic.Platform.isIPad() ? elem.addClass('ipad') : false;
+				
+			scope.$watch('slide', function(newVal, oldVal){
 
-          var token = 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA';
-          var id = 'epilepone.2f443807';
-
-
-          if (ionic.Platform.isIPad()){
-          	elem.addClass('ipad');
-          }
-
-          scope.$watch('slide', function(newVal, oldVal){
-          
-          	if (newVal === 1){
-          		(map === undefined) ? loadMap(): updateMap();
-          	};
-          })
-        
-          function loadMap(){
-            GeoLocate.getAddress().then(function(){
-              map = L.map('map').setView([GeoLocate.lat, GeoLocate.lng], 16);
-              L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-                  attribution: '',
-                  zoomControl: false,
-                  id: id,
-                  accessToken: token 
-              }).addTo(map);
-
-              icon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
-              marker = L.marker([GeoLocate.lat, GeoLocate.lng],{icon: icon}).addTo(map);
-            })
-          };
-
-          function updateMap(){
-          	GeoLocate.getAddress().then(function(){
-              map.setView([GeoLocate.lat, GeoLocate.lng], 16);
-              marker.setLatLng([GeoLocate.lat, GeoLocate.lng]);
-            });
-          }
+				if (newVal === 1){
+					(GeoLocate.map === null) ? GeoLocate.loadMap(): GeoLocate.updateMap();
+				};
+			})
        }
     };
  };
 
 function GeoLocate($rootScope, $q, $cordovaGeolocation){
 
+	var icon, map, marker;
 	var self = this;
 	var posOptions = {timeout: 60000, enableHighAccuracy: false};
+	var token = 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA';
+    var id = 'epilepone.2f443807';
 	
 	self.lat = null;
 	self.lng = null;
 	self.address = null;
 	self.enabled = false;
+	self.map = null;
 
 	self.setup = function(){
 		var deferred = $q.defer();
@@ -84,6 +58,29 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 		    }
 		);
 		return deferred.promise;
+	};
+
+	self.loadMap = function(){
+		self.getAddress().then(function(){
+          self.map = L.map('map').setView([self.lat, self.lng], 16);
+          L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+              attribution: '',
+              zoomControl: false,
+              id: id,
+              accessToken: token 
+          }).addTo(self.map);
+
+          icon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
+          marker = L.marker([self.lat, self.lng],{icon: icon}).addTo(self.map);
+        });
+	};
+
+	self.updateMap = function(){
+
+		self.getAddress().then(function(){
+          self.map.setView([self.lat, self.lng], 16);
+          marker.setLatLng([self.lat, self.lng]);
+        });
 	}
 
 	self.getAddress = function(){

@@ -1,15 +1,14 @@
 var log_test;
 
 angular.module('linkedin')
-  .controller('ChatsCtrl', ChatsCtrl)
-  .controller('ChatDetailCtrl', ChatDetailCtrl)
-
+  
   .controller('NearbyCtrl', NearbyCtrl)
   .controller('NearbyProfileCtrl', NearbyProfileCtrl)
   .controller('ProfileCtrl', ProfileCtrl)
   .controller('LoadingCtrl', LoadingCtrl)
   .controller('SettingsCtrl', SettingsCtrl)
   .controller('NotificationsCtrl', NotificationsCtrl)
+  .controller('NotificationsProfileCtrl', NotificationsProfileCtrl)
   .controller('TabsCtrl', TabsCtrl)
   .controller('SetupCtrl', SetupCtrl);
 
@@ -45,29 +44,11 @@ function NotificationsCtrl ($scope, $reactive, Notify ){
         return Meteor.user().profile.notifications;
       }
   });
-  
-  this.testNotify = function(){
-    Notify.sawProfile(Meteor.userId());
-  }
-
-  this.clearNotes = function(){
-    Meteor.users.update({_id: Meteor.userId()}, 
-      {$set: 
-        {'profile.notifications' : [],
-         'profile.notifyCount' : 0
-        }
-      }
-    );
-  };
-
-  this.pushTest = function(){
-    Meteor.call('pushTest');
-  };
-  
+ 
 };
 
 
-function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscription){
+function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscription ){
   $reactive(this).attach($scope);
   
   var self = this;
@@ -77,8 +58,6 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
   self.mapSlide = 1;
   self.slide = 0; 
   self.geolocate = GeoLocate;
-
-  log_test = self;
 
   if (!subscription){
     console.log('Subscription failed in NearbyCtrl');
@@ -100,33 +79,16 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
   this.notify = function(user){
     Notify.sawProfile(user.receiver);
   }
-  
-  // ------------------ -----  TESTING ----------------------------------
-  this.clear = function(){
-    
-    var pkg = {
-      transmitter: Meteor.user().profile.appId,
-      receiver: Meteor.user().emails[0].address,
-    }
-    Meteor.call('disconnect', pkg, function(err, result){
-      (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
-    })
-  }
 
-  this.testPub = function(){
-
-    Meteor.call('ping', Meteor.user().emails[0].address, function(err, connections){});
-
-    var pkg = {
-      transmitter: Meteor.user().emails[0].address,
-      receiver: Meteor.user().emails[0].address,
-      proximity: Math.random().toString()
-    }
-    Meteor.call('newConnection', pkg, function(err, connections){})
-  };
-  
 };
 
+// STUB . . .
+function NotificationsProfileCtrl ($scope, $reactive, $stateParams){
+  $reactive(this).attach($scope);
+
+}
+  
+  
 function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $cordovaContacts, $timeout, LinkedIn){
   
   $reactive(this).attach($scope);
@@ -147,8 +109,6 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = this.user.name;
   this.currentUser = Meteor.user().username;
-
-  console.log(this.user.id + '  ' + this.currentUser)
 
   // Add to native contacts button
   this.createContact = function(){
@@ -224,18 +184,60 @@ function SettingsCtrl($scope, $state, GeoLocate, Notify, ionicToast) {
   this.toast = function(){
     ionicToast.show(message, 'middle', true, 2500);
   }
-  
+
+  // ------------------ -----  TESTING ----------------------------------
+  // Test meteor method: disconnect by disconnecting any self-connections
+  this.clearPub = function(){
+    
+    var pkg = {
+      transmitter: Meteor.user().profile.appId,
+      receiver: Meteor.user().emails[0].address,
+    }
+    Meteor.call('disconnect', pkg, function(err, result){
+      (err) ? console.log(JSON.stringify(err)) : console.log(JSON.stringify(result)); 
+    })
+  }
+
+  // Clears all notifications from current user
+  this.clearNotes = function(){
+    Meteor.users.update({_id: Meteor.userId()}, 
+      {$set: 
+        {'profile.notifications' : [],
+         'profile.notifyCount' : 0
+        }
+      }
+    );
+  };
+
+  // Test meteor method: newConnection() by adding self to connections
+  this.testPub = function(){
+
+    Meteor.call('ping', Meteor.user().emails[0].address, function(err, connections){});
+
+    var pkg = {
+      transmitter: Meteor.user().emails[0].address,
+      receiver: Meteor.user().emails[0].address,
+      proximity: Math.random().toString()
+    }
+    Meteor.call('newConnection', pkg, function(err, connections){})
+  };
+
+  // Test Notify.sawProfile method by notifying self
+  this.testNotify = function(){
+    Notify.sawProfile(Meteor.userId());
+  }
+
 };
 
 
-function ChatsCtrl ($scope, $reactive){
+/*function ChatsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
   
 };
 
 
 function ChatDetailCtrl($scope, $stateParams, Chats) {
-  /*$scope.helpers({
+  $scope.helpers({
 
     chat: function () {
       return Chats.findOne($stateParams.chatId);
@@ -244,6 +246,6 @@ function ChatDetailCtrl($scope, $stateParams, Chats) {
       return Messages.find({ chatId: $stateParams.chatId });
     }
   
-  });*/
-};
+  });
+};*/
 

@@ -79,8 +79,12 @@ beacon-map.ipad{
 .bar.bar-grey {
 
     background-color: #D6D6D6;
-    background-image: linear-gradient(0deg, #e6b500, #e6b500 50%, transparent 50%);
+    background-image: none;
     color: #444; 
+}
+
+.bar.vertical-center{
+    margin-top: 10px !important;
 }
 
 .bar.bar-transparent{

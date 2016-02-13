@@ -87,7 +87,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         self.initialized = true;
 
         // Check authorization before resolving
-        $cordovaBeacon.requestAuthorizationStatus().then(
+        $cordovaBeacon.getAuthorizationStatus().then(
             function(status){
                 console.log('BEACON AUTH CHECK: ' + status);
                 deferred.resolve();

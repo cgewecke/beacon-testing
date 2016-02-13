@@ -33,7 +33,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 		       error = 'NOTIFICATIONS ERROR: registering for pushToken';
 		       console.log(error);
 		       console.log(err);
-		       deferred.reject();
+		       deferred.resolve();
 		    });
 		    
 		} else {

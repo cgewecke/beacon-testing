@@ -1,5 +1,5 @@
-// Service for initializing, transmitting and receiving beacons signal
-
+// @service: Beacons
+// Handles initializing, transmitting and receiving of beacon signals
 angular.module('linkedin')
   .service("Beacons", Beacons);
 
@@ -8,6 +8,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 
 	var self = this;
 
+    // The set of uuids to monitor for
 	var uuids = [
 		"4F7C5946-87BB-4C50-8051-D503CEBA2F19", //1
 		"D4FB5D93-B1EF-42CE-8C08-CF11685714EB", //2
@@ -21,24 +22,30 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 		"05DEE885-E723-438F-B733-409E4DBFA694", //10
 	];
 
-    var regions = [];
-    var lastDate = new Date();
-    var lastBeacon = null;
 
+    var regions = [];
+    
+    // ------------------------  Public ---------------------------------
 	self.quantity = uuids.length;
     self.initialized = false;
-    self.lock = false;
-
-
+    
+    // @function: getUUID 
+    // Exposes the uuid array. In LoginCtrl, the modulus of the Beacon minor and the 
+    // uuid array side is used to select a uuid. This allows them to be distributed evenly 
+    // across acounts and minimizes the likelyhood that a duplicate uuid will be present
+    // in any group of phones. See beacon-testing/issues/15 for details. 
     self.getUUID = function(index){
         return uuids[index];
     };
 
-	// Needs to happen in $ionicPlatform.ready() in a $auth.waitForUser
+	// @function initialize() 
+    // Sets up beaconing in app. This method resolves on the Nearby tab, so it may
+    // have already run as user navigates around. Rejects if user does not authorize.
 	self.initialize = function(){
 
         var deferred = $q.defer();
 
+        // Return if initialized. Also beacons cannot run in browser + output is annoying in XCode.
         if ($rootScope.DEV || $rootScope.beaconsOFF || self.initialized  ) { deferred.resolve(); return deferred; }
            
         console.log('Initializing beacons');
@@ -92,6 +99,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
                 console.log('BEACON AUTH CHECK: ' + status);
                 deferred.resolve();
             }, function(error){
+                deferred.reject();
                 console.log('BEACON AUTH CHECK ERROR: ' + error);
             }
         );
@@ -99,6 +107,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         return deferred;
 	};
 
+    // ------------------------  Private ---------------------------------
     // setUpRegions(): initialize an array beaconRegion obj of all our possible uuid vals
     function setUpRegions(){
         for (var i = 0; i < uuids.length; i++){
@@ -106,6 +115,9 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         }
     };
     
+    // @function onEntry
+    // Stub. Called when monitoring enters a region. This is not run if waking up from the background, so
+    // basically useless.
     function onEntry(result){
    
         // DEV
@@ -113,12 +125,16 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         Meteor.call('ping', result, function(err, connections){});
     };
 
+    // @function: onExit
+    // @param: result (this only contains uuid, not major/minor)
+    // Called when monitoring exits a region. Pulls app identifier from local storage and
+    // attempts to remove any connections where this app is the receiver and the transmitter
+    // has the uuid specified by 'result'.   
     function onExit(result){
 
         // DEV
         result.message = "EXITING";
         Meteor.call('ping', result, function(err, connections){});
-
 
         var transmitter, pkg, beacon;
         var localId = window.localStorage['pl_id']
@@ -140,12 +156,16 @@ function Beacons($rootScope, $q, $cordovaBeacon){
             });
 
         } else {
-            console.log("Error: receiver - " + receiver + " beacons: " + beacons.length);
+            console.log("Error: receiver - " + receiver);
         }
         
         
     };
 
+    // @function: onCapture
+    // @param: result (result.beacons is an array)
+    // Called when ranging detects a beacon. Pulls app identifier from local storage and
+    // attempts to create a connection record in the meteor DB.  
     function onCapture(result){
 
         var beacons = result.beacons
@@ -171,21 +191,5 @@ function Beacons($rootScope, $q, $cordovaBeacon){
             //console.log("Error: capture - " + receiver + " beacons: " + beacons.length);
         }
     };
-
-    function throttle(beacon){
-        
-        var curDate = new Date();
-        var diff = Math.abs(curDate - lastDate);
-        lastDate = curDate;
-        lastBeacon = beacon;
-
-        if ( diff < 500 && lastBeacon.uuid === beacon.uuid ){
-            Meteor.call('ping', {message: 'THROTTLE: ' + Math.abs(curDate - lastDate) });
-            return false;
-        } else {
-            return true;
-        } 
-
-    }
 
 }

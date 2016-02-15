@@ -1,14 +1,21 @@
+// @controller: LoginCtrl
+//
+// Functions/Methods for a two-step login system where signs into LinkedIn and then
+// Meteor using details from their LinkedIn profile
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
+
 
 function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beacons, ionicToast, $timeout ){
     
     $scope.DEV = $rootScope.DEV;
 
-    var appHash = "Txc9";
-    
-    $scope.loggingIn = false;
+    var appHash = "Txc9"; // Constant to help generate password  
+    $scope.loggingIn = false; // Dom flag for spinner that appears when returning from inAppBrowser login
 
+    // @function: Login
+    // Authenticates with LinkedIn, loads linkedin profile and passes to meteor login handlers. 
+    // Shows toast on authentication failure.
     $scope.login = function(){
 
       $scope.loggingIn = true;
@@ -31,7 +38,9 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
       });
     };
 
-    // DEVELOPMENT
+    // @function: devLogin
+    // DEVELOPMENT ONLY: Bypasses authentication call which cannot run in browser because cordova
+    // inAppBrowser is device/simulator only
     $scope.devLogin = function(){
       console.log('USING DEV LOGIN');
       LinkedIn.getMe().then(function(){
@@ -39,7 +48,9 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
       });
     };
 
-
+    // @function: meteorLogin 
+    // Generates user object stub, then checks Meteor to see if account exists. 
+    // Logs in w/password or creates based on result
     function meteorLogin(){
       console.log('defining user in meteorLogin')
       // User object
@@ -60,14 +71,11 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
         }
       };
 
-      console.log('going into hasRegistered');
       // Check registration
       Meteor.call('hasRegistered', user.username, function(err, registered ){
         
         if (!err){
         
-          console.log("ABOUT TO LOGIN WITH ACCOUNT: " + JSON.stringify(LinkedIn.me));
-
           (registered) ? loginWithAccount(user) : createAccount(user); 
         
         } else {
@@ -78,8 +86,11 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
       
     }
 
-    // REGISTERED: Login with password. Update our user w/current linkedIn profile
-    // Set beacon major - local storage sometimes gets wiped. Redirect to . . .
+    // @function: loginWithAccount
+    // Update our user w/current linkedIn profile
+    // Set pl_id in local storage to user email. This variable will be accessed by
+    // the beacon delegate and used to self-identify with server when woken up in the
+    // background.  Redirect to setup if app is a new install, nearby otherwise.
     function loginWithAccount(user){
       console.log('Logging in with account');
       Meteor.loginWithPassword(user.username, user.password, function(err){
@@ -96,9 +107,10 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
             } else {
               $state.go('tab.nearby');
             }
-            // Does this run?
+
+            // Delay turning spinner off - statechange sometimes takes a while because
+            // nearby route has tons to resolve
             $timeout(function(){
-              console.log('running after statechange');
               $scope.loggingIn = false;
             }, 3000);
           })
@@ -110,8 +122,12 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
       });
     };
 
-    // NEW ACCOUNTS: Get unique beacon major for this app instance, create user and save
-    // major there and in local storage. Redirect to nearby
+    // @function: createAccount
+    // Get next beacon major/minor for this app instance, create user and save
+    // email string composed of uuid, beacon major and minor there and in local storage.  
+    // Redirect to setup or kick back to login if there is an error. This could happen
+    // if for some reason two app simultaneously create accounts and generate the same email
+    // address. Email is guaranteed to be unique.
     function createAccount(user){
 
       Meteor.call( 'getUniqueAppId', function(err, val){ 
@@ -126,9 +142,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
 
           user.email = val.major + '_' + val.minor + '_' + user.profile.appId;
           
-          // DEBUGGING
-          console.log("CREATE ACCOUNT: CLIENT");
-          console.log(JSON.stringify(user));
+          console.log("creating account: " + user.email + ': ' + user.profile.profileUrl);
 
           Accounts.createUser(user, function(err){
             if (!err){
@@ -137,14 +151,11 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
               window.localStorage['pl_newInstall'] = 'true';
               $state.go('setup');
 
-              // Does this run?
               $timeout(function(){
-                console.log('running after statechange');
                 $scope.loggingIn = false;
               }, 3000);
               
             } else{
-              console.log('createUser Error: ' + JSON.stringify(err));
               $scope.loggingIn = false;
               ionicToast.show("Server overloaded (CreateUser) - try again", 'top', true, 2500);
             }

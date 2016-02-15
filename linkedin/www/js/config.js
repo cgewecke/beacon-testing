@@ -2,6 +2,8 @@ angular
   .module('linkedin')
   .run(run);
 
+// @function run 
+// This is where all platformReady code goes
 function run ($ionicPlatform, $rootScope, $auth, $state, Beacons ) {
 
   $ionicPlatform.ready(function() {

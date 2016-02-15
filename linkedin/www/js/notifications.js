@@ -1,3 +1,5 @@
+// @service: Notify
+// Handles push notification registry, and does internal notifications management
 angular.module('linkedin')
   .service("Notify", Notify);
 
@@ -6,8 +8,12 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	var self = this;
 	var error;
 
-	// Must go in after device ready && user logged in.
-	self.initialize = function(init){
+	// @function: initialize
+	// @return: promise
+	// Registers for push notifications when user is new or there has been a new app install.
+	// It seems like the tokens are somehow linked to that - possibly through the device settings or 
+	// something. Resolves in the nearby route.
+	self.initialize = function(){
 	
 		var deferred = $q.defer();
 
@@ -24,7 +30,6 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	 		console.log('Entering notify initialize');
 		    $cordovaPush.register(iosConfig).then(function(deviceToken) {
 		 
-		      console.log("deviceToken: " + deviceToken + 'newInstall: ' + window.localStorage['pl_newInstall']);
 		      Meteor.users.update({ _id: Meteor.userId() }, {$set: {'profile.pushToken' : deviceToken}});
 		      window.localStorage['pl_newInstall'] = 'false';
 		      deferred.resolve();
@@ -44,7 +49,9 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 
 	};
 
-	// sawProfile: param user is the user seen
+	// @function: sawProfile
+	// @param: userId (a meteor userId)
+	// Geolocates, generates a notification. 
 	self.sawProfile = function(userId){
 		
 		if (!LinkedIn.me) return;

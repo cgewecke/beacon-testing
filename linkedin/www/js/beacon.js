@@ -93,14 +93,15 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 
         self.initialized = true;
 
-        // Check authorization before resolving
+        // Check authorization before resolving. Remove newInstall key 
+        // from local storage so that a pw/login will redirect to the settings
+        // page.
         $cordovaBeacon.getAuthorizationStatus().then(
             function(status){
-                console.log('BEACON AUTH CHECK: ' + status);
                 deferred.resolve();
             }, function(error){
-                deferred.reject();
-                console.log('BEACON AUTH CHECK ERROR: ' + error);
+                window.localStorage.removeItem('pl_newInstall');
+                deferred.reject('AUTH_REQUIRED');
             }
         );
         

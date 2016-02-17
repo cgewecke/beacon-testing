@@ -157,7 +157,7 @@ function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
   
 };
 
-function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
+function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
   console.log('ionic loading start' );
 
@@ -165,7 +165,14 @@ function LoadingCtrl ($scope, $ionicPlatform, $ionicLoading, $state, $timeout ){
       $state.go('tab.nearby');
       //$state.go('setup');
   });
-  
+
+  $timeout(function(){
+    if (Meteor.status().status != 'connected'){
+      var message = "There's a problem connecting to the server. Try again later."
+      ionicToast.show(message, 'top', true, 2500);
+      $state.go('login');
+    }
+  }, 5000)
   
 };
 
@@ -229,23 +236,4 @@ function SettingsCtrl($scope, $state, GeoLocate, Notify, ionicToast) {
 
 };
 
-
-/*function ChatsCtrl ($scope, $reactive){
-  $reactive(this).attach($scope);
-  
-};
-
-
-function ChatDetailCtrl($scope, $stateParams, Chats) {
-  $scope.helpers({
-
-    chat: function () {
-      return Chats.findOne($stateParams.chatId);
-    },
-    messages: function () {
-      return Messages.find({ chatId: $stateParams.chatId });
-    }
-  
-  });
-};*/
 

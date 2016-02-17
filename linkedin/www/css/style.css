@@ -83,9 +83,9 @@ beacon-map.ipad{
     color: #444; 
 }
 
-.bar.vertical-center{
+.bar-center{
     margin-top: 10px !important;
-}
+}   
 
 .bar.bar-transparent{
     border-color: none;

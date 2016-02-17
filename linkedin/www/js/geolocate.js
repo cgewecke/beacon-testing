@@ -2,9 +2,8 @@ angular.module('linkedin')
   .service("GeoLocate", GeoLocate)
   .directive("beaconMap", BeaconMap);
 
-// TO DO -- MOVE loadMap, updateMap into geoLocate, 
-// Element
- function BeaconMap(GeoLocate, $rootScope){
+
+function BeaconMap(GeoLocate, $rootScope){
     return {
        restrict: 'E',   
        scope: {slide: '=slide'},

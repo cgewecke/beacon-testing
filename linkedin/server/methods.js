@@ -1,6 +1,5 @@
 Meteor.methods({
 
-
   //---------------- Logging/Debugging -------------------------
   ping(pkg){
 

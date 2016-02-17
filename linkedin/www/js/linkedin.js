@@ -28,8 +28,7 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
 
   // DEVELOPMENT
   if ($rootScope.DEV){
-    var authToken = "AQUhpB0zusNI_MMuDyGDG5RCrhQtyYiassagwNZW77FZxRSzd6pedNm9chjocw88Mqx9uDLzvLj7TalF9nmoUgv9KU_nC3BerAwWxJ7BUnWf0l2VpzW9yEjI37sjvPyUWI-4vAx8_k3uzyJvU9rxGa04iDbZfm8rawM0Zji3NoNChJmFzs0";
-    //var authToken = "AQUl56nBFIjZQ8Oaa0v6HP7L2i7jTxPYfex0zxzCURmUBAuxtA0e0GoUXwh4diqdWLoWEWqjgUdoSV-AoGUuMONt4r5tfkWwT8terrwGSt3FvHk7vHHSjn8Yg1wcH8plajefoPUn_RMRnlKnQvTppKy9z6UeIqK_959_1nzVSLss0BEPVuU";
+    var authToken = "AQVbu1wVMcgL6BeBXtX5vyjBq43jUDUdECcmNIWXbGP0j9qcH1BJZYgRvZ6eNrl6tvu6UTZr0hVgNznuHGM9LknLo9o-s3psKB0kA45XUMgiO8SrCwgAHVvRKquBNwLaJmjetNhy9R3aa3q_q0UyAoJVb1TXRMRax-mG7zwdj0kjJRZZ0_g";    //var authToken = "AQUl56nBFIjZQ8Oaa0v6HP7L2i7jTxPYfex0zxzCURmUBAuxtA0e0GoUXwh4diqdWLoWEWqjgUdoSV-AoGUuMONt4r5tfkWwT8terrwGSt3FvHk7vHHSjn8Yg1wcH8plajefoPUn_RMRnlKnQvTppKy9z6UeIqK_959_1nzVSLss0BEPVuU";
     ///var authToken = "AQWFvIL0cz5QjMQSF7HI7R1iVpd62p_-lsxPmv9pm4SfmJ-WH00GV4vaLExhWJsLN_HJio_b-fYYxFnzn1qRMZXeUMvX9XyryH3mGBsUX7Qdi_RnqHna-O5bVpxLbay9VjDLWwfteLU83i-oaRbq-nsj2Jzbr43nLsZ_k8EirlVYycpUJKQ"
   };
   

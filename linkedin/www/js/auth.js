@@ -10,8 +10,8 @@ angular
 function run ($rootScope, $state) {
 
 	$rootScope.$on('$stateChangeError', function (event, toState, toParams, fromState, fromParams, error) {
-		
-		console.log(error);
+		MSLog('@stateChangeError: ' + error);
+
 		if (error === 'AUTH_REQUIRED') {
 		  $state.go('login');
 		}

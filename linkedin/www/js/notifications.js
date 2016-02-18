@@ -22,12 +22,13 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 			deferred.resolve();
 
 		} else if (!Meteor.user().profile.pushToken || window.localStorage['pl_newInstall'] === 'true') {
+			MSLog('@Notify:initialize - attempting to register for APNS');
 
 			var iosConfig = {
 			    "sound": true,
 			    "alert": true,
 			};
-	 		console.log('Entering notify initialize');
+	 		
 		    $cordovaPush.register(iosConfig).then(function(deviceToken) {
 		 
 		      Meteor.users.update({ _id: Meteor.userId() }, {$set: {'profile.pushToken' : deviceToken}});
@@ -35,13 +36,12 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 		      deferred.resolve();
 
 		    }, function(err) {
-		       error = 'NOTIFICATIONS ERROR: registering for pushToken';
-		       console.log(error);
-		       console.log(err);
+		       MSLog('@Notify:initialize: failed push-notification register: ' + err);
 		       deferred.resolve();
 		    });
 		    
 		} else {
+			MSLog('@Notify:initialize - already registered for APNS');
 			deferred.resolve();
 		}
 
@@ -75,32 +75,21 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 				if (!err){
 					return result;
 				} else {
-					error = 'NOTIFICATIONS ERROR: calling meteor in "seeProfile"';
-					console.log(error);
+					MSLog('@Notify:sawProfile: failed');
 				}
 			});
 		});		
 	};
 
-	self.chatted = function(user){
-		Meteor.call('notify', user, function(err, result){
-			if (!err){
-				return result;
-			} else {
-				error = 'NOTIFICATIONS ERROR: calling meteor in "chatted"';
-				console.log(error);
-			}
-		});
-	};
-
+	// @function: checkedNotifications
+	// Toggles flag server side to disable badge in notifications tab 
 	self.checkedNotifications = function(){
 
 		Meteor.call('resetNotifyCounter', null, function(err, result){
 			if (!err){
 				return result;
 			} else {
-				error = 'NOTIFICATIONS ERROR: calling meteor in "checkedNotifications"';
-				console.log(error);
+				MSLog('@Notify:checkedNotifications: failed ');
 			}
 		});
 		return true;

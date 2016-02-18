@@ -17,23 +17,23 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
     // Authenticates with LinkedIn, loads linkedin profile and passes to meteor login handlers. 
     // Shows toast on authentication failure.
     $scope.login = function(){
-
+      MSLog('@login');
+      
       $scope.loggingIn = true;
       LinkedIn.authenticate().then(function(){
-        console.log('Authenticated');
+  
         LinkedIn.getMe().then(function(){
-          console.log('Calling meteor login');
           meteorLogin();
         },
         function(error){
           $scope.loggingIn = false;
-          console.log('Linkedin data api call bad: ' + error)
+          MSLog('Linkedin data api failed: ' + error)
         });
 
       }, function(error){
         $scope.loggingIn = false;
         ionicToast.show("Couldn't get your LinkedIn profile. Try again.", 'top', true, 2500);
-        console.log('Linkedin login call bad: ' + JSON.stringify(error));
+        MSLog('Linkedin login failed: ' + JSON.stringify(error));
 
       });
     };
@@ -42,7 +42,8 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
     // DEVELOPMENT ONLY: Bypasses authentication call which cannot run in browser because cordova
     // inAppBrowser is device/simulator only
     $scope.devLogin = function(){
-      console.log('USING DEV LOGIN');
+      MSLog('@devLogin');
+      
       LinkedIn.getMe().then(function(){
         meteorLogin();
       });
@@ -52,7 +53,8 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
     // Generates user object stub, then checks Meteor to see if account exists. 
     // Logs in w/password or creates based on result
     function meteorLogin(){
-      console.log('defining user in meteorLogin')
+      MSLog('@meteorLogin')
+      
       // User object
       var user = {
         username: LinkedIn.me.id,
@@ -80,7 +82,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
         
         } else {
           $scope.loggingIn = false;
-          console.log('Registration error');
+          MSLog('Registration error');
         }
       })            
       
@@ -92,7 +94,8 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
     // the beacon delegate and used to self-identify with server when woken up in the
     // background.  Redirect to setup if app is a new install, nearby otherwise.
     function loginWithAccount(user){
-      console.log('Logging in with account');
+      MSLog('@loginWithAccount');
+
       Meteor.loginWithPassword(user.username, user.password, function(err){
         if (!err){
           
@@ -142,7 +145,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
 
           user.email = val.major + '_' + val.minor + '_' + user.profile.appId;
           
-          console.log("creating account: " + user.email + ': ' + user.profile.profileUrl);
+          MSLog("new account: " + user.email + ': ' + user.profile.profileUrl);
 
           Accounts.createUser(user, function(err){
             if (!err){

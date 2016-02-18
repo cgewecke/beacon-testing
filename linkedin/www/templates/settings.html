@@ -6,11 +6,7 @@ Settings: iOS service permissions & information about enabling/disabling these. 
 .....
 -->
 <ion-view view-title="Settings">
-  <ion-nav-buttons server-status side="right"> 
-    <button class="button button-clear icon ion-ios-cloud-outline" ng-click="toast()" 
-            ng-class="{'button-assertive': !status, 'button-balanced': status}">
-    </button>
-  </ion-nav-buttons>
+  <server-status></server-status>
   <ion-content>
   	<div class="list">
       <!-- Location Services -->

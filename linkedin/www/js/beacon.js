@@ -48,7 +48,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         // Return if initialized. Also beacons cannot run in browser + output is annoying in XCode.
         if ($rootScope.DEV || $rootScope.beaconsOFF || self.initialized  ) { deferred.resolve(); return deferred; }
            
-        console.log('Initializing beacons');
+        MSLog('@beacons:initialize');
 
 		var profile, appBeacon;
 
@@ -86,20 +86,17 @@ function Beacons($rootScope, $q, $cordovaBeacon){
             parseInt(profile.minor),
             true
         );
-
-        console.log('Beacon region created: ' + JSON.stringify(appBeacon));
-
         $cordovaBeacon.startAdvertising(appBeacon);
-
-        self.initialized = true;
 
         // Check authorization before resolving. Remove newInstall key 
         // from local storage so that a pw/login will redirect to the settings
         // page.
         $cordovaBeacon.getAuthorizationStatus().then(
             function(status){
+                self.initialized = true;
                 deferred.resolve();
             }, function(error){
+                self.initialized = false;
                 window.localStorage.removeItem('pl_newInstall');
                 deferred.reject('AUTH_REQUIRED');
             }
@@ -121,9 +118,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
     // basically useless.
     function onEntry(result){
    
-        // DEV
-        result.message = "ENTERING";
-        Meteor.call('ping', result, function(err, connections){});
+       MSLog('@beacons:onEntry');
     };
 
     // @function: onExit
@@ -133,9 +128,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
     // has the uuid specified by 'result'.   
     function onExit(result){
 
-        // DEV
-        result.message = "EXITING";
-        Meteor.call('ping', result, function(err, connections){});
+        MSLog('@beacons:onExit');
 
         var transmitter, pkg, beacon;
         var localId = window.localStorage['pl_id']
@@ -152,12 +145,12 @@ function Beacons($rootScope, $q, $cordovaBeacon){
             
             Meteor.call('disconnect', pkg, function(err, success){
                 (err) ? 
-                    console.log(JSON.stringify(err)) : 
-                    console.log(JSON.stringify(success)); 
+                    MSLog(JSON.stringify(err)) : 
+                    MSLog(JSON.stringify(success)); 
             });
 
         } else {
-            console.log("Error: receiver - " + receiver);
+            MSLog("@beacon:disconnect. Error: receiver - " + receiver);
         }
         
         
@@ -173,6 +166,8 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 
         if (beacons.length){
 
+            MSLog('@beacons:onCapture');
+            
             var localId = window.localStorage['pl_id'];
             var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();            
             var transmitter, pkg;
@@ -188,8 +183,6 @@ function Beacons($rootScope, $q, $cordovaBeacon){
                 Meteor.call('newConnection', pkg, function(err, result){});
                 
             })
-        } else {
-            //console.log("Error: capture - " + receiver + " beacons: " + beacons.length);
         }
     };
 

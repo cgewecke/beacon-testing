@@ -1,9 +1,11 @@
 Meteor.methods({
 
   //---------------- Logging/Debugging -------------------------
-  ping(pkg){
-
-    console.log('Got pinged: ' + JSON.stringify(pkg));
+  ping(message){
+    var user = Meteor.user();
+    (user) ?
+      console.log(user.username + ': ' + message) :
+      console.log(message);
   }, 
 
   pushTest(){
@@ -135,8 +137,9 @@ Meteor.methods({
           {receiver: receiver._id}
         
         ]}, function(err){
-          console.log(JSON.stringify(err));
-          return err;
+            (err) ? 
+              console.log('Removal error: ' + JSON.stringify(err)) :
+              false;
         });
        console.log('Successful removal');
        return 'Success';
@@ -150,7 +153,6 @@ Meteor.methods({
 
   hasRegistered(name){
     check(name, String);
-    console.log('ENTERING HAS hasRegistered');
     var user = Meteor.users.find({username: name});
     if (user.count()) 
       return true;

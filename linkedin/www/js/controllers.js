@@ -60,7 +60,7 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
   self.geolocate = GeoLocate;
 
   if (!subscription){
-    console.log('Subscription failed in NearbyCtrl');
+    MSLog('Subscription failed in NearbyCtrl');
   }
 
   self.helpers({
@@ -71,8 +71,6 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
 
   this.maps = function(slide){
     if (slide === self.mapSlide){
-      console.log('maps!')
-
     }
   };
 
@@ -113,6 +111,8 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
   // Add to native contacts button
   this.createContact = function(){
     
+    MSLog('@NearbyProfileCtrl:createContact');
+
     var contact ={
       "displayName": this.user.name,
       "emails": (this.user.emailAddress) ? 
@@ -127,7 +127,6 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
       "birthday": Date('5/5/1973')
     };
     
-    console.log('createContact: ' + JSON.stringify(contact));
     $scope.flasher = true;
     $cordovaContacts.save(contact).then(function(result) {
         
@@ -139,10 +138,9 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
             
         }, 1000)
 
-        console.log(JSON.stringify(result));
     }, function(error) {
         $scope.flasher = false;
-        console.log(error);
+        MSLog('@NearbyProfileCtrl:createContact: failed: ' + error);
     });    
   }
 };
@@ -159,20 +157,21 @@ function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
 
 function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
-  console.log('ionic loading start' );
-
   $ionicPlatform.ready(function(){
       $state.go('tab.nearby');
-      //$state.go('setup');
+
+      $timeout(function(){
+        var message;
+
+        if (Meteor.status().status != 'connected'){
+          message = "There's a problem connecting to the server. Try again later."
+          ionicToast.show(message, 'top', true, 2500);
+          $state.go('login');
+        }
+      }, 5000)
   });
 
-  $timeout(function(){
-    if (Meteor.status().status != 'connected'){
-      var message = "There's a problem connecting to the server. Try again later."
-      ionicToast.show(message, 'top', true, 2500);
-      $state.go('login');
-    }
-  }, 5000)
+  
   
 };
 
@@ -218,8 +217,6 @@ function SettingsCtrl($scope, $state, GeoLocate, Notify, ionicToast) {
 
   // Test meteor method: newConnection() by adding self to connections
   this.testPub = function(){
-
-    Meteor.call('ping', Meteor.user().emails[0].address, function(err, connections){});
 
     var pkg = {
       transmitter: Meteor.user().emails[0].address,

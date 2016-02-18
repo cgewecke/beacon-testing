@@ -60,15 +60,15 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
           self.setAuthToken(Meteor.user().profile.authToken);
           self.getMe().then(function(success){
 
-            console.log('autologged in');
+            MSLog('@LinkedIn:initialize: autologged in');
             d.resolve(true);
           }, function(error){
-            console.log('couldnt get profile')
+            MSLog('@LinkedIn:initialize. Failed: couldnt get profile')
             d.reject('AUTH_REQUIRED');
           }); 
         }, 
         function(userLoggedOut){
-          console.log('requireUser error: ' + userLoggedOut);
+          MSLog('@LinkedIn:initialize: Failed: requireUser: ' + userLoggedOut);
           d.reject('AUTH_REQUIRED');
         }
       );
@@ -91,7 +91,7 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
       $cordovaOauth.linkedin(id, sec, perm, state, {redirect_uri: "http://cyclop.se/help"}).then(
       function(result) {
      		  authToken = result.access_token;
-          console.log('authToken = ' + authToken);
+          MSLog('@LinkedIn:authenticate: authToken = ' + authToken);
       		deferred.resolve();
 
     	}, function(error) {
@@ -116,7 +116,6 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
       	 self.me = result;
       	 self.me.name = result.firstName + " " + result.lastName;
          self.me.authToken = authToken;
-         console.log("Checking obj in getME: " + JSON.stringify(self.me));
       	 deferred.resolve(self.me);
       })
       .error(function(error){

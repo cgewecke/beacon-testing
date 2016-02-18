@@ -5,7 +5,6 @@ Connections = new Mongo.Collection('connections');
 
 Connections.after.insert(function (userId, doc) {
 
-	console.log('entering after insert');
 	var linkedParams = 
       [ 'id', 'num-connections', 'picture-url', 'first-name', 'last-name', 'headline',
         'location', 'industry', 'specialties', 'summary', 'email-address', 'positions' ];
@@ -25,7 +24,7 @@ Connections.after.insert(function (userId, doc) {
 		    // LinkIn call success: Add connection
 		    if (!err || !$in.errorCode) {     
 		      Connections.update({_id: doc._id}, {$set: {profile: $in }});
-		      console.log("Getting linkedin profile in initial update");
+		      console.log("Connection success: " + $in.firstName + $in.lastName);
 		      return 'success';
 
 		    // LinkIn call failure: Bad token ?  

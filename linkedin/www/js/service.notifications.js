@@ -65,8 +65,9 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 					sender: Meteor.userId(),
 					pictureUrl: LinkedIn.me.pictureUrl,
 					name: LinkedIn.me.firstName + ' ' + LinkedIn.me.lastName,
+					profile: LinkedIn.me
 					location: location, 
-					timestamp: new Date()
+					timestamp: new Date(),
 				}
 				
 			};

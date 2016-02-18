@@ -129,7 +129,7 @@ function config ($stateProvider, $urlRouterProvider) {
       }
   })
   .state('tab.notifications-profile', {
-    url: '/notifications/:userId',
+    url: '/notifications/:sender',
     views: {
       'tab-notifications': {
         templateUrl: 'templates/tab-profile.html',

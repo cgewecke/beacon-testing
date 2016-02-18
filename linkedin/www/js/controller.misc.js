@@ -80,14 +80,36 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
 
 };
 
-// STUB . . .
-function NotificationsProfileCtrl ($scope, $reactive, $stateParams){
-  $reactive(this).attach($scope);
+// @controller: NotificationsProfileCtrl
+// @params: $scope, $stateParams
+// 
+// This view is a child of notifications: tab/notifications/:sender
+// Controller iterates through current user's array of notifications to 
+// locate one with correct :sender and populates the default profile
+// template with that note's profile info
+function NotificationsProfileCtrl ($scope, $stateParams){
+  
+  var self = this;
+  var notes = Meteor.user().profile.notifications;
+
+
+  self.user = null; // This is the note sender;
+
+  if (notes){
+    for(var i = 0; i < notes.length; i++){
+      if (notes[i].sender === $stateParams.sender){
+        self.user = notes[i].profile; 
+        self.user.name = this.user.firstName + ' ' + this.user.lastName;
+        self.viewTitle = this.user.name;
+        break;
+      }
+    }
+  };
 
 }
   
   
-function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $cordovaContacts, $timeout, LinkedIn){
+function NearbyProfileCtrl ($scope, $reactive, $stateParams, $cordovaContacts, $timeout, LinkedIn){
   
   $reactive(this).attach($scope);
 
@@ -106,10 +128,10 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
   this.user = this.connection.profile;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = this.user.name;
-  this.currentUser = Meteor.user().username;
+  
 
   // Add to native contacts button
-  this.createContact = function(){
+  /*this.createContact = function(){
     
     MSLog('@NearbyProfileCtrl:createContact');
 
@@ -142,7 +164,7 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $ionicPlatform, $co
         $scope.flasher = false;
         MSLog('@NearbyProfileCtrl:createContact: failed: ' + error);
     });    
-  }
+  }*/
 };
 
 function ProfileCtrl ($scope, $reactive, $state, LinkedIn){

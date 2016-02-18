@@ -23,18 +23,6 @@ Meteor.methods({
 
     var target, note;
 
-    check(info, {
-      target: String,
-      notification: {
-        type: String,
-        sender: String,
-        pictureUrl: String,
-        name: String,
-        location: String,
-        timestamp: Date
-      }
-    });
-
     // Device Notify
     Meteor.users.update({_id: info.target},{
       $inc: {'profile.notifyCount': 1 },
@@ -66,12 +54,11 @@ Meteor.methods({
   },
 
   // @function: addContact
-  // @param: _id (Meteor user id)
-  // Ticks a boolean so that add contact button can be hidden in the client
-  // when that connection has already been added
+  // @param: id (LinkedIn id of added contact)
+  // Adds LinkedIn id to an array representing contacts added by this user;
   addContact(id){
     check(id, String);
-    Connections.update(id, {$set: {contactAdded: true}});
+    Meteor.users.update({_id: Meteor.userId()}, {$push: {'profile.contacts': id}});
   },
 
   //---------------- Connections -------------------------

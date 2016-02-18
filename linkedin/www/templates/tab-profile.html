@@ -37,7 +37,9 @@
       
     </div>
   </ion-content>
-  <ion-footer-bar align-title="left" class="bar-energized" ng-class="{'profile-footer': exit}" ng-show="!vm.connection.contactAdded && !(vm.user.id === vm.currentUser)">
+  <add-contact model="vm.contactModel" user="vm.user"></add-contact>
+
+  <!--<ion-footer-bar align-title="left" class="bar-energized" ng-class="{'profile-footer': exit}" ng-show="!vm.connection.contactAdded && !(vm.user.id === vm.currentUser)">
   <h1 class="title" >
     <span ng-show="!flasher"> Add {{vm.user.firstName}} to contacts</span>
     <span class="profile-add-contact" ng-show="flasher">Added {{vm.user.firstName}} </span>
@@ -46,5 +48,5 @@
     <button class="button button-clear button-light icon ion-ios-plus-outline" ng-click="vm.createContact()">
     </button>
   </div>
-</ion-footer-bar>
+</ion-footer-bar> -->
 </ion-view>

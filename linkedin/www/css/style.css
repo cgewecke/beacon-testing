@@ -1,5 +1,5 @@
 /* Empty. Add your own CSS if you like */
-.profile-add-contact.ng-hide-remove {
+.profile-add-contact {
 	opacity: 8;
     -webkit-animation: flash 1s;
     animation: flash 1s;
@@ -10,6 +10,9 @@
     animation: slideOutDown 300ms;
 }
 
+.directive-footer{
+    bottom: 49px !important;
+}
 .item-chat.new-item.ng-enter {
     -webkit-animation: slideInLeft 500ms;
     animation: slideInLeft 500ms;

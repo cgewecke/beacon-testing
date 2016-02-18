@@ -4,15 +4,15 @@
     <ion-list>
       <ion-item ng-repeat="note in vm.notifications | orderBy:'-timestamp'"
                 class="item-chat item-avatar item-icon-right"
-                type="item-text-wrap">
-                <!-- href="#/tab/notifications/{{note.sender}}"> -->
+                type="item-text-wrap"
+                href="#/tab/notifications/{{note.sender}}"> 
         <img ng-src="{{note.pictureUrl}}">
         <h2>{{note.name}}</h2>
         <p> <span> Checked your profile </span> 
             <span class="last-message-timestamp">{{note.timestamp | timeFilter}}</span>
         </p>
         <p> <span class="last-message-timestamp">{{note.location}}</span> </p>
-        <!-- <i class="icon ion-chevron-right icon-accessory"></i> -->
+        <i class="icon ion-chevron-right icon-accessory"></i> 
       </ion-item>
 
       <!-- No Notifications --> 

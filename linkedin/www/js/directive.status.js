@@ -1,5 +1,4 @@
 angular.module('linkedin')
-  //.service("GeoLocate", GeoLocate)
   .directive("serverStatus", ServerStatus);
 
 

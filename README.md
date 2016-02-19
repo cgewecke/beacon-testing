@@ -1,18 +1,19 @@
 # beacon-testing
 
-Tests: 
+#Tests: 
 
 ```
 % gulp test
 ```
 
-Build:
+#Build:
 
 ```
 % ionic build ios
 ```
 
-Deploy server to Heroku: 
+#Deploy server to Heroku 
+
 1. Trash old visible files in beacon-production/server
 2. copy over current ones from beacon-testing/linkedin/server
 3. Then . . .
@@ -23,7 +24,7 @@ Deploy server to Heroku:
 % git push heroku master
 ```
 
-Deploy to TestFlight
+#Deploy to TestFlight
 
 1. Make sure www/lib/meteor-client-side/meteor-runtime-config.js is set to Production address
 2. Make sure flags in config.platform are set to production values

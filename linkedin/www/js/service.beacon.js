@@ -165,9 +165,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         var beacons = result.beacons
 
         if (beacons.length){
-
-            MSLog('@beacons:onCapture');
-            
+    
             var localId = window.localStorage['pl_id'];
             var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();            
             var transmitter, pkg;

@@ -98,8 +98,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 		// Get current pos
 		$cordovaGeolocation.getCurrentPosition(posOptions)
 		    .then(function (position) {
-		    	MSLog("GeoLocate:getCurrentPosition " + JSON.stringify(position));
-
+		    	
 		    	self.enabled = true;
 		    	// Check coords exist
 		    	if (position.coords){

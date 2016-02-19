@@ -1,5 +1,6 @@
 var log_test;
-
+// controller.misc.js
+// These are little controllers for various routes/views. See config.routes.js
 angular.module('linkedin')
   
   .controller('NearbyCtrl', NearbyCtrl)
@@ -12,6 +13,12 @@ angular.module('linkedin')
   .controller('TabsCtrl', TabsCtrl)
   .controller('SetupCtrl', SetupCtrl);
 
+
+// @controller TabsCtrl
+// @params: $scope, $reactive
+//
+// Exposes user profile var 'notifyCount' (the number of unchecked notifications)
+// to the DOM to determine badge display over tab icon
 function TabsCtrl ($scope, $reactive ){
   $reactive(this).attach($scope);
 
@@ -22,6 +29,11 @@ function TabsCtrl ($scope, $reactive ){
     });  
 };
 
+// @controller SetupCtrl
+// @params: $scope, $state
+//
+// Functions to toggle state change when user approves requests for permission to use
+// iBeacon and APNS on new account creation and new installs
 function SetupCtrl ($scope, $state ){
   this.ready = false;
 
@@ -36,7 +48,12 @@ function SetupCtrl ($scope, $state ){
 
 };
 
-function NotificationsCtrl ($scope, $reactive, Notify ){
+// @controller NotificationsCtrl
+// @params: $scope, $reactive
+//
+// Exposes array of notifications in user.profile to DOM for
+// tab-notifications view
+function NotificationsCtrl ($scope, $reactive ){
   $reactive(this).attach($scope);
   
   this.helpers({
@@ -47,17 +64,26 @@ function NotificationsCtrl ($scope, $reactive, Notify ){
  
 };
 
-
-function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscription ){
+// @controller NearbyCtrl
+// @params: $scope, $reactive
+//
+// Exposes Meteor mongo 'connections' to DOM, filtered against current user as 'transmitter'
+// Subscription to 'connections' is handled in the route resolve and checked here. Also
+// exposes GeoLocate service (for the maps view) and Notify service (to trigger notification when user
+// clicks on list item to see profile)
+function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription ){
   $reactive(this).attach($scope);
   
   var self = this;
 
-  // Slides
+  // Slide constants
   self.listSlide = 0
   self.mapSlide = 1;
   self.slide = 0; 
+
+  // Services
   self.geolocate = GeoLocate;
+  self.notify = Notify;
 
   if (!subscription){
     MSLog('Subscription failed in NearbyCtrl');
@@ -69,15 +95,6 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
       }
   });
 
-  this.maps = function(slide){
-    if (slide === self.mapSlide){
-    }
-  };
-
-  this.notify = function(user){
-    Notify.sawProfile(user.receiver);
-  }
-
 };
 
 // @controller: NotificationsProfileCtrl
@@ -86,14 +103,14 @@ function NearbyCtrl ($scope, $reactive, LinkedIn, Notify, GeoLocate, subscriptio
 // This view is a child of notifications: tab/notifications/:sender
 // Controller iterates through current user's array of notifications to 
 // locate one with correct :sender and populates the default profile
-// template with that note's profile info
+// template with relevant info. This view is cached per unique $stateParams 
+// Meteor.userId
 function NotificationsProfileCtrl ($scope, $stateParams){
   
   var self = this;
   var notes = Meteor.user().profile.notifications;
 
-
-  self.user = null; // This is the note sender;
+  self.user = null; // The note sender's profile;
 
   if (notes){
     for(var i = 0; i < notes.length; i++){
@@ -107,7 +124,6 @@ function NotificationsProfileCtrl ($scope, $stateParams){
   };
 
 }
-  
   
 function NearbyProfileCtrl ($scope, $reactive, $stateParams, $cordovaContacts, $timeout, LinkedIn){
   
@@ -129,45 +145,9 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $cordovaContacts, $
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = this.user.name;
   
-
-  // Add to native contacts button
-  /*this.createContact = function(){
-    
-    MSLog('@NearbyProfileCtrl:createContact');
-
-    var contact ={
-      "displayName": this.user.name,
-      "emails": (this.user.emailAddress) ? 
-        [{ "value": this.user.emailAddress, 
-           "type": "business" }] : null,
-      "organizations": (this.user.positions) ?
-        [{"type": "Company", 
-          "name": this.user.positions.values[0].company.name,
-          "title": this.user.positions.values[0].title 
-        }] : null,
-      "photos": [{"value": this.user.pictureUrl}],
-      "birthday": Date('5/5/1973')
-    };
-    
-    $scope.flasher = true;
-    $cordovaContacts.save(contact).then(function(result) {
-        
-        $timeout(function(){
-        
-            $scope.exit = true;
-            Meteor.call('addContact', self.connection._id); 
-            self.connection.contactAdded = true;
-            
-        }, 1000)
-
-    }, function(error) {
-        $scope.flasher = false;
-        MSLog('@NearbyProfileCtrl:createContact: failed: ' + error);
-    });    
-  }*/
 };
 
-function ProfileCtrl ($scope, $reactive, $state, LinkedIn){
+function ProfileCtrl ($scope, $reactive, LinkedIn){
   $reactive(this).attach($scope);
     
   this.user = LinkedIn.me;

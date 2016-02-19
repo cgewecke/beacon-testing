@@ -1,3 +1,11 @@
+<!-- 
+  loading: 
+  @controller: LoadingCtrl  
+  @state: 'loading'
+  App opens on this page and waits here until ionicPlatform.ready() to redirect to /login
+  or /nearby depending on current auth status. If no meteor server connection, app will
+  redirect to /login with warning toast
+-->
 <ion-view title="PSYCHIC LINK" hide-back-button="true" can-swipe-back="false">
     <ion-content scroll="false">
 		<section class="authenticate-container">

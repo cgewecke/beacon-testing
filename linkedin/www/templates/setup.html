@@ -1,8 +1,21 @@
+<!--
+  Setup:
+  @controller: SetupCtrl as vm
+  @route: '/setup'
+  View shown to new accounts/installs post-login, notifying them of the hardware permissions
+  the app will ask for, and asking them to accept or cancel. This informational view is
+  designed to smooth the process of getting everything app needs from phone. Debatable if it
+  succeeds
+-->
 <ion-view title="You're new!" hide-back-button="true" can-swipe-back="false">
+
+    <!-- A list of the permissions the app is about to ask for -->
     <ion-content ng-show="!vm.ready">   
         <div class="item item-energized item-text-wrap">
           <div class="settings-info">
-            <p> <span class="light"><b> We're about to ask your phone to use the services listed below. (It will ask you if that's ok.) </b> </span> 
+            <p> <span class="light">
+                  <b> We're about to ask your phone to use the services listed below. (It will ask you if that's ok.) </b> 
+                </span> 
                 <span class="light"> You can turn these on and off later from the app's settings menu. </span> 
             </p>
           </div>
@@ -32,6 +45,8 @@
       </div>  
       </div>   
     </ion-content>
+
+    <!-- Accept/Reject buttons -->
     <ion-footer-bar class="bar-stable" >
       <span class="col col-10"></span>
       <span class="button-bar">
@@ -47,6 +62,7 @@
       <span class="col col-10"></span> 
     </ion-footer-bar>
 
+    <!-- Permissions cover (Disabled) -->
     <section class="authenticate-container" ng-show="vm.ready">
       <div class="col spacer"></div>
       <div class="col button-row text-center"> 

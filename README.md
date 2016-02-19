@@ -14,9 +14,10 @@
 
 #Deploy server to Heroku 
 
-1. Trash old visible files in beacon-production/server
-2. copy over current ones from beacon-testing/linkedin/server
-3. Then . . .
+1. In beacon-production/server: % mv .git ..
+2. Trash server
+3. Copy new server to beacon-production/ from beacon-testing/linkedin/server
+4. % mv .git server
 
 ```
 % git add -A

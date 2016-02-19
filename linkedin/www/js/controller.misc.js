@@ -14,8 +14,9 @@ angular.module('linkedin')
   .controller('SetupCtrl', SetupCtrl);
 
 
-// @controller TabsCtrl
+// @controller: TabsCtrl
 // @params: $scope, $reactive
+// @route: /tab
 //
 // Exposes user profile var 'notifyCount' (the number of unchecked notifications)
 // to the DOM to determine badge display over tab icon
@@ -29,8 +30,9 @@ function TabsCtrl ($scope, $reactive ){
     });  
 };
 
-// @controller SetupCtrl
+// @controller: SetupCtrl
 // @params: $scope, $state
+// @route: /setup
 //
 // Functions to toggle state change when user approves requests for permission to use
 // iBeacon and APNS on new account creation and new installs
@@ -48,8 +50,9 @@ function SetupCtrl ($scope, $state ){
 
 };
 
-// @controller NotificationsCtrl
+// @controller: NotificationsCtrl
 // @params: $scope, $reactive
+// @route: /tab/notifications
 //
 // Exposes array of notifications in user.profile to DOM for
 // tab-notifications view
@@ -66,6 +69,7 @@ function NotificationsCtrl ($scope, $reactive ){
 
 // @controller NearbyCtrl
 // @params: $scope, $reactive
+// @route: /tab/nearby
 //
 // Exposes Meteor mongo 'connections' to DOM, filtered against current user as 'transmitter'
 // Subscription to 'connections' is handled in the route resolve and checked here. Also
@@ -76,7 +80,9 @@ function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription ){
   
   var self = this;
 
-  // Slide constants
+  // Slide constants bound to the GeoLocate directive
+  // and other DOM events, trigger updates based on 
+  // whether we are looking at List || Map view. 
   self.listSlide = 0
   self.mapSlide = 1;
   self.slide = 0; 
@@ -99,11 +105,12 @@ function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription ){
 
 // @controller: NotificationsProfileCtrl
 // @params: $scope, $stateParams
-// 
-// This view is a child of notifications: tab/notifications/:sender
-// Controller iterates through current user's array of notifications to 
-// locate one with correct :sender and populates the default profile
-// template with relevant info. This view is cached per unique $stateParams 
+// @route: /tab/notifications/:sender
+//
+// For child view of notifications which shows profile of tapped notification 
+// Iterates through current user's array of notifications to 
+// locate correct :sender and populates the default profile
+// template with relevant info. Is cached per unique $stateParams 
 // Meteor.userId
 function NotificationsProfileCtrl ($scope, $stateParams){
   
@@ -124,7 +131,14 @@ function NotificationsProfileCtrl ($scope, $stateParams){
   };
 
 }
-  
+
+// @controller: NearbyProfileCtrl
+// @params: $scope, $stateParams
+// @route: /tab/nearby/:sender
+//
+// For child view of nearby which shows profile of tapped nearby list item. 
+// Locates/caches profile object stored as part of Meteor mongo connections record
+// and and populates the default profile template with relevant info. 
 function NearbyProfileCtrl ($scope, $reactive, $stateParams, $cordovaContacts, $timeout, LinkedIn){
   
   $reactive(this).attach($scope);
@@ -147,16 +161,29 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, $cordovaContacts, $
   
 };
 
-function ProfileCtrl ($scope, $reactive, LinkedIn){
+// @controller: NearbyProfileCtrl
+// @params: $scope, LinkedIn
+// @route: /tab/profile
+//
+// Exposes LinkedIn.me profile object to default profile template
+function ProfileCtrl ($scope, LinkedIn){
   $reactive(this).attach($scope);
     
   this.user = LinkedIn.me;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
   this.viewTitle = "You";
-  this.currentUser = Meteor.user().username;
   
 };
 
+// @controller: LoadingCtrl
+// @params: $ionicPlatform, $state, $timeout, ionicToast
+// @route: /loading
+//
+// Controller for the default/otherwise route. Waits for platform ready,
+// then attempts to navigate to the 'nearby' tab, which will kick back
+// to 'login' if there is a problem. Run 5s timeout to redirect to login with
+// a warning toast if there's no Meteor server connection, because that causes the 
+// nearby resolves to hang.
 function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
   $ionicPlatform.ready(function(){
@@ -172,11 +199,14 @@ function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
         }
       }, 5000)
   });
-
-  
-  
 };
 
+// @controller: SettingsCtrl
+// @params: $scope, $state, GeoLocate, Notify, ionicToast
+// @route: /settings
+//
+// Attempts to display current app permissions. Currently used for some useful
+// developer testing functions, like clearing notifications etc. 
 function SettingsCtrl($scope, $state, GeoLocate, Notify, ionicToast) {
 
   var message = "Go to Settings > LinkedIn in your device's settings menu to change this."

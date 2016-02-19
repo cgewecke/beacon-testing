@@ -39,13 +39,13 @@ function LinkedIn($rootScope, $http, $q, $auth, $cordovaOauth, $ionicPlatform, B
 	
 	// @function: setAuthToken: 
   // @param: token
-  // Convenience methods to set authToken when app is already authenticated from previous use.
+  // Convenience method to set authToken when app is already authenticated from previous use.
 	self.setAuthToken = function(token){
 		authToken = token;
 	}
 
   // @function: initialize
-  // Invoked in the routing resolve at app start - if user autologs into Meteor,
+  // Invoked in the routing resolve at tab/nearby - if user autologs into Meteor,
   // we still need to fetch a fresh linkedin profile for them. Only initializes
   // if self.me doesn't exist yet.
   self.initialize = function(){

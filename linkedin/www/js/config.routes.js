@@ -41,7 +41,7 @@ function config ($stateProvider, $urlRouterProvider) {
 
   })
 
-  
+
   .state('tab.nearby', {
       url: '/nearby',
       views: {

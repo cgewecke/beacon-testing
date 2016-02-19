@@ -1,3 +1,10 @@
+<!--
+  tab.profile:
+  @controllers: NearbyProfileCtrl, NotificationsProfileCtrl, ProfileCtrl. (All as vm)
+  @url: '/nearby/:userId', /notifications/:sender, 'profile' 
+  Generates a LinkedIn profile view from fields in object vm.user.
+  Shows an addContact footer (see directive.contact.js) 
+-->
 <ion-view view-title="{{vm.viewTitle}}">
   <ion-content class="profile-content">
     <div class="list card">
@@ -37,16 +44,5 @@
       
     </div>
   </ion-content>
-  <add-contact model="vm.contactModel" user="vm.user"></add-contact>
-
-  <!--<ion-footer-bar align-title="left" class="bar-energized" ng-class="{'profile-footer': exit}" ng-show="!vm.connection.contactAdded && !(vm.user.id === vm.currentUser)">
-  <h1 class="title" >
-    <span ng-show="!flasher"> Add {{vm.user.firstName}} to contacts</span>
-    <span class="profile-add-contact" ng-show="flasher">Added {{vm.user.firstName}} </span>
-  </h1>
-  <div class="buttons">
-    <button class="button button-clear button-light icon ion-ios-plus-outline" ng-click="vm.createContact()">
-    </button>
-  </div>
-</ion-footer-bar> -->
+  <add-contact user="vm.user"></add-contact>
 </ion-view>

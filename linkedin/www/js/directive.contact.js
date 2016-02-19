@@ -1,10 +1,8 @@
 angular.module('linkedin')
   .directive("addContact", AddContact);
 
-//@directive: add-contact
-//@params: 
-//  model: the item in collection or array that will be marked as having been added
-//  contact: the profile object of the user to be added
+//@directive: <add-contact user='someUserProfile'></add-contact
+//@params: user (the profile object of the user to be added)
 function AddContact($cordovaContacts, $timeout, $auth){
     return {
        restrict: 'E',   
@@ -25,10 +23,13 @@ function AddContact($cordovaContacts, $timeout, $auth){
 
        link: function(scope, elem, attrs){
 
-          scope.currentUserId = Meteor.user().username;
-          scope.contactAdded = hasContact();
-          scope.flasher = false;
+          scope.currentUserId = Meteor.user().username; // user.username === LinkedIn profile 'id'
+          scope.contactAdded = hasContact(); // Boolean determines visibility of this directive
+          scope.flasher = false; // DOM message flag
 
+          // @function: hasContact
+          // @return: boolean
+          // Determines if currentUser has already added this profile. 
           function hasContact(){
             if (!Meteor.user()) return false;
 
@@ -41,7 +42,9 @@ function AddContact($cordovaContacts, $timeout, $auth){
             return false;
           }; 
     
-       		// Add to native contacts button
+       		// @function: createContact
+          // Add contact to native layer, calls meteor to push this contact id
+          // onto the users list of added contacts
           scope.createContact = function(){
             
             MSLog('@NearbyProfileCtrl:createContact');

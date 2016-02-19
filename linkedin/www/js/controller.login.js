@@ -1,7 +1,8 @@
 // @controller: LoginCtrl
+// @route: /login
 //
-// Functions/Methods for a two-step login system where signs into LinkedIn and then
-// Meteor using details from their LinkedIn profile
+// Functions/Methods for a two-step login process which signs into LinkedIn and then
+// Meteor using details from a LinkedIn profile
 angular.module('linkedin')
   .controller("LoginCtrl", LoginCtrl);
 

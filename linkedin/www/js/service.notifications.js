@@ -9,7 +9,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	var error;
 
 	// @function: initialize
-	// @return: promise
+	// @return: promise - (failures resolve, print to console)
 	// Registers for push notifications when user is new or there has been a new app install.
 	// It seems like the tokens are somehow linked to that - possibly through the device settings or 
 	// something. Resolves in the nearby route.

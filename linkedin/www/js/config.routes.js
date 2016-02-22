@@ -65,7 +65,7 @@ function config ($stateProvider, $urlRouterProvider) {
         beaconInit: ['Beacons', 'pushInit', function(Beacons, pushInit){
             return Beacons.initialize();
         }],
-        subscription: ['$q', 'beaconInit', function ($q, beaconInit) {
+        subscription: ['$q', 'beaconInit', function($q, beaconInit) {
             var deferred = $q.defer();
      
             var sub = Meteor.subscribe('connections', {

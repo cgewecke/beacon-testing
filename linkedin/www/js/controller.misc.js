@@ -77,7 +77,7 @@ function NotificationsCtrl ($scope, $reactive, Meteor ){
 // Subscription to 'connections' is handled in the route resolve and checked here. Also
 // exposes GeoLocate service (for the maps view) and Notify service (to trigger notification when user
 // clicks on list item to see profile)
-function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription ){
+function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription, Connections ){
   $reactive(this).attach($scope);
   
   var self = this;
@@ -112,9 +112,8 @@ function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription ){
 // For child view of notifications which shows profile of tapped notification 
 // Iterates through current user's array of notifications to 
 // locate correct :sender and populates the default profile
-// template with relevant info. Is cached per unique $stateParams 
-// Meteor.userId
-function NotificationsProfileCtrl ($scope, $stateParams){
+// template. Is cached per unique $stateParams Meteor.userId
+function NotificationsProfileCtrl ($scope, $stateParams, Meteor){
   
   var self = this;
   var notes = Meteor.user().profile.notifications;
@@ -136,19 +135,19 @@ function NotificationsProfileCtrl ($scope, $stateParams){
 
 // @controller: NearbyProfileCtrl
 // @params: $scope, $stateParams
-// @route: /tab/nearby/:sender
+// @route: /tab/nearby/:userId
 //
 // For child view of nearby which shows profile of tapped nearby list item. 
 // Locates/caches profile object stored as part of Meteor mongo connections record
-// and and populates the default profile template with relevant info. 
-function NearbyProfileCtrl ($scope, $reactive, $stateParams, $cordovaContacts, $timeout, LinkedIn){
+// and populates the default profile template. 
+function NearbyProfileCtrl ($scope, $reactive, $stateParams, Connections){
   
   $reactive(this).attach($scope);
 
   var self = this;
   
   // DB: Connections, get profile
-  this.subscribe('connections');
+  //this.subscribe('connections');
 
   this.helpers({
     connection: function () {

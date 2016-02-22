@@ -36,7 +36,7 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-     '../www/js/mongo.collections.js'
+     //'../www/js/mongo.collections.js'
     ],
 
     browsers: [

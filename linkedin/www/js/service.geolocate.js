@@ -6,8 +6,8 @@ angular.module('linkedin')
 
 //@ directive: <beacon-map></beacon-map>
 //@ params: 'slide' binds to a variable in the outer scope. If slide's val is '1',
-//  			the map is either initialized or updated. e.g. updates triggered on the slide
-//  			coming into view.
+//  		the map is either initialized or updated. e.g. updates triggered on the slide
+//  		coming into view.
 function BeaconMap(GeoLocate, $rootScope){
     return {
        restrict: 'E',   
@@ -22,7 +22,9 @@ function BeaconMap(GeoLocate, $rootScope){
 			scope.$watch('slide', function(newVal, oldVal){
 
 				if (newVal === 1){
-					(GeoLocate.map === null) ? GeoLocate.loadMap(): GeoLocate.updateMap();
+					(GeoLocate.map === null) ? 
+						GeoLocate.loadMap(): 
+						GeoLocate.updateMap();
 				};
 			})
        }
@@ -43,7 +45,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 
 	// Mapbox API
 	var token = 'pk.eyJ1IjoiZXBpbGVwb25lIiwiYSI6ImNpanRyY3IwMjA2cmp0YWtzdnFoenhkbjkifQ._Sg2cIhMaGfU6gpKMmrGBA';
-   var id = 'epilepone.2f443807';
+    var id = 'epilepone.2f443807';
 	
 	// Public 
 	self.lat = null;
@@ -107,7 +109,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	}
 
 	// @function: getAddress
-	// @return: promise which resolves either an address string or empty string.
+	// @return: promise which resolves either an address string or ''.
 	//
 	// Gets device coordinates and sets public vars 'lat', 'lng' by them.
 	// Reverse geocodes coordinates and sets public var 'address' to result.

@@ -20,12 +20,13 @@ angular.module('linkedin')
 //
 // Exposes user profile var 'notifyCount' (the number of unchecked notifications)
 // to the DOM to determine badge display over tab icon
-function TabsCtrl ($scope, $reactive ){
+function TabsCtrl ($scope, $reactive, Meteor ){
   $reactive(this).attach($scope);
 
     this.helpers({
         notifyCount: function () {
-          if(Meteor.user()) return Meteor.user().profile.notifyCount;
+          if(Meteor.user()) 
+            return Meteor.user().profile.notifyCount;
         }
     });  
 };
@@ -56,12 +57,13 @@ function SetupCtrl ($scope, $state ){
 //
 // Exposes array of notifications in user.profile to DOM for
 // tab-notifications view
-function NotificationsCtrl ($scope, $reactive ){
+function NotificationsCtrl ($scope, $reactive, Meteor ){
   $reactive(this).attach($scope);
   
   this.helpers({
       notifications: function () {
-        return Meteor.user().profile.notifications;
+        if(Meteor.user()) 
+          return Meteor.user().profile.notifications;
       }
   });
  

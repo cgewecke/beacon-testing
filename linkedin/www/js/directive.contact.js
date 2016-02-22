@@ -1,8 +1,12 @@
 angular.module('linkedin')
   .directive("addContact", AddContact);
 
-//@directive: <add-contact user='someUserProfile'></add-contact
-//@params: user (the profile object of the user to be added)
+// @directive: <add-contact user='someUserProfile'></add-contact>
+// @params: user (the profile object of the user to be added). 
+//
+// A footer bar on the profile template that allows user to add info from
+// a discovered LinkedIn profile to be added to the native contacts. Also manages
+// a list of contact ids associated with the user account.
 function AddContact($cordovaContacts, $timeout, $auth){
     return {
        restrict: 'E',   
@@ -43,7 +47,7 @@ function AddContact($cordovaContacts, $timeout, $auth){
           }; 
     
        		// @function: createContact
-          // Add contact to native layer, calls meteor to push this contact id
+          // Adds profile to native contacts, calls meteor to push this contact id
           // onto the users list of added contacts
           scope.createContact = function(){
             

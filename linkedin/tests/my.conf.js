@@ -15,21 +15,55 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        '../www/lib/angular/angular.js',
-        '../www/js/*.js',
+        '../www/lib/ionic/js/ionic.bundle.js',
         '../www/lib/angular-mocks/angular-mocks.js',
-        '**/*tests.js'
+        '../www/lib/moment/moment.js',
+        '../www/lib/meteor-client-side/meteor-runtime-config.js',
+        '../www/lib/meteor-client-side/dist/meteor-client-side.bundle.min.js',
+        '../www/lib/accounts-base-client-side/dist/accounts-base-client-side.bundle.js',
+        '../www/lib/accounts-password-client-side/dist/accounts-password-client-side.bundle.min.js',
+        '../www/lib/angular-meteor/dist/angular-meteor.bundle.js',
+        '../www/lib/angular-meteor/dist/angular-meteor-auth.bundle.js',
+        '../www/lib/ngCordova/dist/ng-cordova.js',
+        '../www/lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js',
+        '../www/lib/ionic-toast/dist/ionic-toast.bundle.min.js',
+        '../www/js/*.js',
+        'controllers/*.js',
+        'services/*.js',
+        //'tests/directives/*.js'
     ],
 
 
     // list of files to exclude
     exclude: [
+     '../www/js/mongo.collections.js'
     ],
 
+    browsers: [
+      'Chrome'
+    ],
 
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
+    customLaunchers: {
+      Chrome_without_security: {
+        base: 'Chrome',
+        flags: ['--disable-web-security']
+      }
+    },
+
+    // Which plugins to enable
+    plugins: [
+      "karma-chrome-launcher",
+      "karma-jasmine",
+      "karma-ng-html2js-preprocessor"
+    ],
+
     preprocessors: {
+      '../www/templates/*.html': ['ng-html2js']
+    },
+
+    ngHtml2JsPreprocessor: {
+      moduleName: 'templates',
+      stripPrefix: 'app/'
     },
 
 
@@ -40,7 +74,7 @@ module.exports = function(config) {
 
 
     // web server port
-    port: 9876,
+    port: 8080,
 
 
     // enable / disable colors in the output (reporters and logs)
@@ -53,13 +87,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
-
-
-    // start these browsers
-    // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
-
+    autoWatch: true,
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

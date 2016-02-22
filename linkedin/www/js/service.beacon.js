@@ -132,7 +132,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 
         var transmitter, pkg, beacon;
         var localId = window.localStorage['pl_id']
-        var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();
+        var receiver = (localId != undefined) ? localId : Meteor.user().emails[0].address;
         
         beacon = result.region;
         
@@ -167,7 +167,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         if (beacons.length){
     
             var localId = window.localStorage['pl_id'];
-            var receiver = (function(){ return (localId != undefined) ? localId : Meteor.user().emails[0].address})();            
+            var receiver = (localId != undefined) ? localId : Meteor.user().emails[0].address;           
             var transmitter, pkg;
 
             angular.forEach(beacons, function(beacon){

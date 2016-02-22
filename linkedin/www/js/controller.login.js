@@ -12,8 +12,11 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
     $scope.DEV = $rootScope.DEV;
 
     var appHash = "Txc9"; // Constant to help generate password  
+    var toastMessage = "Couldn't get your LinkedIn profile. Try again.";
+    
     $scope.loggingIn = false; // Dom flag for spinner that appears when returning from inAppBrowser login
 
+    // ------------------------------------ PUBLIC -------------------------------------------
     // @function: Login
     // Authenticates with LinkedIn, loads linkedin profile and passes to meteor login handlers. 
     // Shows toast on authentication failure.
@@ -28,12 +31,13 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
         },
         function(error){
           $scope.loggingIn = false;
+          ionicToast.show(toastMessage, 'top', true, 2500);
           MSLog('Linkedin data api failed: ' + error)
         });
 
       }, function(error){
         $scope.loggingIn = false;
-        ionicToast.show("Couldn't get your LinkedIn profile. Try again.", 'top', true, 2500);
+        ionicToast.show(toastMessage, 'top', true, 2500);
         MSLog('Linkedin login failed: ' + JSON.stringify(error));
 
       });
@@ -50,6 +54,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
       });
     };
 
+    // ------------------------------------ PRIVATE -------------------------------------------
     // @function: meteorLogin 
     // Generates user object stub, then checks Meteor to see if account exists. 
     // Logs in w/password or creates based on result
@@ -79,8 +84,10 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
       Meteor.call('hasRegistered', user.username, function(err, registered ){
         
         if (!err){
-        
-          (registered) ? loginWithAccount(user) : createAccount(user); 
+
+          (registered) ? 
+            loginWithAccount(user) : 
+            createAccount(user); 
         
         } else {
           $scope.loggingIn = false;
@@ -134,6 +141,7 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
     // if for some reason two app simultaneously create accounts and generate the same email
     // address. Email is guaranteed to be unique.
     function createAccount(user){
+      var toastMessage = "There was a problem creating an account. Try Again";
 
       Meteor.call( 'getUniqueAppId', function(err, val){ 
         if (!err && val ){
@@ -162,13 +170,15 @@ function LoginCtrl ($rootScope, $scope, $auth, $state, $reactive, LinkedIn, Beac
               
             } else{
               $scope.loggingIn = false;
-              ionicToast.show("Server overloaded (CreateUser) - try again", 'top', true, 2500);
+              MSLog("@LoginCtrl: Accounts.createUser failed: " + err);
+              ionicToast.show(toastMessage, 'top', true, 2500);
             }
           })
 
         } else{
           $scope.loggingIn = false;
-          ionicToast.show("Couldn't create psychic link (AppID) - try again", 'top', true, 2500);
+          MSLog("@LoginCtrl: getUniqueAppId failed: " + err);
+          ionicToast.show(toastMessage, 'top', true, 2500);
         }
       });
     };

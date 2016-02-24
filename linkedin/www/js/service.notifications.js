@@ -1,5 +1,5 @@
 // @service: Notify
-// Handles push notification registry, and does internal notifications management
+// Handles push notification registry and does internal notifications management
 angular.module('linkedin')
   .service("Notify", Notify);
 

@@ -111,8 +111,8 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	// @function: getAddress
 	// @return: promise which resolves either an address string or ''.
 	//
-	// Gets device coordinates and sets public vars 'lat', 'lng' by them.
-	// Reverse geocodes coordinates and sets public var 'address' to result.
+	// Gets device coordinates and sets public vars 'lat', 'lng'.
+	// Reverse geocodes coordinates and sets public var 'address'.
 	// Error states set lat, long and address to 0,0,'' respectively.
 	self.getAddress = function(){
 

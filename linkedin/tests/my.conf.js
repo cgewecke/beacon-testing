@@ -10,11 +10,15 @@ module.exports = function(config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine'], 
 
 
     // list of files / patterns to load in the browser
     files: [
+
+        // Add JQuery so that 'find' etc works correctly
+        '../node_modules/jquery/dist/jquery.min.js',
+
         '../www/lib/ionic/js/ionic.bundle.js',
         '../www/lib/angular-mocks/angular-mocks.js',
         '../www/lib/moment/moment.js',
@@ -28,6 +32,8 @@ module.exports = function(config) {
         '../www/lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js',
         '../www/lib/ionic-toast/dist/ionic-toast.bundle.min.js',
         '../www/js/*.js',
+        '../www/templates/*.html',
+
         'controllers/*.js',
         'services/*.js',
         //'tests/directives/*.js'
@@ -63,7 +69,7 @@ module.exports = function(config) {
 
     ngHtml2JsPreprocessor: {
       moduleName: 'templates',
-      stripPrefix: 'app/'
+      stripPrefix: '../www/'
     },
 
 

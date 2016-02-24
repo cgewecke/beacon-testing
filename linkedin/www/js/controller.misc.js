@@ -3,7 +3,7 @@ var log_test;
 // These are little controllers for various routes/views. See config.routes.js
 angular.module('linkedin')
   
-  .controller('NearbyCtrl', NearbyCtrl)
+  .controller('NearbyCtrl', NearbyCtrl)             
   .controller('NearbyProfileCtrl', NearbyProfileCtrl)
   .controller('ProfileCtrl', ProfileCtrl)
   .controller('LoadingCtrl', LoadingCtrl)
@@ -11,7 +11,7 @@ angular.module('linkedin')
   .controller('NotificationsCtrl', NotificationsCtrl)
   .controller('NotificationsProfileCtrl', NotificationsProfileCtrl)
   .controller('TabsCtrl', TabsCtrl)
-  .controller('SetupCtrl', SetupCtrl);
+  .controller('SetupCtrl', SetupCtrl)
 
 
 // @controller: TabsCtrl
@@ -38,6 +38,8 @@ function TabsCtrl ($scope, $reactive, Meteor ){
 // Functions to toggle state change when user approves requests for permission to use
 // iBeacon and APNS on new account creation and new installs
 function SetupCtrl ($scope, $state ){
+
+  console.log('initiating setup-control');
   this.ready = false;
 
   this.accept = function(){
@@ -147,7 +149,7 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, Connections){
   var self = this;
   
   // DB: Connections, get profile
-  //this.subscribe('connections');
+  this.subscribe('connections');
 
   this.helpers({
     connection: function () {
@@ -168,7 +170,6 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, Connections){
 //
 // Exposes LinkedIn.me profile object to default profile template
 function ProfileCtrl ($scope, LinkedIn){
-  $reactive(this).attach($scope);
     
   this.user = LinkedIn.me;
   this.user.name = this.user.firstName + ' ' + this.user.lastName;
@@ -189,7 +190,7 @@ function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
   $ionicPlatform.ready(function(){
       $state.go('tab.nearby');
-
+      console.log('ran code in LoadingCtrl');
       $timeout(function(){
         var message;
 

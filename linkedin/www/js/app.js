@@ -6,7 +6,6 @@
 angular
 
 	.module('linkedin', [
-		'ng',
 		'ionic', 
 		'ionic-toast',
 		'ngCordova',

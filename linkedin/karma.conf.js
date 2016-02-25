@@ -17,25 +17,27 @@ module.exports = function(config) {
     files: [
 
         // Add JQuery so that 'find' etc works correctly
-        '../node_modules/jquery/dist/jquery.min.js',
+        'node_modules/jquery/dist/jquery.min.js',
 
-        '../www/lib/ionic/js/ionic.bundle.js',
-        '../www/lib/angular-mocks/angular-mocks.js',
-        '../www/lib/moment/moment.js',
-        '../www/lib/meteor-client-side/meteor-runtime-config.js',
-        '../www/lib/meteor-client-side/dist/meteor-client-side.bundle.min.js',
-        '../www/lib/accounts-base-client-side/dist/accounts-base-client-side.bundle.js',
-        '../www/lib/accounts-password-client-side/dist/accounts-password-client-side.bundle.min.js',
-        '../www/lib/angular-meteor/dist/angular-meteor.bundle.js',
-        '../www/lib/angular-meteor/dist/angular-meteor-auth.bundle.js',
-        '../www/lib/ngCordova/dist/ng-cordova.js',
-        '../www/lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js',
-        '../www/lib/ionic-toast/dist/ionic-toast.bundle.min.js',
-        '../www/js/*.js',
-        '../www/templates/*.html',
+        'www/lib/ionic/js/ionic.bundle.js',
+        'www/lib/angular-mocks/angular-mocks.js',
+        'www/lib/moment/moment.js',
+        'www/lib/meteor-client-side/meteor-runtime-config.js',
+        'www/lib/meteor-client-side/dist/meteor-client-side.bundle.min.js',
+        'www/lib/accounts-base-client-side/dist/accounts-base-client-side.bundle.js',
+        'www/lib/accounts-password-client-side/dist/accounts-password-client-side.bundle.min.js',
+        'www/lib/angular-meteor/dist/angular-meteor.bundle.js',
+        'www/lib/angular-meteor/dist/angular-meteor-auth.bundle.js',
+        'www/lib/ngCordova/dist/ng-cordova.js',
+        'www/lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js',
+        'www/lib/ionic-toast/dist/ionic-toast.bundle.min.js',
+        'www/js/*.js',
+        'www/templates/*.html',
 
-        'controllers/*.js',
-        'services/*.js',
+        'tests/controllers/*.js',
+        'tests/services/*.js',
+        'tests/mocks/*.js',
+        'tests/util/*.js'
         //'tests/directives/*.js'
     ],
 
@@ -64,19 +66,19 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      '../www/templates/*.html': ['ng-html2js']
+      'www/templates/*.html': ['ng-html2js']
     },
 
     ngHtml2JsPreprocessor: {
       moduleName: 'templates',
-      stripPrefix: '../www/'
+      stripPrefix: 'www/'
     },
 
 
     // test results reporter to use
     // possible values: 'dots', 'progress'
     // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-    reporters: ['progress'],
+    reporters: ['dots'],
 
 
     // web server port
@@ -89,7 +91,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DISABLE,
 
 
     // enable / disable watching file and executing tests whenever any file changes

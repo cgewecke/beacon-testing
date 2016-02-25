@@ -20,7 +20,7 @@ angular.module('linkedin')
 //
 // Exposes user profile var 'notifyCount' (the number of unchecked notifications)
 // to the DOM to determine badge display over tab icon
-function TabsCtrl ($scope, $reactive, Meteor ){
+function TabsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
 
     this.helpers({
@@ -59,7 +59,7 @@ function SetupCtrl ($scope, $state ){
 //
 // Exposes array of notifications in user.profile to DOM for
 // tab-notifications view
-function NotificationsCtrl ($scope, $reactive, Meteor ){
+function NotificationsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
   
   this.helpers({
@@ -79,7 +79,7 @@ function NotificationsCtrl ($scope, $reactive, Meteor ){
 // Subscription to 'connections' is handled in the route resolve and checked here. Also
 // exposes GeoLocate service (for the maps view) and Notify service (to trigger notification when user
 // clicks on list item to see profile)
-function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription, Connections ){
+function NearbyCtrl ($scope, $reactive, Notify, GeoLocate ){
   $reactive(this).attach($scope);
   
   var self = this;
@@ -94,10 +94,6 @@ function NearbyCtrl ($scope, $reactive, Notify, GeoLocate, subscription, Connect
   // Services
   self.geolocate = GeoLocate;
   self.notify = Notify;
-
-  if (!subscription){
-    MSLog('Subscription failed in NearbyCtrl');
-  }
 
   self.helpers({
       connections: function () {
@@ -190,7 +186,6 @@ function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
   $ionicPlatform.ready(function(){
       $state.go('tab.nearby');
-      console.log('ran code in LoadingCtrl');
       $timeout(function(){
         var message;
 

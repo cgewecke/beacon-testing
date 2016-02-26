@@ -134,14 +134,14 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 
 		    	// Check coords exist
 		    	if (position.coords){
-		    			self.lat  = position.coords.latitude;
+		    		self.lat  = position.coords.latitude;
       				self.lng = position.coords.longitude;
      
       				// Check Maps and vals ok
       				if (self.lng && self.lat && google.maps ){
       					
       					// Initialize maps
-							var geocoder = new google.maps.Geocoder();
+						var geocoder = new google.maps.Geocoder();
            				var latlng = new google.maps.LatLng(self.lat, self.lng );
 
            				// Reverse Geocode
@@ -153,20 +153,20 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 			                  if (results[1]) {
 			                    	MSLog('@GeoLocate: ' + JSON.stringify(results[1].formatted_address));
 			                    	self.address = results[1].formatted_address.split(',').slice(0, -2).join(', '),
-			                     deferred.resolve(self.address);
+			                     	deferred.resolve(self.address);
 
 			                  // No address
 			                  } else {
 			                    	self.address = '';
-			                     deferred.resolve('');
-			                     MSLog('@GeoLocate: failed: no maps results for position');
+			                    	deferred.resolve('');
+			                    	MSLog('@GeoLocate: failed: no maps results for position');
 			                  }
 
 			               // Geocoder call fail
 			               } else {
 			                	self.address = '';
-			                  deferred.resolve('');
-			                  MSLog('@GeoLocate: failed: google.maps.geocode error: ' + status);
+			                 	deferred.resolve('');
+			                	MSLog('@GeoLocate: failed: google.maps.geocode error: ' + status);
 			               }
 			            });
 			        // Maps or vals bad    

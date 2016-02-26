@@ -1,6 +1,6 @@
 angular
-  	.module('meteormock', [])
-  	.service('MeteorMock', function(){
+  	.module('mocks', [])
+  	.service('Mock', function(){
 
   		var self = this;
 
@@ -14,26 +14,16 @@ angular
 	            contacts: []
 	        } 
 	    };
-
-	    this.connections = []; 
-	    this.status = 'connected';
-
-	    // Mock Meteor
-	    this.Connections = { 
-	        find: function(query){ 
-	        	console.log('running connections');
-	            return self.connections;
-	        },
-	        findOne: function(query){
-	            return self.connections[0];
-	        }
-	    }
 	    
 	    this.Meteor = {
 	        user: function(){ return self.user;},
 	        call: function(){ return; },
 	        status: function(){ return {status: self.status};},
 	        userId: function(){ return self.user._id}
+	    }
+
+	    this.$cordovaContacts = {
+	    	save: function(){}
 	    }
 
 	    this.$reactive = function(context){

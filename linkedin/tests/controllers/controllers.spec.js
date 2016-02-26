@@ -9,7 +9,7 @@ describe('Small Controllers/Templates', function () {
 
     beforeEach(module('templates'));   // ng-html2js template cache
     beforeEach(module('linkedin'));    // Application
-    beforeEach(module('meteormock'));  // Mocked Meteor services, collections
+    beforeEach(module('mocks'));  // Mocked Meteor services, collections
     
     // Disable Ionic templating
     beforeEach(module(function($provide, $urlRouterProvider) {  
@@ -29,18 +29,16 @@ describe('Small Controllers/Templates', function () {
 
         var $controller, $scope, $reactive, user, MeteorMock;
 
-        beforeEach(inject(function(_$controller_, _$rootScope_, _MeteorMock_){
+        beforeEach(inject(function(_$controller_, _$rootScope_, _Mock_){
             $controller = _$controller_;
             $scope = _$rootScope_;
 
-            $reactive = _MeteorMock_.$reactive;
-            MeteorMock = _MeteorMock_.Meteor;
-            user = _MeteorMock_.user;
+            $reactive = _Mock_.$reactive;
+            Meteor.user = _Mock_.Meteor.user;
+            user = _Mock_.user;
         }));
 
         it('should reactively bind "Meteor.user().notifyCount" to the controller', function(){
-
-            Meteor.user = MeteorMock.user;
 
             var vm = $controller('TabsCtrl', {$scope: $scope, $reactive: $reactive });
                  
@@ -63,10 +61,6 @@ describe('Small Controllers/Templates', function () {
 
         var $controller, $scope, $state, $timeout, $compile, $templateCache
 
-        var mockClick = function(elem, scope){
-            scope.$eval(elem.attr('ng-click'));
-        }
-
         beforeEach(inject(function(_$controller_, _$rootScope_,  _$state_, _$timeout_, 
                                    _$compile_, _$templateCache_){
             
@@ -76,7 +70,6 @@ describe('Small Controllers/Templates', function () {
             $timeout = _$timeout_;
             $compile = _$compile_;
             $templateCache = _$templateCache_;
-            //test_debug = ionic;
 
         }));
 
@@ -139,16 +132,16 @@ describe('Small Controllers/Templates', function () {
 
         var $controller, $scope, $compile, $templateCache, $reactive, $inject, user, template, ctrl;
 
-        beforeEach(inject(function(_$controller_, _$rootScope_, _MeteorMock_, _$compile_, _$templateCache_){
+        beforeEach(inject(function(_$controller_, _$rootScope_, _Mock_, _$compile_, _$templateCache_){
             
             $controller = _$controller_;
             $scope = _$rootScope_;
             $compile = _$compile_;
             $templateCache = _$templateCache_;
 
-            $reactive = _MeteorMock_.$reactive;
-            Meteor = _MeteorMock_.Meteor;
-            user = _MeteorMock_.user;
+            $reactive = _Mock_.$reactive;
+            Meteor = _Mock_.Meteor;
+            user = _Mock_.user;
             
             // Compile /tab-notifications
             compileProvider.directive('notificationsTest', notificationsTest);
@@ -315,14 +308,14 @@ describe('Small Controllers/Templates', function () {
 
         var $controller, $scope, $reactive, MeteorMock, user, $stateParams;
 
-        beforeEach(inject(function(_$controller_, _$rootScope_, _MeteorMock_, _$stateParams_){
+        beforeEach(inject(function(_$controller_, _$rootScope_, _Mock_, _$stateParams_){
             $controller = _$controller_;
             $scope = _$rootScope_;
             $stateParams = _$stateParams_;
 
-            $reactive = _MeteorMock_.$reactive;
-            MeteorMock = _MeteorMock_.Meteor;
-            user = _MeteorMock_.user;
+            $reactive = _Mock_.$reactive;
+            MeteorMock = _Mock_.Meteor;
+            user = _Mock_.user;
             
         }));
 
@@ -343,10 +336,10 @@ describe('Small Controllers/Templates', function () {
 
     describe('NearbyProfileCtrl', function(){
 
-        var $controller, $scope, $stateParams, $compile, $templateCache, template, ctrl, test_connection;
+        var $controller, $scope, $stateParams, $compile, $templateCache, template, ctrl, mini;
 
         beforeEach(inject(function(_$controller_, _$rootScope_, _$stateParams_, _$compile_, _$templateCache_,
-                                    _MeteorMock_){
+                                    _Mock_){
 
 
             $controller = _$controller_;
@@ -355,11 +348,11 @@ describe('Small Controllers/Templates', function () {
             $compile = _$compile_; 
             $templateCache = _$templateCache_;
             
-            // Mock user for contact directive
-            Meteor.user = _MeteorMock_.Meteor.user;
+            // Mock user to silence complaints of contact directive
+            Meteor.user = _Mock_.Meteor.user;
             
             // Prime mini-mongo w/ connection
-            test_connection = {
+            mini = {
                 receiver: '111', 
                 transmitter: Meteor.user._id, 
                 profile: { 
@@ -369,8 +362,8 @@ describe('Small Controllers/Templates', function () {
                 }
             }
 
-            Connections.insert(test_connection);
-            $stateParams.userId = test_connection.profile.id;
+            Connections.insert(mini);
+            $stateParams.userId = mini.profile.id;
 
             // Compile Template
             compileProvider.directive('nearbyProfileTest', function (){
@@ -384,6 +377,7 @@ describe('Small Controllers/Templates', function () {
             $compile(template)($scope);
             $scope.$digest();
 
+            // Get controller
             ctrl = template.find('nearby-profile-test').controller('nearbyProfileTest');
 
         }));
@@ -394,15 +388,13 @@ describe('Small Controllers/Templates', function () {
             expect(ctrl.user).toEqual(ctrl.connection.profile);
             expect(ctrl.viewTitle).toEqual(ctrl.user.name);
 
-            // Implicitly validate helper method
-            expect(ctrl.user.name).toEqual(test_connection.profile.firstName + ' ' + test_connection.profile.lastName);
+            // Validate helper & check explicit assignment
+            expect(ctrl.user.name).toEqual(mini.profile.firstName + ' ' + mini.profile.lastName);
             
 
         });
 
     });
-
-    /*
 
     describe('ProfileCtrl', function(){
 
@@ -424,7 +416,7 @@ describe('Small Controllers/Templates', function () {
             expect(vm.viewTitle).toEqual('You');
         })
 
-    }); */
+    }); 
 
     describe('LoadingCtrl', function(){
 
@@ -447,12 +439,12 @@ describe('Small Controllers/Templates', function () {
             //$ionicPlatform.ready = function(fn){};
             //$httpBackend.expect('JSONP', /(.*)/ ).respond(200);
 
-            var vm = $controller('LoadingCtrl', {$ionicPlatform: $ionicPlatform, $state: $state, $timeout, ionicToast });
+            //var vm = $controller('LoadingCtrl', {$ionicPlatform: $ionicPlatform, $state: $state, $timeout, ionicToast });
             
-            spyOn($ionicPlatform, 'ready').and.callThrough();
-            spyOn($state, 'go');
+            //spyOn($ionicPlatform, 'ready').and.callThrough();
+            //spyOn($state, 'go');
 
-            $scope.$digest();
+            //$scope.$digest();
             //$httpBackend.flush();
 
             //expect($ionicPlatform.ready).toHaveBeenCalled(); 

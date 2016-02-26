@@ -14,14 +14,14 @@ function AddContact($cordovaContacts, $timeout, $auth){
        scope: {user: '='},
        template: 
         
-        '<ion-footer-bar align-title="left" class="bar-energized directive-footer"' +
+        '<ion-footer-bar id="contact-bar" align-title="left" class="bar-energized directive-footer"' +
                         'ng-show="!contactAdded && !(user.id === currentUserId)">' +
           '<h1 class="title" >' +
             '<span ng-show="!flasher"> Add {{user.firstName}} to contacts</span>' +
             '<span class="profile-add-contact" ng-show="flasher">Added {{user.firstName}} </span>' +
           '</h1>' +
           '<div class="buttons">' +
-            '<button class="button button-clear button-light icon ion-ios-plus-outline" ng-click="createContact()"></button>' +
+            '<button id="contact-button" class="button button-clear button-light icon ion-ios-plus-outline" ng-click="createContact()"></button>' +
           '</div>' +
         '</ion-footer-bar>',
 
@@ -67,9 +67,10 @@ function AddContact($cordovaContacts, $timeout, $auth){
               "birthday": Date('5/5/1973')
             };
             
+            console.log('running createContact');
             scope.flasher = true;
             $cordovaContacts.save(contactInfo).then(function(result) {
-                
+                console.log('running post save');
                 $timeout(function(){
                 
                     scope.exit = true;

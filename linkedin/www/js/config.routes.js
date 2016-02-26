@@ -4,7 +4,10 @@ angular
   .module('linkedin')
   .config(config);
 
-function config ($stateProvider, $urlRouterProvider) {
+function config ($stateProvider, $urlRouterProvider, $angularMeteorSettings) {
+
+  // Disables write of warnings to console
+  $angularMeteorSettings.suppressWarnings = true; 
 
   $stateProvider
 

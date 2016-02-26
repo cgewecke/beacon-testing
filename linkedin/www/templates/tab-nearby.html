@@ -5,6 +5,13 @@
   Slidebox where slide '0' is a list view of all connections to this phone, and 
   slide '1' is a map view of users current location, address. There is a footer 
   button bar to toggle between these. Shows scanning cover if there are no connections.
+
+  Unit Testing:
+  #nearby-list-slide
+  #nearby-map-slide
+  #nearby-scanning-cover
+  #nearby-list-button
+  #nearby-map-button
 -->
 <ion-view view-title="Nearby">
   <server-status></server-status>
@@ -12,7 +19,7 @@
     <!-- SLIDES -->
     <ion-slide-box active-slide="vm.slide" auto-play="false" show-pager="false">
       <!-- List Slide -->
-      <ion-slide>
+      <ion-slide id="nearby-list-slide">
         <ion-list>
           <ion-item
             ng-repeat="user in vm.connections"
@@ -32,7 +39,7 @@
        
       </ion-slide>
       <!-- Map Slide -->
-      <ion-slide> 
+      <ion-slide id="nearby-map-slide"> 
          <ion-header-bar align-title="left" class="bar-grey"> 
           <div class="title bar-center">{{vm.geolocate.address}}</div>
           <div class="buttons bar-center">
@@ -49,7 +56,7 @@
   </ion-content> 
 
   <!-- Scanning Cover for empty connections table, list view -->
-  <section class="authenticate-container fade" 
+  <section id="nearby-scanning-cover" class="authenticate-container fade" 
            ng-show="!vm.connections.length && vm.slide === vm.listSlide">
     <div class="col spacer"></div>
     <div class="col button-row text-center"> 
@@ -73,12 +80,12 @@
   <ion-footer-bar align-title="left" class="bar-stable" >
     <span class="col col-20"></span>
     <span class="button-bar">
-      <button class="button button-positive icon-left ion-ios-list-outline"
+      <button id="nearby-list-button" class="button button-positive icon-left ion-ios-list-outline"
               ng-class="{'button-outline': !(vm.slide === vm.listSlide)}"
               ng-click="vm.slide=vm.listSlide">
         List
       </button>
-      <button class="button button-positive icon-left ion-ios-location-outline"
+      <button id="nearby-map-button" class="button button-positive icon-left ion-ios-location-outline"
               ng-class="{'button-outline': !(vm.slide === vm.mapSlide)}"
               ng-click="vm.slide=vm.mapSlide">
         Map

@@ -36,8 +36,8 @@ Some of the typings files have names `angular2.d.ts` and `meteor.d.ts`, which, a
 
 But as you remember, we've mentioned so far only one declaration file `angular2-meteor.d.ts` and used it in the TypeScript config (on the first step), that's thanks to a special TypeScript syntax construction that can link together one declaration files with other declaration files as well as TypeScript files. If you look inside of `angular2-meteor.d.ts` you'll see Angular 2 and Meteor declaration files are linked there by:
 
-    /// <reference path="angular2.d.ts" />
-    /// <reference path="meteor/meteor.d.ts" />
+    /// <reference path="../angular2/angular2.d.ts" />
+    /// <reference path="../meteor/meteor.d.ts" />
 
 Let’s create our own declaration file for our project in order to learn this type-checking better.
 
@@ -79,32 +79,6 @@ Finally, let’s change `Object` to `Party` in the `PartiesList` and `PartyDetai
 {{> DiffBox tutorialName="meteor-angular2-socially" step="7.4"}}
 
 {{> DiffBox tutorialName="meteor-angular2-socially" step="7.5"}}
-
-## TSD
-
-Type definition files come in handy when using other libraries. Luckily, definition files for popular file are available at [Definitely Typed](http://definitelytyped.org/).
-
-To make things easy, [TSD](https://github.com/DefinitelyTyped/tsd) is a package manager for these type definition files.
-
-    npm install tsd -g
-
-TSD allows you to search, install and update declaration files from one global repository of declaration files kept by the TypeScript community.
-
-For example, you can use `tsd query NAME` to search for a specific package NAME:
-
-    tsd query angular2
-    > - angular2 / angular2
-
-To install the Meteor declaration file, just type:
-
-    tsd install meteor
-
-All necessary files will be added into the _typings_ directory.
-
-Angular 2's declaration files are delivered via the official NPM package, so you won't be able to find it in the Definitely Typed repo.
-
-Don't worry though, Angular2-Meteor will update all necessary typings, you only need to periodically
-remove .d.ts-files in the _typings_ folder, thus, letting the package know that the files need to be updated.
 
 ## TypeScript Configuration and IDEs
 
@@ -157,7 +131,7 @@ If you are using [Atom](atom.io) as your editor with the [Atom-TypeScript plugin
   "filesGlob": [
     "**/*.ts"
   ],
-  "files": [],
+  "files": []
 }
 ```
 

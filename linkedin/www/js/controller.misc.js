@@ -23,12 +23,12 @@ angular.module('linkedin')
 function TabsCtrl ($scope, $reactive){
   $reactive(this).attach($scope);
 
-    this.helpers({
-        notifyCount: function () {
-          if(Meteor.user()) 
-            return Meteor.user().profile.notifyCount;
-        }
-    });  
+  this.helpers({
+      notifyCount: function () {
+        if(Meteor.user()) 
+          return Meteor.user().profile.notifyCount;
+      }
+  });  
 };
 
 // @controller: SetupCtrl
@@ -39,11 +39,7 @@ function TabsCtrl ($scope, $reactive){
 // iBeacon and APNS on new account creation and new installs
 function SetupCtrl ($scope, $state ){
 
-  console.log('initiating setup-control');
-  this.ready = false;
-
   this.accept = function(){
-    this.ready = false;
     $state.go('tab.nearby');
   };
 
@@ -111,7 +107,7 @@ function NearbyCtrl ($scope, $reactive, Notify, GeoLocate ){
 // Iterates through current user's array of notifications to 
 // locate correct :sender and populates the default profile
 // template. Is cached per unique $stateParams Meteor.userId
-function NotificationsProfileCtrl ($scope, $stateParams, Meteor){
+function NotificationsProfileCtrl ($scope, $stateParams){
   
   var self = this;
   var notes = Meteor.user().profile.notifications;
@@ -184,18 +180,26 @@ function ProfileCtrl ($scope, LinkedIn){
 // nearby resolves to hang.
 function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
-  $ionicPlatform.ready(function(){
-      $state.go('tab.nearby');
+  var self = this;
+  self.fake = function(){console.log('FAKE')};
+
+  self.ready = function(){
+    $state.go('tab.nearby');
+      console.log('FAKE LOG');
+      self.fake();
+
       $timeout(function(){
         var message;
 
         if (Meteor.status().status != 'connected'){
           message = "There's a problem connecting to the server. Try again later."
           ionicToast.show(message, 'top', true, 2500);
+
           $state.go('login');
         }
       }, 5000)
-  });
+  }
+  $ionicPlatform.ready(self.ready);
 };
 
 // @controller: SettingsCtrl

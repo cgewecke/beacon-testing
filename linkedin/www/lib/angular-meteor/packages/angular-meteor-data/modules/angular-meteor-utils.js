@@ -1,17 +1,21 @@
+/*global
+ angular, _, Tracker, EJSON, FS, Mongo
+ */
+
 'use strict';
 
 var angularMeteorUtils = angular.module('angular-meteor.utils', []);
 
 angularMeteorUtils.service('$meteorUtils', [
-  '$q', '$timeout',
-  function ($q, $timeout) {
+  '$q', '$timeout', '$angularMeteorSettings',
+  function ($q, $timeout, $angularMeteorSettings) {
 
     var self = this;
 
-    this.autorun = function(scope, fn, ignoreDeprecation) {
-      if (!ignoreDeprecation) {
-        console.warn('[angular-meteor.utils.autorun] Please note that this method is deprecated since 1.3.0 and will be removed in 1.4.0! For more info: http://www.angular-meteor.com/api/1.3.1/autorun');
-      }
+    this.autorun = function(scope, fn) {
+      if (!$angularMeteorSettings.suppressWarnings)
+        console.warn('[angular-meteor.utils.autorun] Please note that this method is deprecated since 1.3.0 and will be removed in 1.4.0! For more info: http://www.angular-meteor.com/api/1.3.6/autorun. You can disable this warning by following this guide http://www.angular-meteor.com/api/1.3.6/settings');
+
 
       // wrapping around Deps.autorun
       var comp = Tracker.autorun(function(c) {
@@ -54,11 +58,11 @@ angularMeteorUtils.service('$meteorUtils', [
     this.fulfill = function(deferred, boundError, boundResult) {
       return function(err, result) {
         if (err)
-          deferred.reject(boundError == null ? err : boundError);
+          deferred.reject(boundError === null ? err : boundError);
         else if (typeof boundResult == "function")
-          deferred.resolve(boundResult == null ? result : boundResult(result));
+          deferred.resolve(boundResult === null ? result : boundResult(result));
         else
-          deferred.resolve(boundResult == null ? result : boundResult);
+          deferred.resolve(boundResult === null ? result : boundResult);
       };
     };
 

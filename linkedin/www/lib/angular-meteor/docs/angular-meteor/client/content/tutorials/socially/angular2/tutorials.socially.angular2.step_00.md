@@ -156,7 +156,11 @@ Let's continue defining our Angular 2 application module.
 
 {{> DiffBox tutorialName="meteor-angular2-socially" step="0.5"}}
 
-First we're importing the dependencies we needed from `angular2/core` and `angular2/bootstrap`. This is not a folder and files in your directory, but a reference to System.js modules aliased as `angular2/core` and `angular2/bootstrap` and available in the `urigo:angular2-meteor` package.
+First we're importing the dependencies we needed from `angular2/core` and `angular2/platform/browser`. This is not a folder and files in your directory, but a reference to System.js modules aliased as `angular2/core` and `angular2/platform/browser`.
+They are some of the Angular 2 main modules that are available as part of the `urigo:angular2-meteor` package.
+
+One of the great architectural innovation of Angular 2 is that an app written with Angular 2 can run on different
+platforms. As you can see in our case, we are bootstrapping using the bootstrap from the "browser" platform since our app is a regular Web app to run in a browser.
 
 Notice the `@` syntax. In Angular 2, these are called Annotations. They are similar to a new feature coming to ES7 called Decorators.
 From a consumers point of view, they are almost the same except Decorators are a proposed standard allowing us to add class metadata while Angular 2's Annotations are a realization of that metadata, implemented with the help of Decorators in TypeScript.
@@ -206,28 +210,27 @@ So lets remove `index.html` for now and run the app:
 
 ## TypeScript Typings
 
-At this moment you've likely noticed a message in the console saying that `angular2/core` and `angular2/bootstrap` are not found.
+At this moment you've likely noticed a message in the console saying that `angular2/core` and `angular2/platform/browser` are not found.
 
 It occurs because the TypeScript compiler is configured in the package with diagnostics messages turned on by default and
-the TypeScript compiler doesn't know anything about the location of the `angular2/core` and `angular2/bootstrap` modules. To fix this, you will need to make use of TypeScript declaration files, which is a TypeScript way to inform the compiler about third-party API modules.
+the TypeScript compiler doesn't know anything about the location of the `angular2/core` and `angular2/platform/browser` modules. To fix this, you will need to make use of TypeScript declaration files, which is a TypeScript way to inform the compiler about third-party API modules.
 
-After the first run, you will find the `angular2-meteor.d.ts` file in the new folder called "typings".
-This file has been created by the package at start time and contains a special reference to Angular 2 and Meteor declaration files.
-There are two ways to link `app.ts` and `angular2-meteor.d.ts` together:
+After the first run, a folder called "typings" is created and a new definition file called `angular2-meteor.d.ts` is copied there into a folder with the same name.
+We'll need to link `app.ts` and `angular2-meteor.d.ts` together. There are two ways to achieve that:
 
  - one way is to directly reference `angular2-meteor.d.ts` using a special sugared syntax at the top of `app.ts` as follows:
 
-        /// <reference path="../typings/angular2-meteor.d.ts" />
+        /// <reference path="typings/angular2-meteor/angular2-meteor.d.ts" />
 
         import {Component, View} from 'angular2/core';
 
-        import {bootstrap} from 'angular2/bootstrap';
+        import {bootstrap} from 'angular2/platform/browser';
 
  - another way is to create a custom [TypeScript configuration file](https://github.com/Microsoft/TypeScript/wiki/tsconfig.json) with the "files" property set to include all required typings files.
 
 This configuration file should be called `tsconfig.json` and placed at
-the app root folder. We'll also take a close look at the configuration itself during the "Folder Structure"
-step, including how to configure TypeScript properly to automatically generate your `tsconfig.json` file in different IDEs.
+the app root folder. We'll also take a close look at the configuration itself during
+step 7, including how to configure TypeScript properly to automatically generate your `tsconfig.json` file in different IDEs.
 
 Let's make use of the typings in the second way. Angular 2 and the Meteor API will be
 used in pretty much every file of our app, so adding declaration files manually might become repetitive.
@@ -236,19 +239,44 @@ Now create `tsconfig.json` and add path to `angular2-meteor.d.ts` as follows:
 
 {{> DiffBox tutorialName="meteor-angular2-socially" step="0.8"}}
 
-> Note: if you just loaded your app from a repository, you'll need to re-start it once.
-> This is because Meteor's local hierarchy of files is not yet built at the time the TypeScript compiler accesses them.
+If you look into `angular2-meteor.d.ts`, you'll see there references to Angular 2 and Meteor API.
+It means that we'll need their definition files as well to pull everything together.
+Luckily, besides its own declaration file, Angular2-Meteor installs also Angular 2 definition files as well into the _typings_ folder. 
+These files are distributed via the Angular 2 NPM and Angular2-Meteor uses that NPM internally.
 
+> You only need to periodically remove .d.ts-files in the _typings_ folder, thus, letting the package know that the files need to be updated.
+
+From other side, libraries like Meteor, ES6 Promise etc are so called ambient dependencies, which
+means they provide information about the environment and should be available globally.
+There is least one global repository for typings of such libraries called [DefinitelyTyped](http://definitelytyped.org/).
+In order to install them — thus adding full type-checking support at this stage — we'll use a special tool for typings installation
+and management called `typings`. What's great about this tool is that it can install typings from different locations whether it's a Github repo, local folder, a NPM or even some HTTP path.
+You can find more information about it [here](https://github.com/typings/typings).
+In our case, we'll need to execute commands as follows to install all dependencies:
+
+        npm install typings -g
+
+        typings install meteor --ambient
+
+        typings install es6-promise --ambient
+
+        typings install es6-shim --ambient
+
+If you look into the typings folder after the execution, you'll find there a definition file called `main.d.ts`.
+This is a top level definition file that links all other definition files installed by `typings`.
+Let's add it to the config as well:
+
+{{> DiffBox tutorialName="meteor-angular2-socially" step="0.9"}}
 
 # Templates
 
 Let's make one change. Create a new file called `app.html` under the `client` folder, this will be our main HTML template page:
 
-{{> DiffBox tutorialName="meteor-angular2-socially" step="0.9"}}
+{{> DiffBox tutorialName="meteor-angular2-socially" step="0.10"}}
 
 Change your template in `app.ts` to target `app.html`:
 
-{{> DiffBox tutorialName="meteor-angular2-socially" step="0.10"}}
+{{> DiffBox tutorialName="meteor-angular2-socially" step="0.11"}}
 
 Now our component template will load from the given path specified by `templateUrl`.
 As you can see, we are using an Angular expression inside of `app.html` to check if it works:

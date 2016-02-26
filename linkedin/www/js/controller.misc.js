@@ -134,8 +134,7 @@ function NotificationsProfileCtrl ($scope, $stateParams){
 // For child view of nearby which shows profile of tapped nearby list item. 
 // Locates/caches profile object stored as part of Meteor mongo connections record
 // and populates the default profile template. 
-function NearbyProfileCtrl ($scope, $reactive, $stateParams, Connections){
-  
+function NearbyProfileCtrl ($scope, $reactive, $stateParams ){
   $reactive(this).attach($scope);
 
   var self = this;
@@ -149,10 +148,20 @@ function NearbyProfileCtrl ($scope, $reactive, $stateParams, Connections){
     }
   });
 
-  // Template vars
-  this.user = this.connection.profile;
-  this.user.name = this.user.firstName + ' ' + this.user.lastName;
-  this.viewTitle = this.user.name;
+  $scope.connection = self.connection;
+
+  $scope.$watch('connection', function(newVal, oldVal){
+    if (newVal){
+      self.user = self.connection.profile;
+      self.user.name = self.user.firstName + ' ' + self.user.lastName;
+      self.viewTitle = self.user.name;
+    }
+  });
+
+  /* Template vars
+  self.user = self.connection.profile;
+  self.user.name = self.user.firstName + ' ' + self.user.lastName;
+  self.viewTitle = self.user.name;*/
   
 };
 
@@ -181,13 +190,10 @@ function ProfileCtrl ($scope, LinkedIn){
 function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
    
   var self = this;
-  self.fake = function(){console.log('FAKE')};
 
-  self.ready = function(){
+  $ionicPlatform.ready(function(){
     $state.go('tab.nearby');
-      console.log('FAKE LOG');
-      self.fake();
-
+      
       $timeout(function(){
         var message;
 
@@ -198,8 +204,7 @@ function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
           $state.go('login');
         }
       }, 5000)
-  }
-  $ionicPlatform.ready(self.ready);
+  });
 };
 
 // @controller: SettingsCtrl

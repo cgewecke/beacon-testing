@@ -10,7 +10,8 @@ angular
 	        email: 'nicole@gmail.com', 
 	        profile: { 
 	            id: '777', 
-	            notifications: []
+	            notifications: [],
+	            contacts: []
 	        } 
 	    };
 

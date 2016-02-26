@@ -131,9 +131,7 @@ describe('Small Controllers/Templates', function () {
             
             rejectButton.triggerHandler('click');
             $scope.$apply();
-            expect(vm.reject).toHaveBeenCalled();
-
-            
+            expect(vm.reject).toHaveBeenCalled();      
         })
     });
     
@@ -315,7 +313,7 @@ describe('Small Controllers/Templates', function () {
        
     describe('NotificationsProfileCtrl', function(){
 
-        var $controller, $scope, $reactive, Meteor, user, $stateParams;
+        var $controller, $scope, $reactive, MeteorMock, user, $stateParams;
 
         beforeEach(inject(function(_$controller_, _$rootScope_, _MeteorMock_, _$stateParams_){
             $controller = _$controller_;
@@ -323,7 +321,7 @@ describe('Small Controllers/Templates', function () {
             $stateParams = _$stateParams_;
 
             $reactive = _MeteorMock_.$reactive;
-            Meteor = _MeteorMock_.Meteor;
+            MeteorMock = _MeteorMock_.Meteor;
             user = _MeteorMock_.user;
             
         }));
@@ -332,6 +330,7 @@ describe('Small Controllers/Templates', function () {
                
             user.profile.notifications.push({sender: 'yyy', profile: {firstName: 'xxx', lastName: 'zzz'}});
             $stateParams.sender = 'yyy';
+            Meteor.user = MeteorMock.user;
 
             var vm = $controller('NotificationsProfileCtrl', {$scope, $stateParams});
 
@@ -342,48 +341,68 @@ describe('Small Controllers/Templates', function () {
         });
     })
 
-    /*
     describe('NearbyProfileCtrl', function(){
 
-        var $controller, $scope, $reactive, Meteor, user, connections, Connections, $stateParams;
+        var $controller, $scope, $stateParams, $compile, $templateCache, template, ctrl, test_connection;
 
-        beforeEach(inject(function(_$controller_, _$rootScope_, _MeteorMock_, _$stateParams_){
+        beforeEach(inject(function(_$controller_, _$rootScope_, _$stateParams_, _$compile_, _$templateCache_,
+                                    _MeteorMock_){
+
+
             $controller = _$controller_;
             $scope = _$rootScope_;
             $stateParams = _$stateParams_;
-
-            $reactive = _MeteorMock_.$reactive;
-            Meteor = _MeteorMock_.Meteor;
-            user = _MeteorMock_.user;
-            connections = _MeteorMock_.connections;
-            Connections = _MeteorMock_.Connections;
-        }));
-
-        it('should reactively bind ctrl to Mongo.connection & profile of routes /:userId', function(){
+            $compile = _$compile_; 
+            $templateCache = _$templateCache_;
             
-            connections.push({
+            // Mock user for contact directive
+            Meteor.user = _MeteorMock_.Meteor.user;
+            
+            // Prime mini-mongo w/ connection
+            test_connection = {
                 receiver: '111', 
-                transmitter: user._id, 
+                transmitter: Meteor.user._id, 
                 profile: { 
                     id: '555', 
                     firstName: 'xxx', 
                     lastName: 'zzz'
                 }
+            }
+
+            Connections.insert(test_connection);
+            $stateParams.userId = test_connection.profile.id;
+
+            // Compile Template
+            compileProvider.directive('nearbyProfileTest', function (){
+                return {
+                    controller: 'NearbyProfileCtrl as vm',
+                    template: $templateCache.get('templates/tab-profile.html')
+                }
             });
-
-            $stateParams.userId = '555';
-          
-            var vm = $controller('NearbyProfileCtrl', {$scope, $reactive, $stateParams, Connections});
             
-            expect(vm.connection).toEqual(connections[0]);
+            template = angular.element('<ion-nav-bar><nearby-profile-test></nearby-profile-test></ion-nav-bar');            
+            $compile(template)($scope);
+            $scope.$digest();
 
-            expect(vm.user).toEqual(connections[0].profile);
-            expect(vm.user.name).toEqual(vm.user.firstName + ' ' + vm.user.lastName);
-            expect(vm.viewTitle).toEqual(vm.user.name);
+            ctrl = template.find('nearby-profile-test').controller('nearbyProfileTest');
+
+        }));
+
+        it('should reactively bind ctrl to Mongo.connection & profile of routes /:userId', function(){
+            
+            // Check explicit assignments
+            expect(ctrl.user).toEqual(ctrl.connection.profile);
+            expect(ctrl.viewTitle).toEqual(ctrl.user.name);
+
+            // Implicitly validate helper method
+            expect(ctrl.user.name).toEqual(test_connection.profile.firstName + ' ' + test_connection.profile.lastName);
+            
 
         });
 
     });
+
+    /*
 
     describe('ProfileCtrl', function(){
 

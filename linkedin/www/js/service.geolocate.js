@@ -116,7 +116,6 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	// Error states set lat, long and address to 0,0,'' respectively.
 	self.getAddress = function(){
 
-		MSLog('@GeoLocate:getAddress');
 		var deferred = $q.defer();
 
 		if ($rootScope.DEV){

@@ -19,7 +19,7 @@ describe('Small Controllers/Templates', function () {
 
     
     // Inject $compileProvider so we can spin up directives from the templates
-    // and test the DOM with our mocks.
+    // and test the DOM 
     beforeEach(module(function($compileProvider) {
       compileProvider = $compileProvider;
     }));
@@ -155,7 +155,7 @@ describe('Small Controllers/Templates', function () {
             };
             
             template = angular.element('<ion-nav-bar><notifications-test></notifications-test></ion-nav-bar>');            
-            $compile(template)($scope, null, {transcludeControllers: 'ionNavBar'});
+            $compile(template)($scope);
             $scope.$digest();
 
             ctrl = template.find('notifications-test').controller('notificationsTest');
@@ -420,7 +420,7 @@ describe('Small Controllers/Templates', function () {
 
     describe('LoadingCtrl', function(){
 
-        var $scope, $controller, $ionicPlatform, $state, $httpBackend, $timeout, ionicToast;
+        var $scope, $controller, $ionicPlatform, $state, $httpBackend, $timeout, ionicToast, mock_status;
 
         beforeEach(inject(function(_$rootScope_,_$controller_, _$ionicPlatform_, _$state_, 
                                    _$timeout_, _ionicToast_, _$httpBackend_){
@@ -432,25 +432,43 @@ describe('Small Controllers/Templates', function () {
             $ionicPlatform = _$ionicPlatform_;
             ionicToast = _ionicToast_;
             $httpBackend = _$httpBackend_;
+
+            Meteor.status = function() { return {status: mock_status } };
+
+            spyOn($ionicPlatform, 'ready').and.callThrough();
+            spyOn($state, 'go');
+            spyOn(ionicToast, 'show');
+
+            var vm = $controller('LoadingCtrl', {$ionicPlatform: $ionicPlatform, $state: $state, $timeout, ionicToast });
+            
+            $scope.$digest();
         }));
 
-        it('LoadingCtrl: should navigate to tab.nearby on ionicPlatform ready', function(){
 
-            //$ionicPlatform.ready = function(fn){};
-            //$httpBackend.expect('JSONP', /(.*)/ ).respond(200);
 
-            //var vm = $controller('LoadingCtrl', {$ionicPlatform: $ionicPlatform, $state: $state, $timeout, ionicToast });
-            
-            //spyOn($ionicPlatform, 'ready').and.callThrough();
-            //spyOn($state, 'go');
+        it('it should navigate to tab.nearby on ionicPlatform ready', function(){
 
-            //$scope.$digest();
-            //$httpBackend.flush();
-
-            //expect($ionicPlatform.ready).toHaveBeenCalled(); 
-            //expect($state.go).toHaveBeenCalledWith('tab.nearby');
+            expect($ionicPlatform.ready).toHaveBeenCalled(); 
+            expect($state.go).toHaveBeenCalledWith('tab.nearby');
             
         });
+
+        it('it should handle "no connection to meteor" state: (route resolve hang bug)', function(){
+
+            mock_status = 'not_connected';
+            $timeout.flush();
+            expect(ionicToast.show).toHaveBeenCalled();
+            expect($state.go).toHaveBeenCalledWith('login');
+        });
+
+        it('it should handle "connection to meteor ok" state', function(){
+
+            mock_status = 'connected';
+            $timeout.flush();
+            expect(ionicToast.show).not.toHaveBeenCalled();
+            expect($state.go).not.toHaveBeenCalledWith('login');
+        })
+        
 
     });
         

@@ -4,7 +4,7 @@ describe('Directive: <add-contact>', function () {
     beforeEach(module('linkedin'));    // Application
     beforeEach(module('mocks'));  // Mocked Meteor services, collections
 
-    var $controller, $scope, $compile, $templateCache, $reactive, $inject, 
+    var $scope, $compile,  
     	user, template, initTemplate, scope;
 
     var penelope = {
@@ -17,13 +17,12 @@ describe('Directive: <add-contact>', function () {
     	pictureUrl: 'http://hello.com'
     };
 
-    beforeEach(inject(function(_$controller_, _$rootScope_, _Mock_, _$compile_){
+    beforeEach(inject(function(_$rootScope_, _$compile_, _Mock_ ){
         
-        $controller = _$controller_;
         $scope = _$rootScope_;
         $compile = _$compile_;
 
-        $reactive = _Mock_.$reactive;
+        // Meteor
         Meteor.user = _Mock_.Meteor.user;
         user = _Mock_.user;
 
@@ -39,7 +38,7 @@ describe('Directive: <add-contact>', function () {
         };
     }));
 
-    it('should initialize scope correctly when current user DOES NOT have contact', function(){
+    it('should initialize correctly when current user DOES NOT have contact', function(){
 
     	initTemplate();
     	expect(scope.currentUserId).toEqual(user.username);
@@ -57,7 +56,7 @@ describe('Directive: <add-contact>', function () {
 
     });
 
-    it('should show/hide itself appropriately if contact pre-exists', function(){
+    it('should hide itself if contact already exists', function(){
 
     	initTemplate();
     	
@@ -79,7 +78,7 @@ describe('Directive: <add-contact>', function () {
     	expect(template.hasClass('ng-hide')).toBe(true);
     });
 
-    it('should wire the add button to createContact()', function(){
+    it('should wire its button to fn: createContact()', function(){
     	var button;
 
     	initTemplate();
@@ -99,7 +98,6 @@ describe('Directive: <add-contact>', function () {
 
     	beforeEach(inject(function(_$cordovaContacts_, _Mock_, _$q_, _$timeout_ ){
     		$cordovaContacts = _$cordovaContacts_;
-	        $cordovaContacts.save = _Mock_.$cordovaContacts.save;
 	        $timeout = _$timeout_;
 
 	        defer = _$q_.defer();
@@ -118,21 +116,16 @@ describe('Directive: <add-contact>', function () {
 				"birthday": Date('5/5/1973')
 			};
 
-			success = function(){
-
-				spyOn(Meteor, 'call');
-				$timeout.flush();
-				console.log('running success')
-				expect(scope.contactAdded).toEqual(true);
-				expect(Meteor.call).toHaveBeenCalledWith('addContact', scope.user.id);
-			}
+            $cordovaContacts.save = function(info){
+                return defer.promise;
+            }
     	}))
 
 
 	    it('should correctly format the contact info for iOS', function(){
     		initTemplate();
     		
-   			spyOn($cordovaContacts, 'save').and.returnValue(defer.promise);
+   			spyOn($cordovaContacts, 'save').and.callThrough();
     		scope.createContact();
 
     		expect($cordovaContacts.save).toHaveBeenCalledWith(expected_info);
@@ -141,20 +134,20 @@ describe('Directive: <add-contact>', function () {
 
     	it('should update DOM and the users Meteor record if contact add is succesful', function(){
 
-    		defer.resolve();
-    		$cordovaContacts.save = function() { return defer.promise };
-    		
     		initTemplate();
-    	
-    		// TRYING TO FIGURE THIS OUT
-    		//$cordovaContacts.save(expected_info)
-    		//	.then(function(){ })
-    			
+            
+            spyOn($cordovaContacts, 'save').and.callThrough();
+            spyOn(Meteor, 'call');
 
-    		//$scope.$digest();
-    	} )
+            defer.resolve();
+            scope.createContact();
 
+            $scope.$digest();
+            $timeout.flush(1200);
 
-
+            expect(scope.contactAdded).toEqual(true);
+            expect(Meteor.call).toHaveBeenCalledWith('addContact', scope.user.id)
+            
+    	})
     })
 });

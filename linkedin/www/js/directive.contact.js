@@ -51,7 +51,7 @@ function AddContact($cordovaContacts, $timeout, $auth){
           // onto the users list of added contacts
           scope.createContact = function(){
             
-            MSLog('@NearbyProfileCtrl:createContact');
+            //MSLog('@NearbyProfileCtrl:createContact');
 
             var contactInfo ={
               "displayName": scope.user.name,
@@ -67,12 +67,12 @@ function AddContact($cordovaContacts, $timeout, $auth){
               "birthday": Date('5/5/1973')
             };
             
-            console.log('running createContact');
+      
             scope.flasher = true;
             $cordovaContacts.save(contactInfo).then(function(result) {
-                console.log('running post save');
+              
                 $timeout(function(){
-                
+                    
                     scope.exit = true;
                     scope.contactAdded = true;
                     Meteor.call('addContact', scope.user.id); 

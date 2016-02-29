@@ -44,7 +44,7 @@ describe('Service: Beacons', function () {
     });
 
 
-    describe('getUUID', function(){
+    describe('getUUID()', function(){
 
         var expected_UUID = "D4FB5D93-B1EF-42CE-8C08-CF11685714EB";
         var expected_index = 1;
@@ -55,7 +55,7 @@ describe('Service: Beacons', function () {
         });
     });
 
-    describe('initialize', function(){
+    describe('initialize()', function(){
 
         it('should return immediately if service has already initialized', function(){
 

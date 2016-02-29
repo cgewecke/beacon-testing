@@ -31,10 +31,12 @@ module.exports = function(config) {
         'www/lib/ngCordova/dist/ng-cordova.js',
         'www/lib/ng-cordova-oauth/dist/ng-cordova-oauth.min.js',
         'www/lib/ionic-toast/dist/ionic-toast.bundle.min.js',
+        'www/lib/leaflet/leaflet.js',
+        'www/lib/leaflet-pulse-icon/src/L.Icon.Pulse.js',
         'www/js/*.js',
         'www/templates/*.html',
 
-        //'tests/controllers/*.js',
+        'tests/controllers/*.js',
         'tests/services/*.js',
         'tests/mocks/*.js',
         'tests/util/*.js',

@@ -1,3 +1,5 @@
+var gl_debug;
+
 // @component: GeoLocate - a service and directive 
 // for Geolocation, reverse geocoding, and map display
 angular.module('linkedin')
@@ -8,12 +10,15 @@ angular.module('linkedin')
 //@ params: 'slide' binds to a variable in the outer scope. If slide's val is '1',
 //  		the map is either initialized or updated. e.g. updates triggered on the slide
 //  		coming into view.
-function BeaconMap(GeoLocate, $rootScope){
+function BeaconMap(GeoLocate){
     return {
        restrict: 'E',   
        scope: {slide: '=slide'},
        template: '<div id="map"></div>',
        link: function searchboxEventHandlers(scope, elem, attrs){
+
+       		// Unit Testing exposure
+       		scope.GeoLocate = GeoLocate;
 
        		// Map must be a fixed size, so expand for IPad
 			ionic.Platform.isIPad() ? elem.addClass('ipad') : false;
@@ -37,7 +42,7 @@ function BeaconMap(GeoLocate, $rootScope){
 // 
 function GeoLocate($rootScope, $q, $cordovaGeolocation){
 
-	var icon, map, marker;
+	var icon, map;
 	var self = this;
 
 	// $cordovaGeolocation options
@@ -53,6 +58,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	self.address = null;
 	self.enabled = false;
 	self.map = null;
+	self.marker = null;
 
 	// @function: setup
 	//
@@ -85,7 +91,9 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 	// Loads a Leaflet map with MapBox titles using devices current coordinate
 	self.loadMap = function(){
 		self.getAddress().then(function(){
-          self.map = L.map('map').setView([self.lat, self.lng], 16);
+
+          self.map = L.map('map');
+          self.map.setView([self.lat, self.lng], 16);
           L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
               attribution: '',
               zoomControl: false,
@@ -94,7 +102,8 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
           }).addTo(self.map);
 
           icon = L.icon.pulse({iconSize:[17,17], color:'#387EF5'});
-          marker = L.marker([self.lat, self.lng],{icon: icon}).addTo(self.map);
+          self.marker = L.marker([self.lat, self.lng],{icon: icon}).addTo(self.map);
+
         });
 	};
 
@@ -104,7 +113,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
 
 		self.getAddress().then(function(){
           self.map.setView([self.lat, self.lng], 16);
-          marker.setLatLng([self.lat, self.lng]);
+          self.marker.setLatLng([self.lat, self.lng]);
         });
 	}
 
@@ -147,7 +156,7 @@ function GeoLocate($rootScope, $q, $cordovaGeolocation){
            				// Reverse Geocode
            				geocoder.geocode({ 'latLng': latlng }, function (results, status) {
                 
-			                if (status == google.maps.GeocoderStatus.OK) {
+			                if (status === google.maps.GeocoderStatus.OK) {
 			                    
 			                  // OK
 			                  if (results[1]) {

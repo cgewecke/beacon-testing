@@ -23,7 +23,9 @@ describe('Service: Beacons', function () {
 
         Beacons = _Beacons_;
         Mock = _Mock_;
+        Meteor.user = Mock.Meteor.user;
         mockRegion = 'mockRegion';
+
 
         defer = $q.defer();
 
@@ -101,7 +103,6 @@ describe('Service: Beacons', function () {
 
         it('should begin advertising as the user', function(){
             var profile = Mock.user.profile;
-            Meteor.user = Mock.Meteor.user;
             
             spyOn($cordovaBeacon, 'createBeaconRegion').and.callThrough();
             spyOn($cordovaBeacon, 'startAdvertising');

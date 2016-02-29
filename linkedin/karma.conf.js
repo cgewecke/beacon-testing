@@ -34,7 +34,7 @@ module.exports = function(config) {
         'www/js/*.js',
         'www/templates/*.html',
 
-        'tests/controllers/*.js',
+        //'tests/controllers/*.js',
         'tests/services/*.js',
         'tests/mocks/*.js',
         'tests/util/*.js',
@@ -44,7 +44,7 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-     //'../www/js/mongo.collections.js'
+
     ],
 
     browsers: [

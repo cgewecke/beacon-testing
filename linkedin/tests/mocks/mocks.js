@@ -10,6 +10,10 @@ angular
 	        email: 'nicole@gmail.com', 
 	        profile: { 
 	            id: '777', 
+	            beaconName: 'x',
+	            appId: 'y',
+	            major: 0,
+	            minor: 1,
 	            notifications: [],
 	            contacts: []
 	        } 

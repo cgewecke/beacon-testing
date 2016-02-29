@@ -1,7 +1,5 @@
 "use strict"
 var test_debug;
-//var Meteor;
-//var Connections;
 
 describe('Small Controllers/Templates', function () {
     

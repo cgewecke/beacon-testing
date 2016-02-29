@@ -1,3 +1,5 @@
+"use strict"
+
 describe('Directive: <server-status>', function () {
     
     beforeEach(module('templates'));   // ng-html2js template cache
@@ -19,6 +21,8 @@ describe('Directive: <server-status>', function () {
 
         // Allows us to initialize template against different mock users
         initTemplate = function(){
+
+            // 'ion-nav-buttons' requires the ion-nav-bar controller, unfortunately.
             template = angular.element('<ion-nav-bar><server-status></server-status></ion-nav-bar>');            
             $compile(template)($scope);
             $scope.$digest();

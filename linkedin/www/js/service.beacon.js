@@ -1,5 +1,5 @@
 // @service: Beacons
-// Handles initializing, transmitting and receiving of beacon signals
+// Handlers for initializing, transmitting and receiving of beacon signals
 angular.module('linkedin')
   .service("Beacons", Beacons);
 
@@ -23,7 +23,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 	];
 
 
-    var regions = [];
+    self.regions = [];
     
     // ------------------------  Public ---------------------------------
 	self.quantity = uuids.length;
@@ -57,12 +57,12 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 		$cordovaBeacon.requestAlwaysAuthorization();
 
 		// Monitor all uuids
-		angular.forEach(regions, function(region){
+		angular.forEach(self.regions, function(region){
             $cordovaBeacon.startMonitoringForRegion(region);
         });
 
         // Range for all regions
-        angular.forEach(regions, function(region){
+        angular.forEach(self.regions, function(region){
             $cordovaBeacon.startRangingBeaconsInRegion(region);
         });
 
@@ -109,7 +109,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
     // setUpRegions(): initialize an array beaconRegion obj of all our possible uuid vals
     function setUpRegions(){
         for (var i = 0; i < uuids.length; i++){
-            regions.push( $cordovaBeacon.createBeaconRegion('r_' + i, uuids[i], null, null, true));
+            self.regions.push( $cordovaBeacon.createBeaconRegion('r_' + i, uuids[i], null, null, true));
         }
     };
     
@@ -143,11 +143,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
                receiver: receiver,
             };
             
-            Meteor.call('disconnect', pkg, function(err, success){
-                (err) ? 
-                    MSLog(JSON.stringify(err)) : 
-                    MSLog(JSON.stringify(success)); 
-            });
+            Meteor.call('disconnect', pkg);
 
         } else {
             MSLog("@beacon:disconnect. Error: receiver - " + receiver);
@@ -178,7 +174,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
                    proximity: beacon.proximity 
                 };
                 
-                Meteor.call('newConnection', pkg, function(err, result){});
+                Meteor.call('newConnection', pkg);
                 
             })
         }

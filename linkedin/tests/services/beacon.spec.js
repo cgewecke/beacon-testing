@@ -153,7 +153,7 @@ describe('Service: Beacons', function () {
         })
     });
 
-    describe('Response to event: $cordovaBeacon:didRangeBeaconsInRegion', function(){
+    describe('$on(): $cordovaBeacon:didRangeBeaconsInRegion', function(){
 
         var mock_storage_id, mock_beacons;
 
@@ -192,7 +192,7 @@ describe('Service: Beacons', function () {
 
     });
 
-    describe('Response to event: $cordovaBeacon:didExitRegion', function(){
+    describe('$on(): $cordovaBeacon:didExitRegion', function(){
 
         var mock_storage_id, mock_beacons;
 

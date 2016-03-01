@@ -17,11 +17,9 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	
 		var deferred = $q.defer();
 
-		if($rootScope.DEV || !Meteor.user()){
+		if($rootScope.DEV || !Meteor.user()){ deferred.resolve(); return deferred.promise }
 
-			deferred.resolve();
-
-		} else if (!Meteor.user().profile.pushToken || window.localStorage['pl_newInstall'] === 'true') {
+		if (!Meteor.user().profile.pushToken || window.localStorage['pl_newInstall'] === 'true') {
 			MSLog('@Notify:initialize - attempting to register for APNS');
 
 			var iosConfig = {
@@ -57,7 +55,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 		if (!LinkedIn.me) return;
 
 		GeoLocate.getAddress().then(function(location){
-			
+	
 			var info = {
 				target: userId,
 				notification: {
@@ -72,13 +70,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 				
 			};
 
-			Meteor.call('notify', info, function(err, result){
-				if (!err){
-					return result;
-				} else {
-					MSLog('@Notify:sawProfile: failed');
-				}
-			});
+			Meteor.call('notify', info);
 		});		
 	};
 
@@ -86,13 +78,7 @@ function Notify($q, $rootScope, LinkedIn, GeoLocate, $cordovaPush){
 	// Toggles flag server side to disable badge in notifications tab 
 	self.checkedNotifications = function(){
 
-		Meteor.call('resetNotifyCounter', null, function(err, result){
-			if (!err){
-				return result;
-			} else {
-				MSLog('@Notify:checkedNotifications: failed ');
-			}
-		});
+		Meteor.call('resetNotifyCounter', null);
 		return true;
 	};
 

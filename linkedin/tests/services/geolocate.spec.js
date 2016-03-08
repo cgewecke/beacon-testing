@@ -1,5 +1,6 @@
 "use strict"
 var gl_debug;
+
 // Global Google variable mock for object we get over http at index.html
 var google;
 

@@ -1,5 +1,5 @@
 //utilities.js
-
+var GLOBAL_TESTING = false;
 function MSLog(message){
 	
 	if (GLOBAL_TESTING) return;

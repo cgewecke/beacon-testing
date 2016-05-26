@@ -4,9 +4,10 @@ angular.module('linkedin')
   .service("Beacons", Beacons);
 
 
-function Beacons($rootScope, $q, $cordovaBeacon){
+function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
 
 	var self = this;
+   var old_uuid = 0;
 
     // The set of uuids to monitor for
 	var uuids = [
@@ -70,14 +71,14 @@ function Beacons($rootScope, $q, $cordovaBeacon){
         $rootScope.$on("$cordovaBeacon:didEnterRegion", function(event, result){
             onEntry(result);
         });
-		$rootScope.$on("$cordovaBeacon:didExitRegion", function(event, result){
+		  $rootScope.$on("$cordovaBeacon:didExitRegion", function(event, result){
             onExit(result);
         });
         $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function(event, result){
             onCapture(result);
         });
 
-        // Transmit
+        /* Transmit: Disabled for 
         profile = Meteor.user().profile;
         appBeacon = $cordovaBeacon.createBeaconRegion(
             profile.beaconName,
@@ -87,6 +88,16 @@ function Beacons($rootScope, $q, $cordovaBeacon){
             true
         );
         $cordovaBeacon.startAdvertising(appBeacon);
+        */
+
+        $cordovaBluetoothLE.initialize({request: true}).then(null,
+          function(obj) {
+            Meteor.call('ping', 'Initialized BLE:' + JSON.stringify(obj));
+          },
+          function(obj) {
+            Meteor.call('ping', 'Failed to initialize BLE:' + JSON.stringify(obj));
+          }
+        );
 
         // Check authorization before resolving. Remove newInstall key 
         // from local storage so that a pw/login will redirect to the settings
@@ -142,7 +153,7 @@ function Beacons($rootScope, $q, $cordovaBeacon){
                transmitter: beacon.uuid,
                receiver: receiver,
             };
-            
+            old_uuid = null;
             Meteor.call('disconnect', pkg);
 
         } else {
@@ -158,9 +169,9 @@ function Beacons($rootScope, $q, $cordovaBeacon){
     // attempts to create a connection record in the meteor DB.  
     function onCapture(result){
 
-        var beacons = result.beacons
+         var beacons = result.beacons
 
-        if (beacons.length){
+         if (beacons.length && (old_uuid != beacons[0].uuid)){
     
             var localId = window.localStorage['pl_id'];
             var receiver = (localId != undefined) ? localId : Meteor.user().emails[0].address;           
@@ -170,14 +181,42 @@ function Beacons($rootScope, $q, $cordovaBeacon){
 
                 pkg = {
                    transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid,
-                   receiver: receiver,
+                   //receiver: receiver,
                    proximity: beacon.proximity 
                 };
                 
-                Meteor.call('newConnection', pkg);
-                
-            })
-        }
-    };
+               old_uuid = beacon.uuid;
+               Meteor.call('ping', 'Captured: ' + beacon.uuid);
 
+               $cordovaBluetoothLE.startScan({services:['56D2E78E-FACE-44C4-A786-1763EA8E4302']}).then(null,
+                  function(obj) {
+                     //Handle errors
+                     Meteor.call('ping', 'START SCAN FAILURE: ' + JSON.stringify(obj));
+                  },
+                  function(obj) {
+                     if (obj.status == "scanResult") {
+                       Meteor.call( 'ping', 'SCAN RESULT: ' + JSON.stringify(obj));
+                       
+                        $cordovaBluetoothLE.stopScan().then(null,
+                          function(obj){
+                              Meteor.call( 'ping', 'SCAN STOPPED SUCCESS: ' + JSON.stringify(obj));
+                          },
+                          function(obj){
+                              Meteor.call( 'ping', 'SCAN STOPPED FAILURE: ' + JSON.stringify(obj));
+                          }
+                        );
+                     }
+                     else if (obj.status == "scanStarted"){
+                       Meteor.call( 'ping', 'SCAN STARTED: ' + JSON.stringify(obj));
+                     }
+                  }
+               );
+
+                
+            });
+
+
+        
+         };
+      };
 }

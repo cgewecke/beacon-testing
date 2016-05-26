@@ -29,6 +29,18 @@ function config ($stateProvider, $urlRouterProvider, $angularMeteorSettings) {
       controllerAs: 'vm'
   })
 
+  .state('testing', {
+      url: '/testing',
+      templateUrl: 'templates/testing.html',
+      controller: 'TestingCtrl',
+      controllerAs: 'vm',
+      resolve: {
+         beacons: ['Beacons', function(Beacons){
+            return Beacons.initialize();
+         }]
+      }
+  })
+
   // setup an abstract state for the tabs directive
   .state('tab', {
     url: '/tab',

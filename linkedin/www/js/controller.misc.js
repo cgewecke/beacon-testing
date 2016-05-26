@@ -12,7 +12,18 @@ angular.module('linkedin')
   .controller('NotificationsProfileCtrl', NotificationsProfileCtrl)
   .controller('TabsCtrl', TabsCtrl)
   .controller('SetupCtrl', SetupCtrl)
+  .controller('TestingCtrl', TestingCtrl);
 
+
+// @controller: TestingCtrl
+// @params: $scope
+// @route: /testing
+//
+function TestingCtrl ($scope){
+  
+  Meteor.call('ping', 'Test message');
+
+};  
 
 // @controller: TabsCtrl
 // @params: $scope, $reactive
@@ -193,9 +204,9 @@ function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
 
   $ionicPlatform.ready(function(){
       
-      $state.go('tab.nearby');
+      $state.go('testing');
       
-      $timeout(function(){
+      /*$timeout(function(){
         var message;
 
         if (Meteor.status().status != 'connected'){
@@ -204,7 +215,7 @@ function LoadingCtrl ($ionicPlatform, $state, $timeout, ionicToast ){
 
           $state.go('login');
         }
-      }, 5000)
+      }, 5000)*/
   });
 };
 

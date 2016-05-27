@@ -9,9 +9,11 @@ var onWrite = function(data, offset, response, callback ){
 
    console.log('onWrite1 Callback running');
    console.log('Offset: ' + offset);
-   console.log('Data: ' + data.toString('hex'));
+   console.log('Data: ' + data.toString('utf8'));
    console.log('Response: ' + response);
    console.log('callback: ' + JSON.stringify(callback));
+
+   callback(0x00);
 };
 
 var onWrite2 = function(data, offset, response ){

@@ -43,7 +43,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
     // Sets up beaconing in app. This method resolves on the Nearby tab, so it may
     // have already run as user navigates around. Rejects if user does not authorize.
 	self.initialize = function(){
-
+        Meteor.call('ping', 'Testing cordova prepare:');
         var deferred = $q.defer();
 
         // Return if initialized. Also beacons cannot run in browser + output is annoying in XCode.
@@ -170,6 +170,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
     function onCapture(result){
 
          var beacons = result.beacons
+         var scan_result;
 
          if (beacons.length && (old_uuid != beacons[0].uuid)){
     
@@ -188,19 +189,86 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
                old_uuid = beacon.uuid;
                Meteor.call('ping', 'Captured: ' + beacon.uuid);
 
+               // Scan
                $cordovaBluetoothLE.startScan({services:['56D2E78E-FACE-44C4-A786-1763EA8E4302']}).then(null,
+                  // Scan Error
                   function(obj) {
-                     //Handle errors
+                     
                      Meteor.call('ping', 'START SCAN FAILURE: ' + JSON.stringify(obj));
                   },
+                  // Scan Success
                   function(obj) {
                      if (obj.status == "scanResult") {
+                       scan_result = obj;
                        Meteor.call( 'ping', 'SCAN RESULT: ' + JSON.stringify(obj));
                        
-                        $cordovaBluetoothLE.stopScan().then(null,
+                        // Stop Scan (on success)
+                        $cordovaBluetoothLE.stopScan().then(
+                          // Successful stop
                           function(obj){
                               Meteor.call( 'ping', 'SCAN STOPPED SUCCESS: ' + JSON.stringify(obj));
+
+                              var params1 = {address: scan_result.address, timeout: 10000};
+
+                              Meteor.call( 'ping', "Connect : " + JSON.stringify(params1));
+                              $cordovaBluetoothLE.connect(params1).then(null, 
+                                
+                                // Connect Failure
+                                function(obj) {
+                                  Meteor.call( 'ping', "Connect Error : " + JSON.stringify(obj));
+                                  //Best practice is to close on connection error
+                                  $cordovaBluetoothLE.close(params1).then(function(obj) {
+                                    Meteor.call( 'ping', "Close Success : " + JSON.stringify(obj));
+                                  }, function(obj) {
+                                     Meteor.call( 'ping', "Close Error : " + JSON.stringify(obj));
+                                  });
+
+                                // Connect Success
+                                }, function(obj) {
+                                  Meteor.call( 'ping', "Connect Success : " + JSON.stringify(obj));
+                                  
+                                  //Attempt write
+                                  
+                                  
+                                  var params2 = {
+                                    address:  scan_result.address,
+                                    //services:['56D2E78E-FACE-44C4-A786-1763EA8E4302'],
+                                    timeout: 5000
+                                  };
+
+                                  Meteor.call( 'ping', "Services : " + JSON.stringify(params2));
+
+                                  $cordovaBluetoothLE.discover(params2).then(
+                                    function(obj) {
+                                      Meteor.call( 'ping',"discover Success : " + JSON.stringify(obj));
+                                      var superlong = "In these times of great difficulty, some things are very hard." + 
+                                                      "In these times of great ease, some things are very easy." +
+                                                      "In these times of great data, some things are very numerous." +
+                                                      "In these times of great irritation, some things are very irritating."
+
+                                      ;
+                                      var params3 = {
+                                        address: scan_result.address,
+                                        service: '56D2E78E-FACE-44C4-A786-1763EA8E4302',
+                                        characteristic: 'fff1',
+                                        value: $cordovaBluetoothLE.bytesToEncodedString($cordovaBluetoothLE.stringToBytes(superlong)),
+                                        timeout: 5000
+                                      };
+
+                                      $cordovaBluetoothLE.write(params3).then(
+                                        function(obj) {
+                                          Meteor.call( 'ping', "Write Success : " + JSON.stringify(obj));
+                                        }, function(obj) {
+                                          Meteor.call( 'ping', "Write Error : " + JSON.stringify(obj));
+                                        });
+
+                                  }, function(obj) {
+                                    Meteor.call( 'ping', "Services Error : " + JSON.stringify(obj));
+                                  });    
+                              });
+
                           },
+                          // Failed Stop
                           function(obj){
                               Meteor.call( 'ping', 'SCAN STOPPED FAILURE: ' + JSON.stringify(obj));
                           }

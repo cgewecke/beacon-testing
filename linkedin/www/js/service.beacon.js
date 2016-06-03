@@ -6,30 +6,34 @@ angular.module('linkedin')
 
 function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
 
-	var self = this;
-   var old_uuid = 0;
+    var self = this;
 
     // The set of uuids to monitor for
-	var uuids = [
-		"4F7C5946-87BB-4C50-8051-D503CEBA2F19", //1
-		"D4FB5D93-B1EF-42CE-8C08-CF11685714EB", //2
-		"98983597-F322-4DC3-A36C-72052BF6D612", //3
-		"8960D5AB-3CFA-46E8-ADE2-26A3FB462053", //4
-		"458735FA-E270-4746-B73E-E0C88EA6BEE0", //5
-		"01EC8B5B-B7DB-4D65-949C-81F4FD808A1A", //6
-		"33A93F3C-9CAA-4D39-942A-6659AD039232", //7
-		"774D64CA-91C9-4C3A-8DA3-221D9CF755E7", //8
-		"9BD991F7-0CB9-4FA7-A075-B3AB1B9CFAC8", //9
-		"05DEE885-E723-438F-B733-409E4DBFA694", //10
-	];
+    var uuids = [
+        "4F7C5946-87BB-4C50-8051-D503CEBA2F19", //1
+        "D4FB5D93-B1EF-42CE-8C08-CF11685714EB", //2
+        "98983597-F322-4DC3-A36C-72052BF6D612", //3
+        "8960D5AB-3CFA-46E8-ADE2-26A3FB462053", //4
+        "458735FA-E270-4746-B73E-E0C88EA6BEE0", //5
+        "01EC8B5B-B7DB-4D65-949C-81F4FD808A1A", //6
+        "33A93F3C-9CAA-4D39-942A-6659AD039232", //7
+        "774D64CA-91C9-4C3A-8DA3-221D9CF755E7", //8
+        "9BD991F7-0CB9-4FA7-A075-B3AB1B9CFAC8", //9
+        "05DEE885-E723-438F-B733-409E4DBFA694", //10
+    ];
 
+    // ------------------------  Logger Utility --------------------------
+    var logger = function(msg, obj){
+        Meteor.call('ping', msg + ' ' + JSON.stringify(obj));
+    }
 
-    self.regions = [];
-    
     // ------------------------  Public ---------------------------------
-	self.quantity = uuids.length;
+    self.regions = [];
+    self.quantity = uuids.length;
     self.initialized = false;
-    
+    self.midTransaction = false;
+    self.capture = true;
+
     // @function: getUUID 
     // Exposes the uuid array. In LoginCtrl, the modulus of the Beacon minor and the 
     // uuid array side is used to select a uuid. This allows them to be distributed evenly 
@@ -39,11 +43,11 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
         return uuids[index];
     };
 
-	// @function initialize() 
+    // @function initialize() 
     // Sets up beaconing in app. This method resolves on the Nearby tab, so it may
     // have already run as user navigates around. Rejects if user does not authorize.
-	self.initialize = function(){
-        Meteor.call('ping', 'Testing cordova prepare:');
+    self.initialize = function(){
+        logger('Init: Testing cordova prepare:', null);
         var deferred = $q.defer();
 
         // Return if initialized. Also beacons cannot run in browser + output is annoying in XCode.
@@ -51,14 +55,14 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
            
         MSLog('@beacons:initialize');
 
-		var profile, appBeacon;
+        var profile, appBeacon;
 
         // Init region array. Set device to wake app up when killed/backgrounded
         setUpRegions();
-		$cordovaBeacon.requestAlwaysAuthorization();
+        $cordovaBeacon.requestAlwaysAuthorization();
 
-		// Monitor all uuids
-		angular.forEach(self.regions, function(region){
+        // Monitor all uuids
+        angular.forEach(self.regions, function(region){
             $cordovaBeacon.startMonitoringForRegion(region);
         });
 
@@ -71,33 +75,21 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
         $rootScope.$on("$cordovaBeacon:didEnterRegion", function(event, result){
             onEntry(result);
         });
-		  $rootScope.$on("$cordovaBeacon:didExitRegion", function(event, result){
+          $rootScope.$on("$cordovaBeacon:didExitRegion", function(event, result){
             onExit(result);
         });
         $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function(event, result){
             onCapture(result);
         });
 
-        /* Transmit: Disabled for 
-        profile = Meteor.user().profile;
-        appBeacon = $cordovaBeacon.createBeaconRegion(
-            profile.beaconName,
-            profile.appId,
-            parseInt(profile.major),
-            parseInt(profile.minor),
-            true
-        );
-        $cordovaBeacon.startAdvertising(appBeacon);
-        */
+        // Initialize connection to BLE peripheral 
+        if (!$cordovaBluetoothLE.isInitialized()){
 
-        $cordovaBluetoothLE.initialize({request: true}).then(null,
-          function(obj) {
-            Meteor.call('ping', 'Initialized BLE:' + JSON.stringify(obj));
-          },
-          function(obj) {
-            Meteor.call('ping', 'Failed to initialize BLE:' + JSON.stringify(obj));
-          }
-        );
+            $cordovaBluetoothLE.initialize({request: true}).then(null,
+              function(obj) { logger('Initialized BLE:', obj) },
+              function(obj) { logger('Failed to initialize BLE:', obj) }
+            );
+        };
 
         // Check authorization before resolving. Remove newInstall key 
         // from local storage so that a pw/login will redirect to the settings
@@ -114,7 +106,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
         );
         
         return deferred;
-	};
+    };
 
     // ------------------------  Private ---------------------------------
     // setUpRegions(): initialize an array beaconRegion obj of all our possible uuid vals
@@ -124,14 +116,6 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
         }
     };
     
-    // @function onEntry
-    // Stub. Called when monitoring enters a region. This is not run if waking up from the background, so
-    // basically useless.
-    function onEntry(result){
-   
-       MSLog('@beacons:onEntry');
-    };
-
     // @function: onExit
     // @param: result (this only contains uuid, not major/minor)
     // Called when monitoring exits a region. Pulls app identifier from local storage and
@@ -153,7 +137,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
                transmitter: beacon.uuid,
                receiver: receiver,
             };
-            old_uuid = null;
+            self.capture = true;
             Meteor.call('disconnect', pkg);
 
         } else {
@@ -170,97 +154,64 @@ function Beacons($rootScope, $q, $cordovaBeacon, $cordovaBluetoothLE){
     function onCapture(result){
 
          var beacons = result.beacons
-         var scan_result;
+         var test_uuid = '56D2E78E-FACE-44C4-A786-1763EA8E4302';
+         var scan_result, pkg, beacon;
 
-         if (beacons.length && (old_uuid != beacons[0].uuid)){
-    
-            var localId = window.localStorage['pl_id'];
-            var receiver = (localId != undefined) ? localId : Meteor.user().emails[0].address;           
-            var transmitter, pkg;
+         if (beacons.length && self.midTransaction = false && self.capture ){
+          
+            self.midTransaction = true;
+            self.capture = false;
+            self.scanState = false;
 
-            angular.forEach(beacons, function(beacon){
+            beacon = beacon[0];
+            logger('Captured: ', beacon.uuid );
+            
+            pkg = {
+               transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid,
+               proximity: beacon.proximity 
+            };
+      
+            linkUp(test_uuid).then(
+                self.scanState = true;
+                function(device){
+                    
 
-                pkg = {
-                   transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid,
-                   //receiver: receiver,
-                   proximity: beacon.proximity 
-                };
-                
-               old_uuid = beacon.uuid;
-               Meteor.call('ping', 'Captured: ' + beacon.uuid);
+                    hasTx(user, pkg.transmitter).then(
+                        function(tx){
 
-               // Scan
-               $cordovaBluetoothLE.startScan({services:['56D2E78E-FACE-44C4-A786-1763EA8E4302']}).then(null,
-                  // Scan Error
-                  function(obj) {
-                     
-                     Meteor.call('ping', 'START SCAN FAILURE: ' + JSON.stringify(obj));
-                  },
-                  // Scan Success
-                  function(obj) {
-                     if (obj.status == "scanResult") {
-                       scan_result = obj;
-                       Meteor.call( 'ping', 'SCAN RESULT: ' + JSON.stringify(obj));
-                       
-                        // Stop Scan (on success)
-                        $cordovaBluetoothLE.stopScan().then(
-                          // Successful stop
-                          function(obj){
-                              Meteor.call( 'ping', 'SCAN STOPPED SUCCESS: ' + JSON.stringify(obj));
+                            
+                            if (canTx())
 
-                              var params1 = {address: scan_result.address, timeout: 10000};
+                        },
+                        function(error){
 
-                              Meteor.call( 'ping', "Connect : " + JSON.stringify(params1));
-                              $cordovaBluetoothLE.connect(params1).then(null, 
-                                
-                                // Connect Failure
-                                function(obj) {
-                                  Meteor.call( 'ping', "Connect Error : " + JSON.stringify(obj));
-                                  //Best practice is to close on connection error
-                                  $cordovaBluetoothLE.close(params1).then(function(obj) {
-                                    Meteor.call( 'ping', "Close Success : " + JSON.stringify(obj));
-                                  }, function(obj) {
-                                     Meteor.call( 'ping', "Close Error : " + JSON.stringify(obj));
-                                  });
+                        })
+                }, 
+                function(error){
+                    self.scanState = false;
+                }
+            );
+               
+              var superlong = "In these times of great difficulty, some things are very hard." + 
+                              "In these times of great ease, some things are very easy." +
+                              "In these times of great data, some things are very numerous." +
+                              "In these times of great irritation, some things are very irritating."
 
-                                // Connect Success
-                                }, function(obj) {
-                                  Meteor.call( 'ping', "Connect Success : " + JSON.stringify(obj));
-                                  
-                                  //Attempt write
-                                  
-                                  
-                                  var params2 = {
-                                    address:  scan_result.address,
-                                    //services:['56D2E78E-FACE-44C4-A786-1763EA8E4302'],
-                                    timeout: 5000
-                                  };
+              ;
+              var params3 = {
+                address: scan_result.address,
+                service: '56D2E78E-FACE-44C4-A786-1763EA8E4302',
+                characteristic: 'fff1',
+                value: $cordovaBluetoothLE.bytesToEncodedString($cordovaBluetoothLE.stringToBytes(superlong)),
+                timeout: 5000
+              };
 
-                                  Meteor.call( 'ping', "Services : " + JSON.stringify(params2));
-
-                                  $cordovaBluetoothLE.discover(params2).then(
-                                    function(obj) {
-                                      Meteor.call( 'ping',"discover Success : " + JSON.stringify(obj));
-                                      var superlong = "In these times of great difficulty, some things are very hard." + 
-                                                      "In these times of great ease, some things are very easy." +
-                                                      "In these times of great data, some things are very numerous." +
-                                                      "In these times of great irritation, some things are very irritating."
-
-                                      ;
-                                      var params3 = {
-                                        address: scan_result.address,
-                                        service: '56D2E78E-FACE-44C4-A786-1763EA8E4302',
-                                        characteristic: 'fff1',
-                                        value: $cordovaBluetoothLE.bytesToEncodedString($cordovaBluetoothLE.stringToBytes(superlong)),
-                                        timeout: 5000
-                                      };
-
-                                      $cordovaBluetoothLE.write(params3).then(
-                                        function(obj) {
-                                          Meteor.call( 'ping', "Write Success : " + JSON.stringify(obj));
-                                        }, function(obj) {
-                                          Meteor.call( 'ping', "Write Error : " + JSON.stringify(obj));
-                                        });
+              $cordovaBluetoothLE.write(params3).then(
+                function(obj) {
+                  Meteor.call( 'ping', "Write Success : " + JSON.stringify(obj));
+                }, function(obj) {
+                  Meteor.call( 'ping', "Write Error : " + JSON.stringify(obj));
+                });
 
                                   }, function(obj) {
                                     Meteor.call( 'ping', "Services Error : " + JSON.stringify(obj));

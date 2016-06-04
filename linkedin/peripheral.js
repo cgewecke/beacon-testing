@@ -11,7 +11,6 @@ var onWrite = function(data, offset, response, callback ){
    console.log('Offset: ' + offset);
    console.log('Data: ' + data.toString('utf8'));
    console.log('Response: ' + response);
-   console.log('callback: ' + JSON.stringify(callback));
 
    callback(0x00);
 };
@@ -27,7 +26,7 @@ var onWrite2 = function(data, offset, response ){
 var characteristic1 = new bleno.Characteristic({
    
    uuid: 'fff1', // or 'fff1' for 16-bit
-   properties: [ 'write' ], 
+   properties: [ 'write', 'notify'], 
    onWriteRequest: onWrite
 
 });
@@ -35,7 +34,7 @@ var characteristic1 = new bleno.Characteristic({
 var characteristic2 = new bleno.Characteristic({
    
    uuid: 'fff2', // or 'fff1' for 16-bit
-   properties: [ 'write' ], 
+   properties: [ 'write', 'notify' ], 
    onWriteRequest: onWrite2
 
 });

@@ -9,6 +9,9 @@ angular.module('linkedin')
 function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
     
     var self = this;
+    var user = null;
+    var midTransaction = false; // 
+    var canTransact = true;
 
     // ----------------------- Public -----------------------
 
@@ -32,11 +35,10 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
 
     self.peripheral = {};
     self.txCache = {};
-    self.user = null;
 
-    self.initialize = function(user){
+    self.initialize = function(_user){
 
-        self.user = user;
+        user = _user;
         
         // Initialize connection to BLE peripheral 
         if (!$cordovaBluetoothLE.isInitialized()){
@@ -48,6 +50,74 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
             );
         };
     };
+
+    self.listen = function(uuid, proximity){
+
+        var where = 'AnimistBLE:listen: ';
+        var d = $q.defer();
+
+        if (self.user === null){
+            d.reject({ state: 0, msg: 'NOT_INITIALIZED' });
+        } else if ( midTransaction ){
+            d.resolve({state: 1, msg: 'TRANSACTING'});
+        } else if ( canTransact ){
+            midTransaction = true;
+            d.resolve({state: 1, msg: 'CONNECTING'});
+
+            self.openLink(uuid).then(function(device){
+                self.hasTx(uuid, proximity).then(function(tx){
+
+                    // Case: User can sign their own tx
+                    if (tx.authority === user.address) {
+
+                        tx = user.signTx(tx);
+                        self.signTx(tx, uuid).then( 
+
+                            function(txHash){
+                                $rootScope.$broadcast('Animist:signedTxSuccess'); 
+                                canTransact = false;
+                            }, 
+                            function(error){
+                                $rootScope.$broadcast('Animist:signedTxFailure');
+                            }
+
+                        ).finally(function(){ self.closeLink() });
+
+                    // Case: Signing will be remote - ask endpoint to validate presence
+                    } else if ( tx.authority === user.remoteAuthority){
+
+                        self.authTx(user, transmitter).then(
+                            
+                            function(txHash){
+                                $rootScope.$broadcast('Animist:authTxSuccess');
+                                canTransact = false;
+                            }, 
+                            function(error){
+                                $rootScope.$broadcast('Animist:authTxFailure');
+                            }
+                        ).finally(function(){ self.closeLink() });
+
+                    // No one is authorized (Bad api key etc . . .)
+                    } else {
+                        $rootScope.$broadcast('Animist:unauthorizedTx');
+                        self.closeLink();
+                        canTransact = false; 
+                    }
+
+                // hasTx Failed    
+                }, function( error ){
+                    logger(where + error);
+                })
+            // Open Link failed
+            }, function( error ){
+                logger(where + error);
+            });
+        } else if ( either error state or post-successful tx ) . . {
+
+        };
+
+        return d.promise;
+    }
 
     self.openLink = function( beaconId ){
 
@@ -93,18 +163,13 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
     self.closeLink = function(){
         var where = "AnimistBLE:closeLink: ";
 
-        $cordovaBluetoothLE.close(address: self.peripheral.address).then(
-            
-            function(success){ 
+        $cordovaBluetoothLE.close(address: self.peripheral.address).
+            then().finally(function(){
                 self.cache = {};
                 self.peripheral = {}; 
-                logger(where, success); 
-            },
-            function(error){ 
-                self.cache = {};
-                self.peripheral = {}; 
-                logger(where, error) 
-            }
+                midTransaction = false;
+                logger(where, null); 
+            });
         );
     };
 
@@ -251,7 +316,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
 
             null,
            
-           // Connect failed: close
+           // Connect failed: close per randDusing best practice
             function(error){
                 $cordovaBluetoothLE.close(address: address);
                 d.reject(where + error);

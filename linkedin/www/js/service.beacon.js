@@ -127,6 +127,8 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE){
                transmitter: beacon.uuid,
                receiver: receiver,
             };
+
+            //AnimistBLE.terminate();
             BLE.close();
             Meteor.call('disconnect', pkg);
 
@@ -147,92 +149,14 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE){
         var test_uuid = '56D2E78E-FACE-44C4-A786-1763EA8E4302';
         var scan_result, transmitter, proximity, beacon;
 
-        if (beacons.length && !self.midTransaction && self.canCapture ){
-          
-            self.midTransaction = true;
+        if (beacons.length){
             
             /* DEVELOPMENT: CHANGE */
             beacon = beacon[0];
             logger('Captured: ', beacon.uuid );
             // ----------------------
-
-            transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid;
-            proximity: beacon.proximity; 
-      
-
-            // Move all this shit over to BLE . . . .
-
-            BLE.openLink(test_uuid).then(function(device){
-                
-                // Should reject if proximity is bad, auth is bad, no tx
-                BLE.hasTx(transmitter, proximity).then(
-
-                    function(tx){
-                    
-                        // Case: User can sign their own tx
-                        if (tx.authority === user.address) {
-
-                            tx = user.signTx(tx);
-                            BLE.signTx(tx, transmitter).then( 
-
-                                function(txHash){
-                                    $rootScope.$broadcast('Animist:signedTxSuccess'); 
-                                    self.canCapture = false; 
-                                }, 
-                                function(error){
-                                    $rootScope.$broadcast('Animist:signedTxFailure');
-                                }
-                            ).finally(function(){
-                                BLE.close();
-                                self.midTransaction = false;   
-                            });
-
-                        // Case: Signing will be remote - ask endpoint to validate presence
-                        } else if ( tx.authority === user.remoteAuthority){
-
-                            BLE.authTx(user, transmitter).then(
-                                
-                                function(txHash){
-                                    $rootScope.$broadcast('Animist:authTxSuccess');
-                                    self.canCapture = false;
-                                }, 
-                                function(error){
-                                    $rootScope.$broadcast('Animist:authTxFailure');
-                                }
-                            ).finally(function(){
-                                BLE.close();
-                                self.midTransaction = false;   
-                            });
-
-                        // No one is authorized (Bad api key etc . . .)
-                        } else {
-                            $rootScope.$broadcast('Animist:unauthorizedTx');
-                            BLE.close();
-                            self.midTransaction = false;
-                            self.canCapture = false; 
-                        }
-                    },
-                    function(error){
-
-                        // Case: no transaction found 
-                        if (error.status === 'none'){
-                            $rootScope.$broadcast('Animist:noTransactionFound');
-                            BLE.close();
-                            self.midTransaction = false;
-                            self.canCapture = false;
-                        
-                        // Case: proximity wrong
-                        } else if (error.status === 'proximity'){
-
-                        }
-                    }
-                }, 
-                // 
-                function(error){
-                    // Broadcast error
-                    self.midTransaction = false;
-                };
-            );
+                  
+            AnimistBle.listen(beacon.uuid, beacon.proximity);
         };
     };
 }

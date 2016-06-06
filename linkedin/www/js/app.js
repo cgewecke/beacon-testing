@@ -12,7 +12,7 @@ angular
 		'ngCordovaOauth',
 		'angular-meteor',
 		'angular-meteor.auth',
-      'ngCordovaBluetoothLE'
+        'ngCordovaBluetoothLE'
 
 	]);
 

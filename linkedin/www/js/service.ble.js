@@ -1,3 +1,6 @@
+// TO DO:
+// User verification
+// Transaction caching around proximity
 
 angular.module('linkedin')
   .service("AnimistBLE", AnimistBLE);
@@ -17,6 +20,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
         tx : '3340BC2C-70AE-4E7A-BE24-8B2ED8E3ED06'
     };
 
+    // Animist Beacon UUIDS (Keys) and their corresponding Peripheral UUIDS
     self.endpointMap = {
 
         "4F7C5946-87BB-4C50-8051-D503CEBA2F19" : "05DEE885-E723-438F-B733-409E4DBFA694",
@@ -27,12 +31,18 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
     };
 
     self.peripheral = {};
+    self.txCache = {};
+    self.user = null;
 
-    self.initialize = function(){
+    self.initialize = function(user){
+
+        self.user = user;
+        
         // Initialize connection to BLE peripheral 
         if (!$cordovaBluetoothLE.isInitialized()){
 
-            $cordovaBluetoothLE.initialize({request: true}).then(null,
+            $cordovaBluetoothLE.initialize({request: true}).then(
+              null,
               function(obj) { logger('Initialized BLE:', obj) },
               function(obj) { logger('Failed to initialize BLE:', obj) }
             );
@@ -44,7 +54,13 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
         var where = 'AnimistBLE:openLink: ';
         var d = $q.defer();
         var uuid = self.endpointMap[beaconId];
-            
+        
+        // Check to see if peripheral is already open
+        if (Object.keys(self.peripheral).length > 0){
+            d.resolve(self.peripheral);
+            return d.promise;
+        }    
+
         // Scan, discover and compose current peripheral object
         scan(uuid).then(
             function(scan){
@@ -52,13 +68,18 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
                 connectAndDiscover(scan.address).then(
                     function(device){
                         
+                        // Bind service to device
                         self.peripheral.address = scan.address;
                         self.peripheral.device = device;
 
-                        subscribePin().then(
-                            function(){ d.resolve(device) },
-                            function(){ d.reject( where + error)}
-                        );
+                        // Setup Subscriptions
+                        subscribePin().then( function(){ 
+                            subscribeHasTx().then( function(){
+                                
+                                d.resolve(device);
+
+                            }, function(error){ d.reject( where + error)})
+                        }, function(error){ d.reject( where + error)});
                     },
                     // Connect & Discover fail
                     function(error){ d.reject(where + error) }
@@ -73,25 +94,81 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
         var where = "AnimistBLE:closeLink: ";
 
         $cordovaBluetoothLE.close(address: self.peripheral.address).then(
-            function(){ self.peripheral = {} },
-            function(error){ logger(where, error) }
+            
+            function(success){ 
+                self.cache = {};
+                self.peripheral = {}; 
+                logger(where, success); 
+            },
+            function(error){ 
+                self.cache = {};
+                self.peripheral = {}; 
+                logger(where, error) 
+            }
         );
     };
 
-    self.hasTx = function(user, uuid, proximity){
+    self.hasTx = function( signedPIN, proximity){
 
+        var required;
         var where = 'AnimistBLE:hasTx: ';
-        var peripheralError = 'no peripheral connection';
-        var pinError = 'no PIN reading';
-        var deferred = $q.defer();
-        var address = self.peripheral.address
-        var pin = self.peripheral.pin
+        var d = $q.defer();
+        var peripheral = canCall();
 
-        // Verify scan was called and we have time PIN
-        if (!address) 
-            deferred.reject(where + peripheralError )
-        else if (!pin)
-            deferred.reject(where + pinError)
+        if (!peripheral) {
+            d.reject( where + peripheral );
+            return d.promise;
+        }
+       
+        // Check connection
+        $cordovaBluetoothLE.isConnected(address).then(
+            // Connected
+            function(){
+                // hasTx 
+                write(signedPin, proximity, self.UUID.hasTx ).then(
+                    function(tx){
+
+                        // Resolve when the hasTx subscription event fires
+                        $rootScope.$on('Animist:gotTx', function(){
+
+                            // Required proximity
+                            required = self.peripheral.tx.proximity;
+
+                            // Case: no tx found
+                            if (self.peripheral.tx == null){
+                                d.reject({status: 'none' });
+
+                            // Case: proximity requirement mismatch
+                            } else if (required != 'any' && required != proximity)
+                                d.reject({status: 'proximity', proximity: required });
+
+                            // Case: ok
+                            } else {
+                                d.resolve(self.peripheral.tx);
+                            }
+                        }); 
+                    }, 
+                    // Write failed
+                    function(error){ 
+                        d.reject( {status: undefined, msg: where + error); 
+                    }
+                )
+            // Disconnected
+            }, function(error){ d.reject({ status: undefined, msg: where + error)  }
+        );
+        return d.promise;
+    };
+
+    self.authTx = function(user, uuid, proximity){
+
+        var where = 'AnimistBLE:authTx: ';
+        var d = $q.defer();
+        var peripheral = canCall();
+
+        if (!peripheral){ 
+            d.reject( where + peripheral );
+            return d.promise;
+        };
 
         // Check connection
         $cordovaBluetoothLE.isConnected(address).then(
@@ -99,25 +176,38 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
             // Connected
             function(){
 
-                // hasTx ?
-                publish(user, pin, self.UUID.hasTx, true).then(
-                    function(tx){ deferred.resolve(tx) }, 
-                    function(error){ deferred.reject( where + error) }
+                // Authenticate
+                write( self.UUID.authTx, true).then(
+                    function(ok){ 
+                        publish()
+                        d.resolve(tx) }, 
+                    function(error){ d.reject( where + error) }
                 )
             // Disconnected
-            }, function(error){ deferred.reject(where + error)  }
+            }, function(error){ d.reject(where + error)  }
         );
-
-        return deferred.promise;
-    };
+    }
 
 
     // ------------------------ Private -----------------------------------------
 
     // Debugging Utility 
     var logger = function(msg, obj){
+        if (!Meteor) return;
+
         Meteor.call('ping', msg + ' ' + JSON.stringify(obj));
     }
+
+    // State check run before tx attempts
+    function canCall(){
+        
+        var peripheralError = 'no peripheral connection';
+        var pinError = 'no PIN reading';
+
+        if      (!self.peripheral.address)  return peripheralError;
+        else if (!self.peripheral.pin)      return pinError;
+        else                                return true;
+    };
 
     // @function scan( uuid ) 
     // @param uuid (String): Animist service uuid (beacon id + 1) 
@@ -125,7 +215,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
     function scan( uuid ){
 
         var where = 'AnimistBLE:scan: '
-        var deferred = $q.defer();
+        var d = $q.defer();
 
         // Figure out how to scan only once per session using was connected . . . . .  
         // Scan
@@ -134,29 +224,27 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
             // Scan failed
             function(error){ 
                 logger(where, error); 
-                deferred.reject(where + error) 
+                d.reject(where + error) 
             },
             // Scan succeeded
             function(scan){         
-             
                 logger(where, scan);
-             
                 // Stop Scan on Success
                 $cordovaBluetoothLE.stopScan().then( 
-                    function(){ deferred.resolve(scan) },
-                    function(){ deferred.reject(where + error) }
+                    function(){ d.resolve(scan) },
+                    function(){ d.reject(where + error) }
                 );
             }
         );
 
-        return deferred.promise;
+        return d.promise;
     };
 
     // Initial connection
     function connectAndDiscover( address ){
 
         var where = 'AnimistBLE:connectAndDiscover: '
-        var deferred = $q.defer();
+        var d = $q.defer();
 
         // Connect 
         $cordovaBluetoothLE.connect(address: address, timeout: 5000).then(
@@ -166,7 +254,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
            // Connect failed: close
             function(error){
                 $cordovaBluetoothLE.close(address: address);
-                deferred.reject(where + error);
+                d.reject(where + error);
             },
 
             // Connected
@@ -179,23 +267,23 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
                     // Discovered
                     function(device){
                         logger(where, device);
-                        deferred.resolve(device);
+                        d.resolve(device);
                     },
                     // Discover failed
                     function(error){
                         $cordovaBluetoothLE.close(address: address);
-                        deferred.reject(where + error);
+                        d.reject(where + error);
                     };
                 );
             }
         );
-        return deferred.promise;
+        return d.promise;
     };
 
     function connect( address ){
 
         var where = 'AnimistBLE:connect: '
-        var deferred = $q.defer();
+        var d = $q.defer();
 
         // Connect 
         $cordovaBluetoothLE.connect(address: address, timeout: 5000).then(
@@ -206,27 +294,35 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
             function(error){
                 $cordovaBluetoothLE.close(address: address);
                 logger(where, error);
-                deferred.reject(where + error);
+                d.reject(where + error);
             },
 
             // Connected
             function(connected){
                 logger(where, connected);
-                deferred.resolve();
+                d.resolve();
             }
         );
 
-        return deferred.promise;
+        return d.promise;
     };
 
 
     // ---------------------  Characteristic Helpers -----------------------------
-    function publish(user, PIN, target, wait){
+    function write(signed, target, wait){
 
-        var msg = self.peripheral.service + '_' + PIN;
-        var signed = user.sign( msg );
+        var where = 'AnimistBLE:write: ';
         var signedBytes = $cordovaBluetoothLE.stringToBytes(signed);
         var signedEncoded = $cordovaBluetoothLE.bytesToEncodedString(signedBytes);
+
+        var d = $q.defer();
+        var peripheral = canCall();
+
+        // Verify peripheral;
+        if (!peripheral){ 
+            d.reject( where + peripheral );
+            return d.promise;
+        };
 
         // Compose 'write' req to hasTx characteristic
         var req {
@@ -239,18 +335,28 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
 
         // Attempt write, wait for notify
         $cordovaBluetoothLE.write(req).then( 
-           function(PIN){ deferred.resolve()}, 
-           function(error){ deferred.reject(where + error)}
+           function(ok){ d.resolve()}, 
+           function(error){ d.reject(where + error)}
         );
+
+        return d.promise;
     };
 
 
     function subscribeHasTx(){
+        
         var decoded;
         var where = 'AnimistBLE:subscribeHasTx: ';
         var d = $q.defer();
+        var peripheral = canCall();
 
-        // Compose subscribe req to hasTx characteristic
+        // Verify peripheral;
+        if (!peripheral){ 
+            d.reject( where + peripheral );
+            return d.promise;
+        };
+
+        // hasTx characteristic params
         var req = {
             address: self.peripheral.address,
             service: self.peripheral.service,
@@ -260,28 +366,37 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
 
         // Attempt
         $cordovaBluetoothLE.subscribe(req).then( 
+            
             // Auto unsubscribe callback
             null, 
+
             // Subscribe failed     
-            function(error){ deferred.reject(where + error)},
+            function(error){ d.reject(where + error)},
+            
             // Subscribed/Updated
             function(sub){ 
+                
                 // Subscribed, resolve: 
-                // This is write/notify so won't get update until we
-                // write our auth to hasTx.
                 if (sub.status === 'subscribed'){
                     logger(where, sub);
                     d.resolve();
+
+                // Notification handler: broadcasts gotTx event
                 } else {
-                    // Update tx
+
                     logger(where, sub );
-                    decodedTx = $cordovaBluetoothLE.encodedStringToBytes(sub.value);
-                    decodedTx = $cordovaBluetoothLE.bytesToString(decodedTx));
-                    self.peripheral.tx = decodedTx;
+                    decoded = $cordovaBluetoothLE.encodedStringToBytes(sub.value);
+                    decoded = $cordovaBluetoothLE.bytesToString(decoded));
+                    
+                    (decoded == 'null') ? 
+                        self.peripheral.tx = null : 
+                        self.peripheral.tx = decoded;
+                    
+                    $rootScope.$broadcast('Animist:gotTx');
                 };
             }
         );
-        return deferred.promise;
+        return d.promise;
     }
 
     function subscribePin(){
@@ -289,6 +404,14 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
         var decodedTx;
         var where = 'AnimistBLE:subscribePIN: ';
         var d = $q.defer();
+
+        var peripheral = canCall();
+
+        // Verify peripheral;
+        if (!peripheral) {
+            d.reject( where + peripheral );
+            return d.promise;
+        }
 
         // Compose subscribe req to pin characteristic
         var req = {
@@ -298,7 +421,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
             timeout: 5000
         };
 
-        // Attempt
+        // Subscribe, register notification handler
         $cordovaBluetoothLE.subscribe(req).then( 
             function(sub){ 
                 
@@ -312,7 +435,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
                     decodedTx = $cordovaBluetoothLE.bytesToString(decodedTx));
                     self.peripheral.tx = decodedTx;
                     
-                    // Resolve on initial read
+                    // Resolve on initial read.
                     if (d.$$state.status === 0)
                         d.resolve();
                 }
@@ -320,7 +443,6 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE){
             // Subscribe failed     
             function(error){ d.reject(where + error)}
         );
-
         return d.promise;
     };
 };

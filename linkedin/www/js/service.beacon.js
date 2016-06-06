@@ -127,7 +127,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE){
                transmitter: beacon.uuid,
                receiver: receiver,
             };
-            self.canCapture = true;
+            BLE.close();
             Meteor.call('disconnect', pkg);
 
         } else {
@@ -159,31 +159,73 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE){
             transmitter: beacon.major + '_' + beacon.minor + '_' + beacon.uuid;
             proximity: beacon.proximity; 
       
-            BLE.openLink(test_uuid).then( function(device){
+
+            // Move all this shit over to BLE . . . .
+
+            BLE.openLink(test_uuid).then(function(device){
                 
                 // Should reject if proximity is bad, auth is bad, no tx
-                BLE.hasTx(user, transmitter, proximity).then(function(tx){
+                BLE.hasTx(transmitter, proximity).then(
+
+                    function(tx){
                     
-                    if (tx.authority === user.address) {
-                        authTx(tx).then( function(txHash){
-                            // broadcast authTx success
+                        // Case: User can sign their own tx
+                        if (tx.authority === user.address) {
+
+                            tx = user.signTx(tx);
+                            BLE.signTx(tx, transmitter).then( 
+
+                                function(txHash){
+                                    $rootScope.$broadcast('Animist:signedTxSuccess'); 
+                                    self.canCapture = false; 
+                                }, 
+                                function(error){
+                                    $rootScope.$broadcast('Animist:signedTxFailure');
+                                }
+                            ).finally(function(){
+                                BLE.close();
+                                self.midTransaction = false;   
+                            });
+
+                        // Case: Signing will be remote - ask endpoint to validate presence
+                        } else if ( tx.authority === user.remoteAuthority){
+
+                            BLE.authTx(user, transmitter).then(
+                                
+                                function(txHash){
+                                    $rootScope.$broadcast('Animist:authTxSuccess');
+                                    self.canCapture = false;
+                                }, 
+                                function(error){
+                                    $rootScope.$broadcast('Animist:authTxFailure');
+                                }
+                            ).finally(function(){
+                                BLE.close();
+                                self.midTransaction = false;   
+                            });
+
+                        // No one is authorized (Bad api key etc . . .)
+                        } else {
+                            $rootScope.$broadcast('Animist:unauthorizedTx');
+                            BLE.close();
+                            self.midTransaction = false;
+                            self.canCapture = false; 
+                        }
+                    },
+                    function(error){
+
+                        // Case: no transaction found 
+                        if (error.status === 'none'){
+                            $rootScope.$broadcast('Animist:noTransactionFound');
+                            BLE.close();
                             self.midTransaction = false;
                             self.canCapture = false;
+                        
+                        // Case: proximity wrong
+                        } else if (error.status === 'proximity'){
 
-                        }, function(error){
-                            //broadcast authTx failure
-                            self.midTransaction = false;
-                        });
-                    } else if ( tx.authority === user.remoteAuthority){
-
-                        BLE.authTx(user, transmitter).then(function(txHash){
-                            self.midTransaction = false;
-                            self.canCapture = false;
-                        }, function(error){
-                            //broadcast authPresence failure;
-                            self.midTransaction = false;
-                        });
-                    };
+                        }
+                    }
                 }, 
                 // 
                 function(error){

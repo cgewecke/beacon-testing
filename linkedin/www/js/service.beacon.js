@@ -4,7 +4,7 @@ angular.module('linkedin')
   .service("Beacons", Beacons);
 
 
-function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE){
+function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
 
     var self = this;
     var BLE = AnimistBLE;
@@ -155,7 +155,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE){
             beacon = beacon[0];
             logger('Captured: ', beacon.uuid );
             // ----------------------
-                  
+
             AnimistBle.listen(beacon.uuid, beacon.proximity);
         };
     };

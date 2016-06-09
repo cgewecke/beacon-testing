@@ -1,21 +1,39 @@
 var bleno = require('bleno');
+var Characteristic = bleno.Characteristic;
 
 // Service properties
+// Characteristic UUIDS
+var UUID = {
 
+      auth: 'E219B7F9-7BF3-4B03-8DB6-88D228922F40',
+      pin : 'C40C94B3-D9FF-45A0-9A37-032D72E423A9',
+      hasTx:  'BFA15C55-ED8F-47B4-BD6A-31280E98C7BA',
+      authTx: '297E3B0A-F353-4531-9D44-3686CC8C4036',
+      signTx : '3340BC2C-70AE-4E7A-BE24-8B2ED8E3ED06'
+};
+
+var pin = null;
+
+function resetPin(){
+   var temp = Math.floor(Math.random() * (100000 - 10000 + 1)) + 10000;
+   pin = temp.toString();
+}
 var name = 'Animist';
 var uuid = '56D2E78E-FACE-44C4-A786-1763EA8E4302'
 
-var onWrite = function(data, offset, response, callback ){
 
-   console.log('onWrite1 Callback running');
-   console.log('Offset: ' + offset);
-   console.log('Data: ' + data.toString('utf8'));
-   console.log('Response: ' + response);
+var onAuth = function(data, offset, response, callback){
 
-   callback(0x00);
+
+}
+var onPinRead = function(offset, callback ){
+
+   console.log('onPinRead: ' + pin );
+   callback(Characteristic.RESULT_SUCCESS, new Buffer(pin));
 };
 
-var onWrite2 = function(data, offset, response ){
+
+var onHasTx = function(data, offset, response, callback ){
 
    console.log('onWrite2 Callback running');
    console.log('Offset: ' + offset);
@@ -23,26 +41,51 @@ var onWrite2 = function(data, offset, response ){
    console.log('Response: ' + response);
 };
 
-var characteristic1 = new bleno.Characteristic({
+var onAuthTx = function(data, offset, response, callback){
+
+};
+
+var onSignTx = function(data, offset, response, callback){
+
+}
+
+var authCharacteristic = new bleno.Characteristic({
+   uuid: 'E219B7F9-7BF3-4B03-8DB6-88D228922F40',
+   properties: ['write'], 
+   //onWriteRequest: onWrite
+});
+
+var pinCharacteristic = new bleno.Characteristic({
    
-   uuid: 'fff1', // or 'fff1' for 16-bit
-   properties: [ 'write', 'notify'], 
-   onWriteRequest: onWrite
+   uuid: 'C40C94B3-D9FF-45A0-9A37-032D72E423A9',
+   properties: ['read'], 
+   onReadRequest: onPinRead
 
 });
 
-var characteristic2 = new bleno.Characteristic({
+var hasTxCharacteristic = new bleno.Characteristic({
    
-   uuid: 'fff2', // or 'fff1' for 16-bit
-   properties: [ 'write', 'notify' ], 
-   onWriteRequest: onWrite2
+   uuid: 'BFA15C55-ED8F-47B4-BD6A-31280E98C7BA',
+   properties: ['write', 'notify'], 
+   //onWriteRequest: onWrite2
+
+});
+
+var signTxCharacteristic = new bleno.Characteristic({
+   
+   uuid: '3340BC2C-70AE-4E7A-BE24-8B2ED8E3ED06',
+   properties: ['write'], 
+   //onWriteRequest: onWrite2
 
 });
 
 var service = new bleno.PrimaryService({
         
    uuid: uuid,
-   characteristics: [ characteristic1, characteristic2 ]
+   characteristics: [ 
+      pinCharacteristic, 
+      hasTxCharacteristic 
+   ]
 
 });
 
@@ -69,6 +112,9 @@ bleno.on('advertisingStart', function(err) {
    if (!err) {
       console.log('advertising...' + JSON.stringify(service));
       bleno.setServices([ service ]);
+      
+      // Reset pin every x seconds 
+      setInterval(resetPin, 5000);
    }
 });
 

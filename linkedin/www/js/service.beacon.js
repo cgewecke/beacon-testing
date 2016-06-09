@@ -8,6 +8,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
 
     var self = this;
     var BLE = AnimistBLE;
+    var lock = false;
 
     // The set of uuids to monitor for
     var uuids = [
@@ -27,9 +28,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
     self.regions = [];
     self.quantity = uuids.length;
     self.initialized = false;
-    self.midTransaction = false;
-    self.canCapture = true;
-
+    
     // @function: getUUID 
     // Exposes the uuid array. In LoginCtrl, the modulus of the Beacon minor and the 
     // uuid array side is used to select a uuid. This allows them to be distributed evenly 
@@ -45,6 +44,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
     self.initialize = function(){
         
         var deferred = $q.defer();
+        var where = "AnimistBeacons:initialize";
 
         // Return if initialized. Also beacons cannot run in browser + output is annoying in XCode.
         if ($rootScope.DEV || $rootScope.beaconsOFF || self.initialized  ) { deferred.resolve(); return deferred; }
@@ -79,7 +79,13 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
         });
 
         // Initialize BLE
-        AnimistBLE.initialize();
+        AnimistAccount.init().then(function(user){
+            logger(where, user);
+            AnimistBLE.initialize(user);
+        }, function(error){
+            logger(where, error)
+        });
+        
 
         // Check authorization before resolving. Remove newInstall key 
         // from local storage so that a pw/login will redirect to the settings
@@ -129,7 +135,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
             };
 
             //AnimistBLE.terminate();
-            BLE.close();
+            //AnimistBLE.close();
             Meteor.call('disconnect', pkg);
 
         } else {
@@ -145,18 +151,24 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
     // attempts to create a connection record in the meteor DB.  
     function onCapture(result){
 
+
         var beacons = result.beacons
+
+        var where = "AnimistBeacons:onCapture";
         var test_uuid = '56D2E78E-FACE-44C4-A786-1763EA8E4302';
         var scan_result, transmitter, proximity, beacon;
 
-        if (beacons.length){
-            
+        if (beacons.length && !lock ){
+            lock = true;
             /* DEVELOPMENT: CHANGE */
-            beacon = beacon[0];
-            logger('Captured: ', beacon.uuid );
+            beacon = beacons[0];
+            //logger('Captured: ', beacon.uuid );
             // ----------------------
 
-            AnimistBle.listen(beacon.uuid, beacon.proximity);
+            AnimistBLE.listen(beacon.uuid, beacon.proximity).then(
+                function(success){lock = false; logger(where, success)},
+                function(error){lock = false; logger(where, error)}
+            );
         };
     };
 }

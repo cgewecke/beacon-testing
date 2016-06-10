@@ -26,16 +26,20 @@ var UUID = {
       signTx : '3340BC2C-70AE-4E7A-BE24-8B2ED8E3ED06'
 };
 
-codes = {
-   NO_PROXIMITY_IN_REQUEST: 0x01,
-   INVALID_JSON_IN_REQUEST: 0x02,
-   NO_SIGNED_MSG_IN_REQUEST: 0x03,
-   NO_TX_FOUND: 0x04,
-   RESULT_SUCCESS: 0x00
+var codes = {
+   NO_PROXIMITY_IN_REQUEST:   0x01,
+   INVALID_JSON_IN_REQUEST:   0x02,
+   NO_SIGNED_MSG_IN_REQUEST:  0x03,
+   NO_TX_FOUND:               0x04,
+   RESULT_SUCCESS:            0x00
 };
+
+var MAX_SEND = 128;
 
 var pin = randomstring.generate();
 var oldPin = null;
+var sendStack = [];
+var killHasTx;
 
 function resetPin(){
    oldPin = pin;
@@ -57,7 +61,7 @@ var onPinRead = function(offset, callback ){
 };
 
 
-var onHasTx = function(data, offset, response, callback ){
+var onHasTxWrite = function(data, offset, response, callback ){
 
    var address, address_old, signed, res;
    var req = checkHasTxRequest(data);
@@ -69,7 +73,6 @@ var onHasTx = function(data, offset, response, callback ){
       // Recover address from signed pin
       address = lightwallet.signing.recoverAddress(pin, signed.v, signed.r, signed.s);
       address = address.toString('hex');
-      console.log('recovered Address: ' + address);
       
       // Try to find tx with address derived from current pin
       tx = getTx(address);
@@ -85,18 +88,14 @@ var onHasTx = function(data, offset, response, callback ){
 
       // Success: confirm write, then send tx across after 50ms
       if (tx){
-         console.log('sending write confirm')
+
+         killHasTx = false;
          callback(codes.RESULT_SUCCESS);
+         stackTx(tx);
 
          setTimeout(function(){
-            console.log('sending updateValueCallback');
-            if (hasTxCharacteristic.updateValueCallback){
-               res = new Buffer(tx);
-               console.log('Buffer length: ' + res.length);
-               hasTxCharacteristic.maxValueSize = 3000;
-               hasTxCharacteristic.updateValueCallback(res);
-               console.log('hasTxCharacteristic: ' + JSON.stringify(hasTxCharacteristic));
-            };
+            console.log("writing first sendStack section")
+            hasTxCharacteristic.updateValueCallback(sendStack.shift());
          }, 50);
          
       } else {
@@ -110,6 +109,59 @@ var onHasTx = function(data, offset, response, callback ){
    }
 };
 
+// onHasTxIndicate: Runs updateValueCallback in a timeout per:
+// https://github.com/sandeepmistry/bleno/issues/170
+var onHasTxIndicate = function(){
+
+   var eof;
+
+   if (killHasTx) {
+      console.log("Returning on killHasTx");
+      return;
+   }
+
+   if (sendStack.length){
+      console.log("writing sendStack section");
+      setTimeout(function(){
+         hasTxCharacteristic.updateValueCallback(sendStack.shift());
+      }, 0)
+      
+   } else {
+      console.log("writing EOF");
+      eof = new Buffer('EOF');
+      killHasTx = true;
+      setTimeout(function(){
+         hasTxCharacteristic.updateValueCallback(eof);
+      }, 0)
+   }
+};
+
+// Test this . . . .
+var stackTx = function(tx){
+
+   var trans_size, start, end;
+   var out = new Buffer(tx);
+
+   start = 0;
+   trans_size = end = MAX_SEND;
+
+   sendStack = [];
+
+   for (var i = 0; i < out.length; i += trans_size){
+      
+      ((out.length - start) < trans_size) ?
+         end = start + (out.length - start) :
+         end = end + trans_size;
+      
+      if (start != end){
+         sendStack.push(out.slice(start, end));
+         start = end;
+      }
+   }
+};
+
+
+
 var checkHasTxRequest = function(data){
 
    var parsed, address;
@@ -117,30 +169,24 @@ var checkHasTxRequest = function(data){
    try {
       // Check JSON formatting
       parsed = JSON.parse(data);
-      console.log('parsed @ hasTxRequest: ' + JSON.stringify(parsed));
 
-      // Check proximity field
-      if (!parsed.hasOwnProperty('proximity'))
-         return { status: 0, val: codes.NO_PROXIMITY_IN_REQUEST }
-      
       // Check signed message
-      else if (!parsed.hasOwnProperty('signed') || 
+      if (!parsed.hasOwnProperty('signed') || 
                !parsed.signed.hasOwnProperty('r') ||
                !parsed.signed.hasOwnProperty('s') ||
-               !parsed.signed.hasOwnProperty('v'))
+               !parsed.signed.hasOwnProperty('v')) {
          
          return { status: 0, val: codes.NO_SIGNED_MSG_IN_REQUEST }
 
-      // Return parsed value
-      else {
+      // Explicitly recast r, s as buffers & return parsed value
+      } else {
          parsed.signed.r = new Buffer(parsed.signed.r.data);
          parsed.signed.s = new Buffer(parsed.signed.s.data);
          return {status: 1, val: parsed }
       }
    
+   // JSON formatting failure catch
    } catch (err){
-      console.log(err);
-      // JSON formatting failure catch
       return {status: 0, val: codes.INVALID_JSON_IN_REQUEST }
    }
 }
@@ -168,7 +214,6 @@ var getTx = function(address){
 var authCharacteristic = new bleno.Characteristic({
    uuid: 'E219B7F9-7BF3-4B03-8DB6-88D228922F40',
    properties: ['write'], 
-   onWriteRequest: onHasTx
 });
 
 var pinCharacteristic = new bleno.Characteristic({
@@ -182,8 +227,9 @@ var pinCharacteristic = new bleno.Characteristic({
 var hasTxCharacteristic = new bleno.Characteristic({
    
    uuid: 'BFA15C55-ED8F-47B4-BD6A-31280E98C7BA',
-   properties: ['write', 'notify'], 
-   onWriteRequest: onHasTx
+   properties: ['write', 'indicate'], 
+   onWriteRequest: onHasTxWrite,
+   onIndicate: onHasTxIndicate
 
 });
 
@@ -205,6 +251,7 @@ var service = new bleno.PrimaryService({
 
 });
 
+
 //
 // Wait until the BLE radio powers on before attempting to advertise.
 // If you don't have a BLE radio, then it will never power on!
@@ -213,9 +260,7 @@ bleno.on('stateChange', function(state) {
    if (state === 'poweredOn') {
       console.log('starting advertising');
       bleno.startAdvertising(name, [service.uuid], function(err) {
-         if (err) {
-            console.log(err);
-         }
+         if (err) { console.log(err) }
       });
    }
    else {
@@ -226,7 +271,7 @@ bleno.on('stateChange', function(state) {
 
 bleno.on('advertisingStart', function(err) {
    if (!err) {
-      console.log('advertising...' + JSON.stringify(service));
+      console.log('advertising...');
       bleno.setServices([ service ]);
       
       // Reset pin every x seconds 

@@ -45,6 +45,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     };
 
     self.peripheral = {};
+    self.proximity;
     self.txCache = {};
 
     self.initialize = function(_user){
@@ -75,6 +76,8 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
 
         var where = 'AnimistBLE:listen: ';
         var d = $q.defer();
+        
+        self.proximity = proximity;
         
         // Verify initialization
         if (!initialized){
@@ -172,7 +175,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
 
                         // Setup Subscriptions
                         readPin().then(function(){ 
-                            subscribeHasTx(proximity).then(function(){
+                            subscribeHasTx().then(function(){
                                 
                                 d.resolve(device);
 
@@ -458,10 +461,10 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
 
 
     // ---------------------  Characteristic Helpers -----------------------------
-    function write(signed, proximity, target ){
+    function write(signed, target ){
 
         var where = 'AnimistBLE:write: ';
-        var payload = JSON.stringify({proximity: proximity, signed: signed });
+        var payload = JSON.stringify({signed: signed });
         var signedBytes = $cordovaBluetoothLE.stringToBytes(payload);
         var signedEncoded = $cordovaBluetoothLE.bytesToEncodedString(signedBytes);
 
@@ -494,9 +497,9 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     };
 
 
-    function subscribeHasTx(proximity){
+    function subscribeHasTx(){
         
-        var decoded;
+        var decoded, msg = '';
         var where = 'AnimistBLE:subscribeHasTx: ';
         var d = $q.defer();
         var peripheral = canCall();
@@ -508,7 +511,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
                 address: self.peripheral.address,
                 service: self.peripheral.service,
                 characteristic: self.UUID.hasTx,
-                timeout: 5000
+                timeout: 25000
             };
 
             logger(where, null);
@@ -526,12 +529,8 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
                         logger(where, sub);
 
                         signedPin = user.sign(self.pin);
-                        //var test = user.recover(self.pin, signedPin);
-                        //logger('SIGNED', JSON.stringify(signedPin));
-                        //logger('CURRENT ADDRESS', user.address );
-                        //logger('PIN RECOVER TEST:', test.toString('hex'));
                         
-                        write(signedPin, proximity, self.UUID.hasTx ).then(
+                        write(signedPin, self.UUID.hasTx ).then(
                             function(success){ d.resolve() }, 
                             function(error){ d.reject(where + JSON.stringify(error))}
                         );
@@ -542,12 +541,26 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
                         decoded = $cordovaBluetoothLE.encodedStringToBytes(sub.value);
                         decoded = $cordovaBluetoothLE.bytesToString(decoded);
                         
-                        (decoded === 'null') ? 
-                            self.peripheral.tx = null : 
-                            self.peripheral.tx = decoded;
-                        
-                        logger(where, decoded);
-                        $rootScope.$broadcast( events.receivedTx );
+                        // Case: no transaction found
+                        if (decoded === 'noTx') {
+                            
+                            self.peripheral.tx = null;
+                            logger(where, decoded);
+                            $rootScope.$broadcast( events.receivedTx );
+
+                        // Case: mid-transmission
+                        } else if (decoded != 'EOF'){
+                            logger(where, 'getting more message');
+                            msg += decoded;
+
+                        // Case: end of transmission
+                        } else {
+                            self.peripheral.tx = msg;
+                            logger(where, 'end of message');
+                            logger(where, msg);
+                            $rootScope.$broadcast( events.receivedTx );
+
+                        }
                     };
                 }
             );

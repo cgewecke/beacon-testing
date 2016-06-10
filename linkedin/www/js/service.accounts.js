@@ -24,6 +24,8 @@ function AnimistAccount($rootScope, $q ){
                 self.user.pwDerivedKey = pwDerivedKey;
                 self.user.address = addr;
                 self.user.keystore = ks;
+                self.user.sign = self.sign;
+                self.user.recover = self.recover;
                 d.resolve(self.user);
             };
         });
@@ -32,8 +34,13 @@ function AnimistAccount($rootScope, $q ){
 
     };
 
+    // THIS IS FUCKED UP . . . . . 
     self.sign = function(msg){
-        return lightwallet.signing.signMsg(user.ks, user.pwDerivedKey, msg, user.address);
+        return lightwallet.signing.signMsg(self.user.keystore, self.user.pwDerivedKey, msg, self.user.address);
+    }
+
+    self.recover = function(msg, signed){
+        return lightwallet.signing.recoverAddress(msg, signed.v, signed.r, signed.s);
     }
 
     self.validate = function(user){

@@ -24,6 +24,7 @@
     "karma-ng-scenario": "^0.1.0",
     "karma-phantomjs-launcher": "^0.2.3",
     "phantomjs": "^1.9.19",
+    "randomstring": "^1.1.5",
     "shelljs": "^0.3.0"
   },
   "cordovaPlugins": [

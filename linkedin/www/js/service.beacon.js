@@ -68,10 +68,11 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
         });
 
         // Register handlers
-        $rootScope.$on("$cordovaBeacon:didEnterRegion", function(event, result){
+        /*$rootScope.$on("$cordovaBeacon:didEnterRegion", function(event, result){
             onEntry(result);
-        });
-          $rootScope.$on("$cordovaBeacon:didExitRegion", function(event, result){
+        });*/
+
+        $rootScope.$on("$cordovaBeacon:didExitRegion", function(event, result){
             onExit(result);
         });
         $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function(event, result){
@@ -111,7 +112,8 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
             self.regions.push( $cordovaBeacon.createBeaconRegion('r_' + i, uuids[i], null, null, true));
         }
     };
-    
+
+
     // @function: onExit
     // @param: result (this only contains uuid, not major/minor)
     // Called when monitoring exits a region. Pulls app identifier from local storage and
@@ -135,7 +137,7 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
             };
 
             //AnimistBLE.terminate();
-            //AnimistBLE.close();
+            AnimistBLE.close();
             Meteor.call('disconnect', pkg);
 
         } else {
@@ -150,7 +152,6 @@ function Beacons($rootScope, $q, $cordovaBeacon, AnimistBLE, AnimistAccount ){
     // Called when ranging detects a beacon. Pulls app identifier from local storage and
     // attempts to create a connection record in the meteor DB.  
     function onCapture(result){
-
 
         var beacons = result.beacons
 

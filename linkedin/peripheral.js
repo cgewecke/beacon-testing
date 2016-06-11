@@ -31,7 +31,8 @@ var codes = {
    INVALID_JSON_IN_REQUEST:   0x02,
    NO_SIGNED_MSG_IN_REQUEST:  0x03,
    NO_TX_FOUND:               0x04,
-   RESULT_SUCCESS:            0x00
+   RESULT_SUCCESS:            0x00,
+   EOF :                      'EOF' 
 };
 
 var MAX_SEND = 128;
@@ -115,24 +116,26 @@ var onHasTxIndicate = function(){
 
    var eof;
 
-   if (killHasTx) {
+   if (!killHasTx) {
+      
+      if (sendStack.length){
+         console.log("writing sendStack section");
+         setTimeout(function(){
+            hasTxCharacteristic.updateValueCallback(sendStack.shift());
+         }, 0)
+         
+      } else {
+         console.log("writing EOF");
+         eof = new Buffer(codes.EOF);
+         killHasTx = true;
+         setTimeout(function(){
+            hasTxCharacteristic.updateValueCallback(eof);
+         }, 0)
+      }
+
+   else {
       console.log("Returning on killHasTx");
       return;
-   }
-
-   if (sendStack.length){
-      console.log("writing sendStack section");
-      setTimeout(function(){
-         hasTxCharacteristic.updateValueCallback(sendStack.shift());
-      }, 0)
-      
-   } else {
-      console.log("writing EOF");
-      eof = new Buffer('EOF');
-      killHasTx = true;
-      setTimeout(function(){
-         hasTxCharacteristic.updateValueCallback(eof);
-      }, 0)
    }
 };
 
@@ -246,7 +249,9 @@ var service = new bleno.PrimaryService({
    uuid: uuid,
    characteristics: [ 
       pinCharacteristic, 
-      hasTxCharacteristic 
+      hasTxCharacteristic,
+      signTxCharacteristic,
+      authTxCharacteristic 
    ]
 
 });
@@ -275,7 +280,7 @@ bleno.on('advertisingStart', function(err) {
       bleno.setServices([ service ]);
       
       // Reset pin every x seconds 
-      setInterval(resetPin, 60000);
+      setInterval(resetPin, 30000);
    }
 });
 

@@ -4,7 +4,8 @@ angular.module('linkedin')
 function AnimistAccount($rootScope, $q ){
 
     var self = this;
-    self.user = {};
+    var user = {};
+    
     // Testing
     self.init = function(){
         
@@ -21,12 +22,15 @@ function AnimistAccount($rootScope, $q ){
                 ks.generateNewAddress(pwDerivedKey, 1);
                 addr = ks.getAddresses();
 
-                self.user.pwDerivedKey = pwDerivedKey;
-                self.user.address = addr;
-                self.user.keystore = ks;
-                self.user.sign = self.sign;
-                self.user.recover = self.recover;
-                d.resolve(self.user);
+                user = {
+                    animistUserIsInitialized: true,
+                    pwDerivedKey: pwDerivedKey,
+                    address: addr,
+                    keystore: ks,
+                    sign: sign,
+                    recover: recover
+                } 
+                d.resolve(user);
             };
         });
 
@@ -34,20 +38,21 @@ function AnimistAccount($rootScope, $q ){
 
     };
 
-    // THIS IS FUCKED UP . . . . . 
-    self.sign = function(msg){
-        return lightwallet.signing.signMsg(self.user.keystore, self.user.pwDerivedKey, msg, self.user.address);
+    function sign(msg){
+        return lightwallet.signing.signMsg(user.keystore, user.pwDerivedKey, msg, user.address);
     }
 
-    self.recover = function(msg, signed){
+    function recover(msg, signed){
         return lightwallet.signing.recoverAddress(msg, signed.v, signed.r, signed.s);
     }
 
-    self.validate = function(user){
-
-        if (user.hasOwnProperty('pwDerivedKey'))
-            return true;
-        else
+    self.validate = function(_user){
+        ( _user != null && 
+          typeof _user === 'object' && 
+          _user.hasOwnProperty('animistUserIsInitialized') && 
+          _user.isInitialized ) ? 
+            
+            return true : 
             return false;
     };
   

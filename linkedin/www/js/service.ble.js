@@ -44,6 +44,17 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         "458735FA-E270-4746-B73E-E0C88EA6BEE0" : "01EC8B5B-B7DB-4D65-949C-81F4FD808A1A"
     };
 
+    // These are common to whale-island and wowshuxkluh
+    // **** Do NOT update one without the other *****
+    self.codes = {
+
+       INVALID_JSON_IN_REQUEST:   0x02,
+       NO_SIGNED_MSG_IN_REQUEST:  0x03,
+       NO_TX_FOUND:               0x04,
+       RESULT_SUCCESS:            0x00,
+       EOF :                      'EOF' 
+    };
+
     self.peripheral = {};
     self.proximity;
 
@@ -71,35 +82,39 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     };
 
     // listen(): Gets hit continuously in the Beacon capture 
-    self.listen = function(uuid, proximity){
+    self.listen = function(beaconId, proximity){
 
+        var peripheral_uuid;
         var where = 'AnimistBLE:listen: ';
         var d = $q.defer();
         
         self.proximity = proximity;
-
 
         // Verify initialization
         if (!initialized){
             d.reject({ state: 0, msg: 'NOT_INITIALIZED' });
 
         // Verify beacon is Animist
-        } else if ( !isAnimistSignal(uuid)){
+        } else if ( !isAnimistSignal(beaconId)){
             d.reject({ state: 0, msg: 'BAD_UUID: ' + uuid });
 
         // Resolve if we are connected/connecting etc 
         } else if ( midTransaction ){
             d.resolve({state: 1, msg: 'TRANSACTING'});
 
-        // Connect 
+        // Connect & Resolve immediately
         } else if ( canTransact ){
+            
             midTransaction = true;
+            peripheral_uuid = self.endpointMap[beaconId];
+
+            self.openLink(peripheral_uuid, proximity).then(
+                function(device){}, 
+                function(error){ logger(where, error) }
+            );
+
             d.resolve({state: 1, msg: 'CONNECTING'});
 
-            self.openLink(uuid, proximity).then(
-                function(device){}, 
-                function( error ){ logger(where, error) }
-            );
         } else {
             d.resolve({state: 0, msg: 'COMPLETED'})
         }
@@ -107,17 +122,11 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         return d.promise;
     }
 
-    self.openLink = function( beaconId, proximity ){
+    self.openLink = function( uuid, proximity ){
 
         var where = 'AnimistBLE:openLink: ';
         var d = $q.defer();
-        logger(where, beaconId);
-        // Production
-        //var uuid = self.endpointMap[beaconId];
         
-        // Testing
-        var uuid = '56D2E78E-FACE-44C4-A786-1763EA8E4302';
-
         // Peripheral has not been connected to yet
         if (Object.keys(self.peripheral).length === 0){
             
@@ -131,7 +140,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
                     
                     // Setup Subscriptions
                     readPin().then(function(){ 
-                        subscribeHasTx().then(function(){
+                        subscribeHasTx().then( function(){
                             
                             d.resolve(self.peripheral);
 
@@ -142,17 +151,22 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
             }, function(e){ d.reject( where + readable(e) )});
 
         // Or we're reconnecting: connect -> readPin -> submit cached tx
-        } else {
+        } else if (proximityMatch(self.peripheral.tx )) {
+
             connect(self.peripheral.address).then(function(){ 
                 readPin().then(function(){                     
-                    submitTx(self.peripheral.tx.then(function(){
+                    submitTx(self.peripheral.tx).then(function(){
 
                         d.resolve(self.peripheral);
                     
                     }, function(e){ d.reject( where + readable(e) )})
                 }, function(e){ d.reject( where + readable(e) )})
             }, function(e){ d.reject( where + readable(e) )});
-        }    
+        
+        // No proximity match
+        } else {
+            d.resolve(self.peripheral);
+        }   
         
         return d.promise;
     }
@@ -203,6 +217,9 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         (!self.peripheral.tx) ? self.endSession() : submitTx(self.peripheral.tx);
     };
 
+    function proximityMatch(tx){
+        return ( tx && (tx.proximity === self.proximity) ) ? true : false;
+    }
 
     // WORKING HERE . . . .
     function submitTx(tx){

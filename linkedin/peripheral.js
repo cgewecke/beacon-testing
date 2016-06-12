@@ -27,7 +27,6 @@ var UUID = {
 };
 
 var codes = {
-   NO_PROXIMITY_IN_REQUEST:   0x01,
    INVALID_JSON_IN_REQUEST:   0x02,
    NO_SIGNED_MSG_IN_REQUEST:  0x03,
    NO_TX_FOUND:               0x04,
@@ -36,6 +35,16 @@ var codes = {
 };
 
 var MAX_SEND = 128;
+
+// Animist Beacon UUIDS (Keys) and their corresponding Peripheral UUIDS
+var endpointMap = {
+
+  "4F7C5946-87BB-4C50-8051-D503CEBA2F19" : "05DEE885-E723-438F-B733-409E4DBFA694",
+  "D4FB5D93-B1EF-42CE-8C08-CF11685714EB" : "9BD991F7-0CB9-4FA7-A075-B3AB1B9CFAC8", 
+  "98983597-F322-4DC3-A36C-72052BF6D612" : "774D64CA-91C9-4C3A-8DA3-221D9CF755E7",
+  "8960D5AB-3CFA-46E8-ADE2-26A3FB462053" : "33A93F3C-9CAA-4D39-942A-6659AD039232",
+  "458735FA-E270-4746-B73E-E0C88EA6BEE0" : "01EC8B5B-B7DB-4D65-949C-81F4FD808A1A"
+};
 
 var pin = randomstring.generate();
 var oldPin = null;
@@ -48,7 +57,7 @@ function resetPin(){
 }
 
 var name = 'Animist';
-var uuid = '56D2E78E-FACE-44C4-A786-1763EA8E4302'
+var uuid = '05DEE885-E723-438F-B733-409E4DBFA694';
 
 
 var onAuth = function(data, offset, response, callback){
@@ -78,7 +87,7 @@ var onHasTxWrite = function(data, offset, response, callback ){
       // Try to find tx with address derived from current pin
       tx = getTx(address);
 
-      // It's possible the pin updated during the transfer, so try 
+      // Pin updates every 30sec and transaction may be on this seam, so try 
       // with address derived from old pin
       if (!tx){
 
@@ -195,6 +204,10 @@ var checkHasTxRequest = function(data){
 }
 
 var onAuthTx = function(data, offset, response, callback){
+   /*
+   validate pin
+   getTx
+   */
 
 };
 
@@ -213,11 +226,6 @@ var getTx = function(address){
 
    return JSON.stringify(response);
 }
-
-var authCharacteristic = new bleno.Characteristic({
-   uuid: 'E219B7F9-7BF3-4B03-8DB6-88D228922F40',
-   properties: ['write'], 
-});
 
 var pinCharacteristic = new bleno.Characteristic({
    
@@ -239,10 +247,16 @@ var hasTxCharacteristic = new bleno.Characteristic({
 var signTxCharacteristic = new bleno.Characteristic({
    
    uuid: '3340BC2C-70AE-4E7A-BE24-8B2ED8E3ED06',
-   properties: ['write'], 
+   properties: ['write', 'notify'], 
    //onWriteRequest: onWrite2
 
 });
+
+var authCharacteristic = new bleno.Characteristic({
+   uuid: 'E219B7F9-7BF3-4B03-8DB6-88D228922F40',
+   properties: ['write', 'notify'], 
+});
+
 
 var service = new bleno.PrimaryService({
         

@@ -1,7 +1,9 @@
 // TO DO:
 // generateTx
-// Peripheral authTx, signTx
-// Listening for events 
+// Peripheral authTx, signTx 
+// Rationalize error propagation: all errors w/ where + should be objects . . .
+//      they get printed by the listen() callback in AnimistBeacon
+//
 
 angular.module('linkedin')
   .service("AnimistBLE", AnimistBLE);
@@ -19,7 +21,8 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         signedTxFailure: 'Animist:signedTxFailure',
         authTxSuccess: 'Animist:authTxSuccess',
         authTxSuccess: 'Animist:authTxFailure',
-        unauthorizedTx: 'Animist:unauthorizedTx'
+        unauthorizedTx: 'Animist:unauthorizedTx',
+        bleFailure: 'Animist:bleFailure'
     };
 
     // ----------------------- Public -----------------------
@@ -45,7 +48,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     };
 
     // These are common to whale-island and wowshuxkluh
-    // **** Do NOT update one without the other *****
+    // **** Do NOT change one without updating the other *****
     self.codes = {
 
        INVALID_JSON_IN_REQUEST:   0x02,
@@ -61,7 +64,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     self.initialize = function(_user){
 
         var where = 'AnimistBLE:initialize: ';
-        var userError = 'invalid user: ' + JSON.stringify(AnimistAccount);
+        var userError = 'invalid user: ';
         var d = $q.defer();
 
         initialized = false;
@@ -75,13 +78,13 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
             );
         } else {
             logger(where, userError);
-            d.reject();
+            d.reject(where + userError);
         }
 
         return d.promise;
     };
 
-    // listen(): Gets hit continuously in the Beacon capture 
+    // listen(): This gets hit continuously in the Beacon capture callback.  
     self.listen = function(beaconId, proximity){
 
         var peripheral_uuid;
@@ -91,32 +94,39 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         self.proximity = proximity;
 
         // Verify initialization
-        if (!initialized){
-            d.reject({ state: 0, msg: 'NOT_INITIALIZED' });
+        if (!initialized){ 
+            d.reject('NOT_INITIALIZED' });
 
         // Verify beacon is Animist
         } else if ( !isAnimistSignal(beaconId)){
-            d.reject({ state: 0, msg: 'BAD_UUID: ' + uuid });
+            d.reject('NOT_ANIMIST'});
 
-        // Resolve if we are connected/connecting etc 
+        // Kick back if we are connected/connecting etc 
         } else if ( midTransaction ){
-            d.resolve({state: 1, msg: 'TRANSACTING'});
+            d.resolve('TRANSACTING'});
 
-        // Connect & Resolve immediately
+        // OR connect & resolve immediately
         } else if ( canTransact ){
             
             midTransaction = true;
             peripheral_uuid = self.endpointMap[beaconId];
 
+            // Any connection errors below here in the code propagate back to 
+            // this handler which broadcasts bleFailure and ends the session. 
             self.openLink(peripheral_uuid, proximity).then(
-                function(device){}, 
-                function(error){ logger(where, error) }
+                null,
+                function(error){
+                    logger(where, error);
+                    $rootscope.$broadcast(events.bleFailure, {error: error});
+                    self.endSession();
+                }
             );
 
-            d.resolve({state: 1, msg: 'CONNECTING'});
+            d.resolve('CONNECTING'});
 
+        // OR finished
         } else {
-            d.resolve({state: 0, msg: 'COMPLETED'})
+            d.resolve('COMPLETED'});
         }
 
         return d.promise;
@@ -127,43 +137,55 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         var where = 'AnimistBLE:openLink: ';
         var d = $q.defer();
         
-        // Peripheral has not been connected to yet
-        if (Object.keys(self.peripheral).length === 0){
+        // Peripheral has not been connected to yet or nothing cached.
+        if (!wasConnected()){
             
-            // Scan, discover and compose current peripheral object
+            // Scan, discover and try to get tx
             scan(uuid).then(function(scan){
                 connectAndDiscover(scan.address).then(function(device){
                         
-                    // Model endpoint
+                    // Peripheral vals from the scan
                     self.peripheral.address = scan.address;
                     self.peripheral.service = uuid;
                     
                     // Setup Subscriptions
                     readPin().then(function(){ 
-                        subscribeHasTx().then( function(){
-                            
-                            d.resolve(self.peripheral);
+                        subscribeHasTx().then(function(){
 
-                        // Fail sequence: hasTx -> pin -> con&dis -> scan
-                        }, function(e){ d.reject( where + readable(e) )})
-                    }, function(e){ d.reject( where + readable(e) )})
-                }, function(e){ d.reject( where + readable(e) )})
-            }, function(e){ d.reject( where + readable(e) )});
+                            d.resolve();
 
-        // Or we're reconnecting: connect -> readPin -> submit cached tx
+                            // Waiting for the receivedTx event. 
+                            // Listen() is kicking everything
+                            // while we are in mid-transaction.  
+                        
+                        }, function(e){ d.reject(e)}) 
+                    }, function(e){ d.reject(e)}) 
+                }, function(e){ d.reject(e)}) 
+            }, function(e){ d.reject(e)}); 
+
+        // ***** CHECK SESSION TIMESTAMP *****
+        // Cached but session is stale: Start again w/ a hard reset
+        } else if (hasTimedOut()){
+
+    
+        // Cached, current and we might reconnect w/ right proximity: 
+        // Check prox, connect and submit cached tx
         } else if (proximityMatch(self.peripheral.tx )) {
 
-            connect(self.peripheral.address).then(function(){ 
-                readPin().then(function(){                     
-                    submitTx(self.peripheral.tx).then(function(){
+            connect(self.peripheral.address).then(function(){                  
+                submitTx(self.peripheral.tx).then(function(){ 
 
-                        d.resolve(self.peripheral);
-                    
-                    }, function(e){ d.reject( where + readable(e) )})
-                }, function(e){ d.reject( where + readable(e) )})
-            }, function(e){ d.reject( where + readable(e) )});
+                    d.resolve(); 
+
+                    // Waiting for the txConfirm 
+                    // events w/ their txHashes. SubmitTx 
+                    // will manage closing everything down on
+                    // success or failure.
+                
+                }, function(e){ d.reject(e)}) 
+            }, function(e){ d.reject(e)}); 
         
-        // No proximity match
+        // Cached but proximity is wrong: keep cycling.
         } else {
             d.resolve(self.peripheral);
         }   
@@ -171,9 +193,9 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         return d.promise;
     }
 
-    // close(): Used on its own when a transaction is discovered but the 
-    // the proximity requirement hasn't been met. App should wait until we get
-    // the right prox, then reconnect and request auth or tx.
+    // close(): Called on its own when a transaction is first discovered but the 
+    // the proximity requirement hasn't been met. Client waits until it gets
+    // the right prox, then reconnects and requests endpoint auth or sends a signed tx.
     self.close = function(){
         var where = "AnimistBLE:close: ";
         var param = { address: self.peripheral.address };
@@ -186,19 +208,21 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         );
     };
 
-    // endSession(): Used when transaction is completed or no transaction 
-    // is possible. 
+    // endSession(): Called when transaction is completed OR no transaction 
+    // was found. Stops any reconnection attempt while client is in current 
+    // beacon region
     self.endSession = function(){
         canTransact = false;
         midTransaction = false;
         self.close();
     };
 
-    // reset(): Run in the exit region callback of AnimistBeacon - resets
-    // all the state variables and enables a virgin reconnection
+    // reset(): Called in the exit_region callback of AnimistBeacon OR when a 
+    // connection times out - resets all the state variables and enables 
+    // a virgin connection
     self.reset = function(){
 
-        var where = "AnimistBLE:terminate: ";
+        var where = "AnimistBLE:reset: ";
 
         $cordovaBluetoothLE.close({address: self.peripheral.address}).
             then().finally(function(result){
@@ -213,64 +237,67 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
 
     // receivedTx Event: 
     $rootscope.$on(events.receivedTx, function(){
+        
+        if (self.peripheral.tx){
+            
+            proximityMatch(self.peripheral.tx) ? 
+                submitTx(self.peripheral.tx) : 
+                self.close();
 
-        (!self.peripheral.tx) ? self.endSession() : submitTx(self.peripheral.tx);
+        } else {
+            self.endSession(); 
+        }
     };
 
     function proximityMatch(tx){
         return ( tx && (tx.proximity === self.proximity) ) ? true : false;
     }
 
-    // WORKING HERE . . . .
+    function wasConnected(){
+        return (Object.keys(self.peripheral).length != 0);
+    }
+
+    // ********* WRITE THIS **************
+    function hasTimedOut(){
+        return false;
+    }
+
     function submitTx(tx){
+    
+        // Case: User can sign their own tx
+        // Broadcasts txHash of the signedTx or error
+        if (tx.authority === user.address) {
 
-        var d = $q.defer();
+            out.pin = user.sign(self.pin);
+            /******* THIS NEEDS TO BE WRITTEN */
+            out.tx = user.generateTx(tx);
+            // ********************************
 
-        if (tx.proximity === 'any' || tx.proximity === self.proximity){
-            
-            // Case: User can sign their own tx
-            // Resolves txHash of the signed 
-            if (tx.authority === user.address) {
+            subscribeSignTx(out).then(
 
-                out.pin = user.sign(self.pin);
-                /******* THIS NEEDS TO BE WRITTEN */
-                out.tx = user.generateTx(tx);
-                // ********************************
+                function(txHash){ $rootScope.$broadcast( events.signedTxSuccess, {txHash: txHash} )}, 
+                function(error) { $rootScope.$broadcast( events.signedTxFailure, {error: error} )}
 
-                subscribeSignTx(out).then(
+            ).finally(function(){ self.endSession()});
 
-                    function(txHash){ $rootScope.$broadcast( events.signedTxSuccess, {txHash: txHash} )}, 
-                    function(error) { $rootScope.$broadcast( events.signedTxFailure, {error: error} )}
+        // Case: Signing will be remote - ask endpoint to validate presence
+        // Broadcasts txHash of the endpoint's authTx or error
+        } else if ( tx.authority === user.remoteAuthority){
 
-                ).finally(function(){ self.endSession(); d.resolve() });
+            out.pin = user.sign(self.pin);
 
-            // Case: Signing will be remote - ask endpoint to validate presence
-            // Resolves txHash of the auth action
-            } else if ( tx.authority === user.remoteAuthority){
+            subscribeAuthTx(out).then(
+                
+                function(txHash){ $rootScope.$broadcast( events.authTxSuccess, {txHash: txHash} )}, 
+                function(error){  $rootScope.$broadcast( events.authTxFailure, {error: error} )}
 
-                out.pin = user.sign(self.pin);
+            ).finally(function(){ self.endSession() });
 
-                subscribeAuthTx(out).then(
-                    
-                    function(txHash){ $rootScope.$broadcast( events.authTxSuccess, {txHash: txHash} )}, 
-                    function(error){  $rootScope.$broadcast( events.authTxFailure, {error: error} )}
-
-                ).finally(function(){ self.endSession(); d.resolve() });
-
-            // Case: No one is authorized (Bad api key etc . . .)
-            } else {
-                $rootScope.$broadcast( events.unauthorizedTx );
-                self.endSession();
-                d.resolve();
-            }
-
-        // Proximity wrong
+        // Case: No one is authorized (Bad api key etc . . .)
         } else {
-            d.resolve();
+            $rootScope.$broadcast( events.unauthorizedTx );
+            self.endSession();
         }
-
-        return d.promise;
-
     };
 
 
@@ -283,8 +310,6 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
         Meteor.call('ping', msg + ' ' + JSON.stringify(obj));
     }
 
-    var readable = JSON.stringify;
-
     // isAnimistSignal: 
     function isAnimistSignal(uuid){
         return (self.endpointMap.hasOwnProperty(uuid)) ? true : false;
@@ -293,16 +318,14 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     // State check run before tx attempts
     function canCall(){
         
-        var peripheralError = 'no peripheral connection';
-        var pinError = 'no PIN reading';
-
-        if      (!self.peripheral.address)  return peripheralError;
-        else if (!self.peripheral.pin)      return pinError;
+        if      (!self.peripheral)          return false;
+        else if (!self.peripheral.address)  return false;
+        else if (!self.peripheral.pin)      return false
         else                                return true;
     };
 
     // @function scan( uuid ) 
-    // @param uuid (String): Animist service uuid (beacon id + 1) 
+    // @param uuid (String): Animist service uuid associated w/ the heard beacon uuid 
     // Resolves the BLE hardware address of the endpoint peripheral
     function scan( uuid ){
 
@@ -328,7 +351,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
                 if (scan.status === 'scanResult'){
                     $cordovaBluetoothLE.stopScan().then( 
                         function(){ d.resolve(scan) },
-                        function(){ d.reject(where + error) }
+                        function(e){ d.reject(e) }
                     );  
                 }   
             }
@@ -366,7 +389,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
                     // Discover failed
                     function(error){
                         $cordovaBluetoothLE.close({address: address});
-                        d.reject(where + JSON.stringify(error));
+                        d.reject(error);
                     }
                 );
             }
@@ -388,7 +411,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
             function(error){
                 $cordovaBluetoothLE.close({address: address});
                 logger(where, error);
-                d.reject(where + error);
+                d.reject(error);
             },
 
             // Connected
@@ -470,7 +493,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
     
                         write(out, self.UUID.signTx ).then(
                             function(success){}, 
-                            function(error){ d.reject(where + JSON.stringify(error))}
+                            function(error){ d.reject(where + error)}
                         );
 
                     // Notification handler: resolves txHash
@@ -536,7 +559,7 @@ function AnimistBLE($rootScope, $q, $cordovaBluetoothLE, AnimistAccount ){
 
         // No peripheral 
         } else {
-            d.reject( where + peripheral );
+            d.reject( where + self.peripheral );
         }
         return d.promise;
     };
